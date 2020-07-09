@@ -10,6 +10,7 @@
 #include <Arduino.h>
 #include <SPIFFS.h>
 #include <Stream.h>
+#include <Wire.h>
 
 String wrfile = "/led_sts.txt";//読み書きするファイル名を設定
 
@@ -37,8 +38,9 @@ int ReadLedSts()
   fr.close();	//ファイルを閉じる
   //SPIFFS.end();
   delay(100);
+  readStr.replace("\r\n", "");
   //Serial.println(readStr);
-  if(readStr == "0\r\n")
+  if(readStr == "0")
     return 0;
   else
     return 1;
