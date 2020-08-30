@@ -1,13 +1,14 @@
 #define LED_RED 4
 #define LED_GRE 16
 #define SPOT_LIGHT 2
-#define HUMAN_SENSOR 17
+#define HUMAN_SENSOR 15
 #define SWITCH0 0
 
 #include <Arduino.h>
 //#include <Esp32.h>
 #include <time.h>
 
+bool blLightningFlg = false;
 //********************************************************
 void setup() 
 {
@@ -20,10 +21,12 @@ void setup()
   if(!esp_sleep_get_wakeup_cause())
   {
     LedFlash(100, 5, false);
+    blLightningFlg = false;
   }
   else
   {
     LedFlash(100, 1, false);
+    blLightningFlg = true;
   }
 
 }
@@ -31,13 +34,17 @@ void setup()
 //********************************************************
 void loop() 
 {
-  digitalWrite(LED_GRE, LOW);
-  delay(5000);
-  digitalWrite(LED_GRE, HIGH);
+  if(blLightningFlg)
+  {
+    digitalWrite(LED_GRE, LOW);
+    digitalWrite(SPOT_LIGHT, HIGH);
+    delay(10000);
+  }
 
-  //deepSleep開始
-  //deepSleep_Timer(5000000);
-  deepSleep_Port(GPIO_NUM_0);
+  digitalWrite(LED_GRE, HIGH);
+  digitalWrite(SPOT_LIGHT, LOW);
+  //blLightningFlg = false;
+  deepSleep_Port(GPIO_NUM_15, true);
 }
 
 //********************************************************
@@ -87,10 +94,11 @@ void Init_Port()
 
   //スポットライト
   pinMode(SPOT_LIGHT, OUTPUT);
-  digitalWrite(SPOT_LIGHT, HIGH);
+  digitalWrite(SPOT_LIGHT, LOW);
 
   //人感センサ
   pinMode(HUMAN_SENSOR, INPUT);
+  //pinMode(15, INPUT);
 
   //タクトスイッチ
   pinMode(SWITCH0, INPUT_PULLUP);
@@ -107,11 +115,14 @@ void deepSleep_Timer(int iWakeupTime)
 
 }
 
-void deepSleep_Port(gpio_num_t portNum)
+void deepSleep_Port(gpio_num_t portNum, bool blHigh)
 //portNum:GPIO_NUM_*
 //ex)　deepSleep_Port(GPIO_NUM_0);
 {
-  esp_sleep_enable_ext0_wakeup(portNum, 0);
+  int iHighLow = 0;
+  if(blHigh)
+    iHighLow = 1;
+  esp_sleep_enable_ext0_wakeup(portNum, iHighLow);
   esp_deep_sleep_start();
 }
 
