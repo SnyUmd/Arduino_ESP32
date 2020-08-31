@@ -9,6 +9,8 @@
 #include <time.h>
 
 bool blLightningFlg = false;
+int iWakeupCnt = 0;
+int iLightingCnt = 0;
 //********************************************************
 void setup() 
 {
@@ -27,6 +29,7 @@ void setup()
   {
     LedFlash(100, 1, false);
     blLightningFlg = true;
+    iWakeupCnt++;
   }
 
 }
@@ -34,17 +37,22 @@ void setup()
 //********************************************************
 void loop() 
 {
+  //スリープからの復帰動作
   if(blLightningFlg)
   {
     digitalWrite(LED_GRE, LOW);
     digitalWrite(SPOT_LIGHT, HIGH);
-    delay(10000);
+    if(HumanCheck(50, 100))
+    {
+      digitalWrite(SPOT_LIGHT, HIGH);
+      delay(60000);
+      digitalWrite(SPOT_LIGHT, LOW);
+    }
   }
 
-  digitalWrite(LED_GRE, HIGH);
-  digitalWrite(SPOT_LIGHT, LOW);
+
   //blLightningFlg = false;
-  deepSleep_Port(GPIO_NUM_15, true);
+  DeepSleep_WakeupPort(GPIO_NUM_15, true);
 }
 
 //********************************************************
@@ -106,16 +114,16 @@ void Init_Port()
 }
 
 //********************************************************
-void deepSleep_Timer(int iWakeupTime)
+void DeepSleep_WakeupTime(int iWakeupTime)
 //iWakeupTime：タイマーの時間はuSオーダー
 {
   esp_sleep_enable_timer_wakeup(iWakeupTime);
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_0, 0);
   esp_deep_sleep_start();
-
 }
 
-void deepSleep_Port(gpio_num_t portNum, bool blHigh)
+//********************************************************
+void DeepSleep_WakeupPort(gpio_num_t portNum, bool blHigh)
 //portNum:GPIO_NUM_*
 //ex)　deepSleep_Port(GPIO_NUM_0);
 {
@@ -123,8 +131,25 @@ void deepSleep_Port(gpio_num_t portNum, bool blHigh)
   if(blHigh)
     iHighLow = 1;
   esp_sleep_enable_ext0_wakeup(portNum, iHighLow);
+
+  digitalWrite(LED_GRE, HIGH);
+  digitalWrite(SPOT_LIGHT, LOW);
   esp_deep_sleep_start();
 }
 
 //********************************************************
+bool HumanCheck(int iLoopCnt, int iCycleTime)
+{
+  int iCnt = 0;
+  for(int i = 0; i < iLoopCnt; i++)
+  {
+    if(digitalRead(HUMAN_SENSOR)) iCnt++;
+    delay(iCycleTime);
+  }
+
+  if(iCnt >= 10)
+    return true;
+  else
+    return false;
+}
 //********************************************************
