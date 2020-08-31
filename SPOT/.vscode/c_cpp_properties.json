@@ -10,7 +10,9 @@
                 "C:\\Users\\SHUMEDA\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\**",
                 "C:\\Users\\SHUMEDA\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.4\\**",
                 "${workspaceFolder}",
-                "E:\\!SNY\\Document\\Documents\\Arduino\\hardware\\espressif\\esp32\\**"
+                "E:\\!SNY\\Document\\Documents\\Arduino\\hardware\\espressif\\esp32\\**",
+                "C:\\Users\\sny-acer\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.4\\**",
+                "C:\\Users\\sny-acer\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\**"
             ],
             "browse": {
                 "path": [

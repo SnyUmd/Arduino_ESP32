@@ -1,16 +1,25 @@
-#define LED_RED 4
-#define LED_GRE 16
-#define SPOT_LIGHT 2
-#define HUMAN_SENSOR 15
-#define SWITCH0 0
+// #define LED_RED 4
+// #define LED_GRE 16
+// #define SPOT_LIGHT 2
+// #define HUMAN_SENSOR 15
+// #define SWITCH0 0
 
 #include <Arduino.h>
 //#include <Esp32.h>
 #include <time.h>
+#include "SpotTimer.h"
+#include "clsHumanSensor.h"
+#include "def.h"
 
+//変数宣言
 bool blLightningFlg = false;
 int iWakeupCnt = 0;
 int iLightingCnt = 0;
+int iLightingTime = 10000;
+
+//クラス**********************
+clsHumanSensor clsHS;
+
 //********************************************************
 void setup() 
 {
@@ -22,7 +31,7 @@ void setup()
   //ディープスリープからの立ち上がりなのかを判定
   if(!esp_sleep_get_wakeup_cause())
   {
-    LedFlash(100, 5, false);
+    LedFlash(50, 5, false);
     blLightningFlg = false;
   }
   else
@@ -31,7 +40,8 @@ void setup()
     blLightningFlg = true;
     iWakeupCnt++;
   }
-
+  digitalWrite(LED_RED, LOW);
+  
 }
 
 //********************************************************
@@ -40,19 +50,26 @@ void loop()
   //スリープからの復帰動作
   if(blLightningFlg)
   {
-    digitalWrite(LED_GRE, LOW);
-    digitalWrite(SPOT_LIGHT, HIGH);
-    if(HumanCheck(50, 100))
+    //復帰からの最初の人チェック
+    if(clsHS.HumanCheck(10, 100, 8))
     {
+      digitalWrite(LED_GRE, LOW);
       digitalWrite(SPOT_LIGHT, HIGH);
-      delay(60000);
+      delay(iLightingTime);
+
+      //二回目以降のチェックは少し緩めに
+      if(!clsHS.HumanCheck(10, 100, 5)) blLightningFlg = false;
+    }
+    else
+    {
       digitalWrite(SPOT_LIGHT, LOW);
+      DeepSleep_WakeupPort(GPIO_NUM_15, true);
     }
   }
-
-
-  //blLightningFlg = false;
-  DeepSleep_WakeupPort(GPIO_NUM_15, true);
+  else
+  {
+    DeepSleep_WakeupPort(GPIO_NUM_15, true);
+  }
 }
 
 //********************************************************
@@ -133,23 +150,24 @@ void DeepSleep_WakeupPort(gpio_num_t portNum, bool blHigh)
   esp_sleep_enable_ext0_wakeup(portNum, iHighLow);
 
   digitalWrite(LED_GRE, HIGH);
+  digitalWrite(LED_RED, HIGH);
   digitalWrite(SPOT_LIGHT, LOW);
   esp_deep_sleep_start();
 }
 
-//********************************************************
-bool HumanCheck(int iLoopCnt, int iCycleTime)
-{
-  int iCnt = 0;
-  for(int i = 0; i < iLoopCnt; i++)
-  {
-    if(digitalRead(HUMAN_SENSOR)) iCnt++;
-    delay(iCycleTime);
-  }
+// //********************************************************
+// bool HumanCheck(int iLoopCnt, int iCycleTime, int iExecuteNum)
+// {
+//   int iCnt = 0;
+//   for(int i = 0; i < iLoopCnt; i++)
+//   {
+//     if(digitalRead(HUMAN_SENSOR)) iCnt++;
+//     delay(iCycleTime);
+//   }
 
-  if(iCnt >= 10)
-    return true;
-  else
-    return false;
-}
+//   if(iCnt >= iExecuteNum)
+//     return true;
+//   else
+//     return false;
+// }
 //********************************************************
