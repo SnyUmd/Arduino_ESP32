@@ -10,6 +10,7 @@
 #include "SpotTimer.h"
 #include "clsHumanSensor.h"
 #include "def.h"
+#include "PowerCtrl.h"
 
 //変数宣言
 bool blLightningFlg = false;
@@ -19,7 +20,7 @@ int iLightingTime = 10000;
 
 //クラス**********************
 clsHumanSensor clsHS;
-
+clsPowerCtrl clsPC;
 //********************************************************
 void setup() 
 {
@@ -63,12 +64,12 @@ void loop()
     else
     {
       digitalWrite(SPOT_LIGHT, LOW);
-      DeepSleep_WakeupPort(GPIO_NUM_15, true);
+      clsPC.DeepSleep_WakeupPort(GPIO_NUM_15, true);
     }
   }
   else
   {
-    DeepSleep_WakeupPort(GPIO_NUM_15, true);
+    clsPC.DeepSleep_WakeupPort(GPIO_NUM_15, true);
   }
 }
 
@@ -140,20 +141,20 @@ void DeepSleep_WakeupTime(int iWakeupTime)
 }
 
 //********************************************************
-void DeepSleep_WakeupPort(gpio_num_t portNum, bool blHigh)
-//portNum:GPIO_NUM_*
-//ex)　deepSleep_Port(GPIO_NUM_0);
-{
-  int iHighLow = 0;
-  if(blHigh)
-    iHighLow = 1;
-  esp_sleep_enable_ext0_wakeup(portNum, iHighLow);
+// void DeepSleep_WakeupPort(gpio_num_t portNum, bool blHigh)
+// //portNum:GPIO_NUM_*
+// //ex)　deepSleep_Port(GPIO_NUM_0);
+// {
+//   int iHighLow = 0;
+//   if(blHigh)
+//     iHighLow = 1;
+//   esp_sleep_enable_ext0_wakeup(portNum, iHighLow);
 
-  digitalWrite(LED_GRE, HIGH);
-  digitalWrite(LED_RED, HIGH);
-  digitalWrite(SPOT_LIGHT, LOW);
-  esp_deep_sleep_start();
-}
+//   digitalWrite(LED_GRE, HIGH);
+//   digitalWrite(LED_RED, HIGH);
+//   digitalWrite(SPOT_LIGHT, LOW);
+//   esp_deep_sleep_start();
+// }
 
 // //********************************************************
 // bool HumanCheck(int iLoopCnt, int iCycleTime, int iExecuteNum)
