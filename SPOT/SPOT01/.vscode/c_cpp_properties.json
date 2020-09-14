@@ -8,8 +8,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}",
-                "C:\\Users\\sny-acer\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.4\\**",
-                "C:\\Users\\sny-acer\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\**"
+                "E:\\!SNY\\Document\\Documents\\Arduino\\hardware\\espressif\\esp32\\**"
             ],
             "browse": {
                 "path": [

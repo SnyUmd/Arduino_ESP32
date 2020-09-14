@@ -7,47 +7,30 @@
 #include <Arduino.h>
 //#include <Esp32.h>
 #include <time.h>
+#include "def.h"
+#include "Init.h"
 #include "SpotTimer.h"
 #include "clsHumanSensor.h"
-#include "def.h"
 #include "PowerCtrl.h"
+#include "TimeCtrl.h"
 
-//変数宣言
-bool blLightningFlg = false;
-int iWakeupCnt = 0;
-int iLightingCnt = 0;
-int iLightingTime = 90000;
 
 //クラス**********************
 clsHumanSensor clsHS;
 clsPowerCtrl clsPC;
+
+
 //********************************************************
 void setup() 
 {
 
   //マルチタスク設定
   //xTaskCreatePinnedToCore(subloop, "subloop", 4096, NULL, 1, NULL, 1);
-    Init_Port();
+  //Initialize_Port();
 
   //ディープスリープからの立ち上がりなのかを判定
   if(!esp_sleep_get_wakeup_cause())
-  {
     blLightningFlg = false;
-    digitalWrite(SPOT_LIGHT, HIGH);
-    LedFlash(1000, 30, false);
-    if(!clsHS.HumanCheck(100, 10, 40)) 
-    {
-      while(1)
-      {
-        if(clsHS.HumanCheck(100, 10, 40)) 
-          delay(iLightingTime);
-        else
-          break;
-      }
-    }
-    LedFlash(50, 5, false);
-
-  }
   else
   {
     LedFlash(100, 1, false);
@@ -62,7 +45,13 @@ void setup()
 void loop() 
 {
   //スリープからの復帰動作
-  if(blLightningFlg)
+  if(!blLightningFlg)
+  {
+    LedFlash(1000, 30, false);
+    //continue;
+  }
+  //復帰時
+  else
   {
     //復帰からの最初の人チェック
     if(clsHS.HumanCheck(100, 10, 50))
@@ -80,21 +69,10 @@ void loop()
       clsPC.DeepSleep_WakeupPort(GPIO_NUM_15, true);
     }
   }
-  else
-  {
-    clsPC.DeepSleep_WakeupPort(GPIO_NUM_15, true);
-  }
+
+  clsPC.DeepSleep_WakeupPort(GPIO_NUM_15, true);
+
 }
-
-//********************************************************
-
-// void subloop(void* pvParameters)
-// {
-//   while(1)
-//   {
-
-//   }
-// }
 
 //****************************************************************************************************************
 //****************************************************************************************************************
@@ -122,66 +100,33 @@ void LedFlash(int iPeriod, int iLightNum, bool blLighsUp)
 }
 
 //********************************************************
-void Init_Port()
-{
-  //LED
-  pinMode(LED_RED, OUTPUT);
-  pinMode(LED_GRE, OUTPUT);
-
-  digitalWrite(LED_RED, HIGH);
-  digitalWrite(LED_GRE, HIGH);
-
-  //スポットライト
-  pinMode(SPOT_LIGHT, OUTPUT);
-  digitalWrite(SPOT_LIGHT, LOW);
-
-  //人感センサ
-  pinMode(HUMAN_SENSOR, INPUT);
-  //pinMode(15, INPUT);
-
-  //タクトスイッチ
-  pinMode(SWITCH0, INPUT_PULLUP);
-
-}
-
-//********************************************************
-void DeepSleep_WakeupTime(int iWakeupTime)
-//iWakeupTime：タイマーの時間はuSオーダー
-{
-  esp_sleep_enable_timer_wakeup(iWakeupTime);
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_0, 0);
-  esp_deep_sleep_start();
-}
-
-//********************************************************
-// void DeepSleep_WakeupPort(gpio_num_t portNum, bool blHigh)
-// //portNum:GPIO_NUM_*
-// //ex)　deepSleep_Port(GPIO_NUM_0);
+// void Init_Port()
 // {
-//   int iHighLow = 0;
-//   if(blHigh)
-//     iHighLow = 1;
-//   esp_sleep_enable_ext0_wakeup(portNum, iHighLow);
+//   //LED
+//   pinMode(LED_RED, OUTPUT);
+//   pinMode(LED_GRE, OUTPUT);
 
-//   digitalWrite(LED_GRE, HIGH);
 //   digitalWrite(LED_RED, HIGH);
+//   digitalWrite(LED_GRE, HIGH);
+
+//   //スポットライト
+//   pinMode(SPOT_LIGHT, OUTPUT);
 //   digitalWrite(SPOT_LIGHT, LOW);
+
+//   //人感センサ
+//   pinMode(HUMAN_SENSOR, INPUT);
+//   //pinMode(15, INPUT);
+
+//   //タクトスイッチ
+//   pinMode(SWITCH0, INPUT_PULLUP);
+
+// }
+
+//********************************************************
+// void DeepSleep_WakeupTime(int iWakeupTime)
+// //iWakeupTime：タイマーの時間はuSオーダー
+// {
+//   esp_sleep_enable_timer_wakeup(iWakeupTime);
+//   esp_sleep_enable_ext0_wakeup(GPIO_NUM_0, 0);
 //   esp_deep_sleep_start();
 // }
-
-// //********************************************************
-// bool HumanCheck(int iLoopCnt, int iCycleTime, int iExecuteNum)
-// {
-//   int iCnt = 0;
-//   for(int i = 0; i < iLoopCnt; i++)
-//   {
-//     if(digitalRead(HUMAN_SENSOR)) iCnt++;
-//     delay(iCycleTime);
-//   }
-
-//   if(iCnt >= iExecuteNum)
-//     return true;
-//   else
-//     return false;
-// }
-//********************************************************
