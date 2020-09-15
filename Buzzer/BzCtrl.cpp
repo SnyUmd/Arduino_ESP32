@@ -7,11 +7,8 @@ void InitBz()
     //ledcWrite(PWM_CHANNEL0, PWM_DUTY);
 }
 
-void BuzzerRing0(int ringNum, int iPeriod)
+void BuzzerRing_Dot(int ringNum, int iPeriod)
 {
-    //ledcSetup(PWM_CHANNEL0, PWM_FRQ1000, PWM_BIT_NUM);
-    //ledcAttachPin(PWM_PIN, PWM_CHANNEL0);
-
     int iDuty = PWM_RESOLUTION / 2;
     for(int i = 0; i < ringNum; i++)
     {
@@ -22,26 +19,44 @@ void BuzzerRing0(int ringNum, int iPeriod)
     }
 }
 
+void BuzzerRing(int ringTime, float frq, bool blStop, int iStopTime)
+{
+    int iDuty = PWM_RESOLUTION / 2;
+    ledcSetup(PWM_CHANNEL0, frq, PWM_BIT_NUM);
+    ledcWrite(PWM_CHANNEL0, iDuty);
+    delay(ringTime);
+    if(blStop)
+    {
+        ledcWrite(PWM_CHANNEL0, 0);
+        delay(iStopTime);
+    }
+}
+
+void BuzzerRing_Demo_00(int ringNum, int iPeriod)
+{
+  
+}
+
 void BuzzerRing_Demo(int ringNum, int iPeriod)
 {
   InitBz();
 
   BzDo0();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
   BzRe0();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
   BzMi0();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
   BzFa0();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
   BzSo0();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
   BzRa0();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
   BzSi0();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
   BzDo1();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
 }
 
 void BuzzerRing_Demo_Revers(int ringNum, int iPeriod)
@@ -49,32 +64,26 @@ void BuzzerRing_Demo_Revers(int ringNum, int iPeriod)
   InitBz();
 
   BzDo1();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
   BzSi0();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
   BzRa0();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
   BzSo0();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
   BzFa0();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
   BzMi0();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
   BzRe0();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
   BzDo0();
-  BuzzerRing0(ringNum, iPeriod);
+  BuzzerRing_Dot(ringNum, iPeriod);
 }
 
-void BuzzerRing_Test()
+void BzStop()
 {
-    for(int i = 0; i < 1000; i++)
-    {
-        digitalWrite(BUZZER_PWM, HIGH);
-        delay(1);
-        digitalWrite(BUZZER_PWM, LOW);
-        delay(1);
-    }
+    ledcWrite(PWM_CHANNEL0, 0);
 }
 
 void BzDo0()

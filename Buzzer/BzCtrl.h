@@ -2,11 +2,13 @@
 #include "def.h"
 
 void InitBz();
-void BuzzerRing0(int ringTime, int iPeriod);
-void BuzzerRing_Demo(int ringNum, int iPeriod);
-void BuzzerRing_Demo_Revers(int ringNum, int iPeriod);
+void BuzzerRing_Dot(int , int );
+void BuzzerRing(int , float , bool , int );
+void BuzzerRing_Demo_00(int , int );
+void BuzzerRing_Demo(int , int );
+void BuzzerRing_Demo_Revers(int , int );
 
-void BuzzerRing_Test();
+void BzStop();
 
 void BzDo0();
 void BzRe0();
