@@ -19,11 +19,11 @@ void setup()
 
   InitBz();
 
-  BuzzerRing_Demo(1,20);
-  delay(50);
-  BuzzerRing_Demo(2,75);
-  delay(50);
-  BuzzerRing_Demo_Revers(1,20);
+  BuzzerRing_Demo(1,10);
+  delay(100);
+  BuzzerRing_Demo(1,50);
+  delay(100);
+  BuzzerRing_Demo_Revers(1,10);
 
 }
 
@@ -31,6 +31,7 @@ void setup()
 void loop() 
 {
   
+
 
 }
 
