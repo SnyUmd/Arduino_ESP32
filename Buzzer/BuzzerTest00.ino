@@ -18,13 +18,13 @@ void setup()
   InitBz();
   //BuzzerRing(100, GetMelody(0,0), true, 100);
   BuzzerRing(100, flMelody[0][0], true, 100);
-  BuzzerRing(100, GetMelody(0,2), true, 100);
-  BuzzerRing(100, GetMelody(0,4), true, 100);
-  BuzzerRing(100, GetMelody(0,5), true, 100);
-  BuzzerRing(100, GetMelody(0,7), true, 100);
-  BuzzerRing(100, GetMelody(0,9), true, 100);
-  BuzzerRing(100, GetMelody(0,11), true, 100);
-
+  BuzzerRing(100, flMelody[0][2], true, 100);
+  BuzzerRing(100, flMelody[0][4], true, 100);
+  BuzzerRing(100, flMelody[0][5], true, 100);
+  BuzzerRing(100, flMelody[0][7], true, 100);
+  BuzzerRing(100, flMelody[0][8], true, 100);
+  BuzzerRing(100, flMelody[0][11], true, 100);
+  BuzzerRing(100, flMelody[1][0], true, 100);
 }
 
 //********************************************************
