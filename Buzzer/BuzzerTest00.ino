@@ -13,25 +13,26 @@ void setup()
 {
   Initialize_Port();
 
-  LedFlash(50,3,true);
+  LedFlash(50,3,false);
 
   InitBz();
-  //BuzzerRing(100, GetMelody(0,0), true, 100);
-  BuzzerRing(100, flMelody[0][0], true, 100);
-  BuzzerRing(100, flMelody[0][2], true, 100);
-  BuzzerRing(100, flMelody[0][4], true, 100);
-  BuzzerRing(100, flMelody[0][5], true, 100);
-  BuzzerRing(100, flMelody[0][7], true, 100);
-  BuzzerRing(100, flMelody[0][8], true, 100);
-  BuzzerRing(100, flMelody[0][11], true, 100);
-  BuzzerRing(100, flMelody[1][0], true, 100);
+
 }
 
 //********************************************************
 void loop() 
 {
-  
+  BzGoUp(10, 10);
+  BzStop(200);
 
+  Bz_DragonQuest_First();
+
+  BzStop(200);
+
+  LedFlash(50,3,false);
+  BzGoDown(10,10);
+
+  while(1);
 
 }
 

@@ -21,3 +21,15 @@ void LedFlash(int iPeriod, int iLightNum, bool blLighsUp)
     digitalWrite(LED_GRE, HIGH);
   }
 }
+
+void LedRighting()
+{
+    digitalWrite(LED_RED, LOW);
+    digitalWrite(LED_GRE, LOW);
+}
+
+void LedOff()
+{
+    digitalWrite(LED_RED, HIGH);
+    digitalWrite(LED_GRE, HIGH);
+}
