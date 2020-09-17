@@ -4,7 +4,8 @@
 int iDuty = PWM_RESOLUTION / 2;
 //extern float flMScale[][12];
 
-int beat = 1110;
+float beat0 = 1110;
+float beat1 = 2000;
 
 
 //*******************************************************
@@ -19,17 +20,18 @@ float flMScale[][12] =
         /*　0ド , 1ド# , 2レ, 3レ#, 4ミ , 5ファ , 6ファ# , 7ソ , 8ソ# , 9ラ , 10ラ# , 11シ　*/
 };
 
-//*******************************************************
-enum enmMelodyNote
-{
-    all = 0,
-    harf,
-    quad,
-    eighth,
-    sixteenth
-};
+// //*******************************************************
+// enum enmMelodyNote
+// {
+//     all = 0,
+//     harf,
+//     quarter,
+//     eighth,
+//     sixteenth
+// };
 
-float flTime[] = {beat, beat / 2, beat / 4, beat / 8, beat / 16};
+// float flTime[] = {beat, beat / 2, beat / 4, beat / 8, beat / 16};
+
 //*******************************************************
 
 enum enmMelody
@@ -49,29 +51,227 @@ enum enmMelody
 };
 
 //*******************************************************
-int ary_scale[][3];
-//{時間, 記号種, 音}
-//記号種　
-//0：休符
-//1：音符
-//2：伸ばし
-void setScale(int iTime, int type = 0, int scale = 0)
+float ary_score0[][4] = 
+{//{記号種, 記号, 音, ペース}
+//記号
+//0：休符//1：音符//2：伸ばし
+        {1, getScale0(4), flMScale[2][mMI], 100},
+        {2, getScale0(8), 0, 100},
+        {1, getScale0(16), flMScale[2][mMI], 100},
+        {0, getScale0(16), 0, 100},
+        {1, getScale0(8), flMScale[2][mMI], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flMScale[2][mRE], 100},
+        {0, getScale0(8), 0, 100},
+        //---------------------------------------
+        {1, getScale0(8), flMScale[2][mRE], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flMScale[2][mRE], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flMScale[2][mDO], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flMScale[2][mRE], 100},
+        {0, getScale0(8), 0, 100},
+        //---------------------------------------
+        {1, getScale0(8), flMScale[2][mMI], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flMScale[2][mFA], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flMScale[2][mMI], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flMScale[2][mRE], 100},
+        {0, getScale0(8), 0, 100},
+        //---------------------------------------
+        {1, getScale0(8), flMScale[2][mMI], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flMScale[2][mFA], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flMScale[2][mSO], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flMScale[2][mRA], 100},
+        {0, getScale0(8), 0, 100},
+        //---------------------------------------
+        {1, getScale0(8), flMScale[3][mDO], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flMScale[2][mRA], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flMScale[2][mSO], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flMScale[2][mFA], 100},
+        {0, getScale0(8), 0, 100},
+        //---------------------------------------
+        {1, getScale0(8), flMScale[2][mMI], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(4), flMScale[2][mRE], 100},
+        {2, getScale0(8), 0, 100},
+        {1, getScale0(16), flMScale[2][mRE], 100},
+        {0, getScale0(16), 0, 100},
+        {1, getScale0(8), flMScale[2][mRE], 100},
+        {0, getScale0(8), 0, 100},
+        //---------------------------------------
+        {1, getScale0(4), flMScale[2][mMI], 110},
+        {2, getScale0(8), 0, 110},
+        {1, getScale0(16), flMScale[2][mMI], 125},
+        {0, getScale0(16), 0, 125},
+        {1, getScale0(8), flMScale[2][mMI], 125},
+        {0, getScale0(8), 0, 150},
+        {1, getScale0(8), flMScale[2][mMI], 150},
+        {0, getScale0(8), 0, 150},
+        //---------------------------------------
+        {1, getScale0(8), flMScale[2][mDO], 180},
+        {0, getScale0(8), 0, 180},
+        {1, getScale0(4), flMScale[2][mMI], 180},
+        {1, getScale0(2), flMScale[2][mRE], 200},
+        {2, getScale0(1), 0, 200},
+        //---------------------------------------
+        {0, getScale0(1), 0, 200}
+};
+
+float ary_score1[][4] = 
 {
-    switch (type)
+    {1, getScale1(8), flMScale[2][mSO], 100},
+    {2, getScale1(16), 0, 100},
+    {1, getScale1(16), flMScale[2][mSO], 100},
+    {1, getScale1(4), flMScale[3][mDO], 100},
+    {1, getScale1(4), flMScale[3][mRE], 100},
+    //------------------------
+    {1, getScale1(4), flMScale[3][mMI], 100},
+    {1, getScale1(4), flMScale[3][mFA], 100},
+    {1, getScale1(8), flMScale[3][mSO], 100},
+    {0, getScale1(8), 0, 100},
+    {1, getScale1(4), flMScale[4][mDO], 100},
+    ////------------------------
+    {2, getScale1(4), 0, 100},
+    {1, getScale1(8), flMScale[3][mSI], 100},
+    {2, getScale1(16), 0, 100},
+    {1, getScale1(16), flMScale[3][mRA], 100},
+    {1, getScale1(4), flMScale[3][mRA], 100},
+    {2, getScale1(8), 0, 100},
+    {1, getScale1(8), flMScale[3][mSO], 100},
+    //------------------------
+    {2, getScale1(8), 0, 100},
+    {1, getScale1(16), flMScale[3][mFAs], 100},
+    {0, getScale1(16), 0, 100},
+    {1, getScale1(8), flMScale[3][mFAs], 100},//楽譜ではファ
+    {1, getScale1(8), flMScale[3][mRA], 100},
+    {1, getScale1(4), flMScale[3][mSO], 100},
+    {1, getScale1(4), flMScale[3][mMI], 100},
+    //------------------------
+    {2, getScale1(4), 0, 100},
+    {1, getScale1(8), flMScale[2][mMI], 100},
+    {2, getScale1(16), 0, 100},
+    {1, getScale1(16), flMScale[2][mMI], 100},
+    {1, getScale1(4), flMScale[2][mMI], 100},
+    {1, getScale1(4), flMScale[2][mMI], 100},
+    //------------------------
+    {1, getScale1(4), flMScale[2][mFAs], 100},
+    {1, getScale1(4), flMScale[2][mSOs], 100},
+    {1, getScale1(2), flMScale[2][mRA], 100},
+    //------------------------
+    {2, getScale1(8), 0, 100},
+    {1, getScale1(16), flMScale[2][mRA], 100},
+    {0, getScale1(16), 0, 100},
+    {1, getScale1(16), flMScale[2][mSI], 100},
+    {0, getScale1(16), 0, 100},
+    {1, getScale1(16), flMScale[3][mDO], 100},
+    {0, getScale1(16), 0, 100},
+    {1, getScale1(2), flMScale[3][mRE], 100},
+    //------------------------
+    {2, getScale1(8), 0, 100},
+    {1, getScale1(16), flMScale[2][mRA], 100},
+    {0, getScale1(16), 0, 100},
+    {1, getScale1(16), flMScale[2][mRA], 100},
+    {0, getScale1(16), 0, 100},
+    {1, getScale1(16), flMScale[3][mRE], 100},
+    {0, getScale1(16), 0, 100},
+    {1, getScale1(4), flMScale[3][mRE], 100},
+    {1, getScale1(4), flMScale[2][mSI], 100},
+    //------------------------
+    {1, getScale1(4), flMScale[2][mRA], 100},
+    {1, getScale1(4), flMScale[2][mSO], 100},
+    {1, getScale1(2), flMScale[3][mMI], 100}
+};
+float ary_score2[][4] = 
+{
+    {2, getScale1(8), 0, 100},
+    {1, getScale1(8), flMScale[3][mFA], 100},
+    {1, getScale1(8), flMScale[3][mMI], 100},
+    {1, getScale1(8), flMScale[3][mRE], 100},
+    {1, getScale1(2), flMScale[3][mDO], 100},
+    //------------------------
+    {1, getScale1(4), flMScale[2][mRA], 100},
+    {1, getScale1(4), flMScale[3][mDO], 100},
+    {1, getScale1(2), flMScale[3][mRE], 100},
+    //------------------------
+    {2, getScale1(8), 0, 100},
+    {1, getScale1(8), flMScale[3][mMI], 100},
+    {1, getScale1(8), flMScale[3][mRE], 100},
+    {1, getScale1(8), flMScale[3][mDO], 100},
+    {1, getScale1(2), flMScale[3][mDO], 100},
+    //------------------------
+    {1, getScale1(4), flMScale[2][mSI], 100},
+    {1, getScale1(4), flMScale[2][mSO], 100},
+    {1, getScale1(2), flMScale[3][mSO], 100},
+    //------------------------
+    {2, getScale1(8), 0, 100},
+    {1, getScale1(8), flMScale[3][mMI], 100},
+    {1, getScale1(8), flMScale[3][mFA], 100},
+    {1, getScale1(8), flMScale[3][mSO], 100},
+    {1, getScale1(2), flMScale[3][mRA], 100},
+    //------------------------
+    {2, getScale1(8), 0, 100},
+    {1, getScale1(8), flMScale[2][mRA], 100},
+    {1, getScale1(8), flMScale[2][mSI], 100},
+    {1, getScale1(8), flMScale[3][mDO], 100},
+    {1, getScale1(2), flMScale[3][mFA], 100},
+    //------------------------
+    {1, getScale1(2), flMScale[3][mMI], 100},
+    {1, getScale1(2), flMScale[3][mDO], 100},
+    //------------------------
+    {2, getScale1(16), 0, 100},
+    {0, getScale1(16), 0, 100},
+    {0, getScale1(8), 0, 100},
+    {1, getScale1(8), flMScale[2][mSO], 100},
+    {2, getScale1(16), 0, 100},
+    {1, getScale1(16), flMScale[2][mSO], 100},
+    {1, getScale1(4), flMScale[3][mDO], 100},
+    {1, getScale1(4), flMScale[3][mRE], 100},
+    //------------------------
+    {1, getScale1(4), flMScale[3][mMI], 100},
+    {1, getScale1(4), flMScale[3][mFA], 100},
+    {1, getScale1(8), flMScale[3][mSO], 100},
+    {0, getScale1(8), 0, 100},
+    {1, getScale1(4), flMScale[4][mDO], 100}
+};
+void BzNote(float type, float iTime, float scale, float iPase)
+{
+    float iPaseBuf = iPase / 100;
+    switch (int(type))
     {
-    case 0/* constant-expression */:
-        /* code */
+    case 0:
+        ledcWrite(PWM_CHANNEL0, 0);
+        delay(iTime * iPaseBuf);
         break;
     case 1:
-
+        ledcSetup(PWM_CHANNEL0, scale, PWM_BIT_NUM);
+        ledcAttachPin(PWM_PIN, PWM_CHANNEL0);
+        ledcWrite(PWM_CHANNEL0, iDuty);
+        delay(iTime * iPaseBuf);
+        break;
     case 2:
-
-    default:
+        delay(iTime * iPaseBuf);
         break;
     }
 }
 
-
+float getScale0(float iNote)
+{
+    return beat0/iNote;
+}
+float getScale1(float iNote)
+{
+    return beat1/iNote;
+}
 //*******************************************************
 void InitBz()
 {
@@ -121,290 +321,32 @@ void BzRest(float restTime)
     delay(restTime);
 }
 
-
-
-
-
 //*******************************************************
 //*******************************************************
 //*******************************************************
 void Bz_DragonQuest_Preface0(int iBarNum)
 {
-    switch (iBarNum)
-    {
-    case 0:
-        LedRighting();
-        BzRing(flMScale[2][mMI], flTime[quad] + flTime[eighth] - 100);
-        LedOff();
-        delay(100); //LEDの為
-        LedRighting();
-        BzRing(flMScale[2][mMI], flTime[sixteenth]);
-        LedOff();
-        BzStop(flTime[sixteenth]);
-        LedRighting();
-        BzRing(flMScale[2][mMI], flTime[eighth]);
-        LedOff();
-        BzStop(flTime[eighth]);
-        LedRighting();
-        BzRing(flMScale[2][mRE], flTime[eighth]);
-        LedOff();
-        BzStop(flTime[eighth]);
-        break;
-    }
-
-    //--------------
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mDO], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    //--------------
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mFA], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    //--------------
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mFA], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mSO], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mRA], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    //--------------
-    LedRighting();
-    BzRing(flMScale[3][mDO], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mRA], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mSO], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mFA], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    //--------------
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[quad] + flTime[eighth] - 100);
-    LedOff();
-    delay(100); //LEDの為
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[sixteenth]);
-    LedOff();
-    BzStop(flTime[sixteenth]);
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    //--------------
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[quad] + flTime[eighth] * 1.025 - 100);
-    LedOff();
-    delay(100); //LEDの為
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[sixteenth] * 1.05);
-    LedOff();
-    BzStop(flTime[sixteenth] * 1.075);
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[eighth] * 1.1);
-    LedOff();
-    BzStop(flTime[eighth] * 1.2);
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[eighth] * 1.4);
-    LedOff();
-    BzStop(flTime[eighth] * 1.75);
-    //--------------
-    LedRighting();
-    BzRing(flMScale[2][mDO], flTime[eighth] * 1.75);
-    LedOff();
-    BzStop(flTime[eighth] * 1.75);
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[quad] * 2 - 100);
-    LedOff();
-    delay(100); //LEDの為
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[harf] * 2);
-    //--------------
-    BzExtend(flTime[all] * 2);
-    LedOff();
+    
 }
 
 //*******************************************************
 void Bz_DragonQuest_Preface()
 {
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[quad] + flTime[eighth] - 100);
-    LedOff();
-    BzExtend(100); //LEDの為
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[sixteenth]);
-    LedOff();
-    BzStop(flTime[sixteenth]);
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    //--------------
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mDO], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    //--------------
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mFA], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    //--------------
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mFA], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mSO], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mRA], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    //--------------
-    LedRighting();
-    BzRing(flMScale[3][mDO], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mRA], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mSO], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mFA], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    //--------------
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[quad] + flTime[eighth] - 100);
-    LedOff();
-    BzExtend(100); //LEDの為
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[sixteenth]);
-    LedOff();
-    BzStop(flTime[sixteenth]);
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[eighth]);
-    LedOff();
-    BzStop(flTime[eighth]);
-    //--------------
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[quad] + flTime[eighth] * 1.025 - 100);
-    LedOff();
-    BzExtend(100); //LEDの為
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[sixteenth] * 1.05);
-    LedOff();
-    BzStop(flTime[sixteenth] * 1.075);
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[eighth] * 1.1);
-    LedOff();
-    BzStop(flTime[eighth] * 1.2);
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[eighth] * 1.4);
-    LedOff();
-    BzStop(flTime[eighth] * 1.75);
-    //--------------
-    LedRighting();
-    BzRing(flMScale[2][mDO], flTime[eighth] * 1.75);
-    LedOff();
-    BzStop(flTime[eighth] * 1.75);
-    LedRighting();
-    BzRing(flMScale[2][mMI], flTime[quad] * 2 - 100);
-    LedOff();
-    BzExtend(100); //LEDの為
-    LedRighting();
-    BzRing(flMScale[2][mRE], flTime[harf] * 2);
-    //--------------
-    BzExtend(flTime[all] * 2);
-    LedOff();
+    int iRow = sizeof(ary_score0) / sizeof(ary_score0[0]);
+    int iCol = sizeof(ary_score0[0]) / sizeof(ary_score0[0][0]);
+
+    for(int i0 = 0; i0 < iRow; i0++)
+       BzNote(ary_score0[i0][0],ary_score0[i0][1],ary_score0[i0][2],ary_score0[i0][3]);
+    
+    iRow = sizeof(ary_score1) / sizeof(ary_score1[0]);
+    for(int i1 = 0; i1 < iRow; i1++)
+      BzNote(ary_score1[i1][0],ary_score1[i1][1],ary_score1[i1][2],ary_score1[i1][3]);
+    
+    iRow = sizeof(ary_score2) / sizeof(ary_score2[0]);
+    for(int i2 = 0; i2 < iRow; i2++)
+        BzNote(ary_score2[i2][0],ary_score2[i2][1],ary_score2[i2][2],ary_score2[i2][3]);
+
+
 }
 
 //*************************************************************************************

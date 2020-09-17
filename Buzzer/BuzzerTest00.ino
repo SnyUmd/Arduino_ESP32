@@ -7,7 +7,7 @@
 #include "Bzctrl.h"
 
 extern float flMScale[][12];
-
+extern int beat;
 //********************************************************
 void setup() 
 {
