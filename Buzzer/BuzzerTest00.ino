@@ -6,7 +6,7 @@
 #include "LedCtrl.h"
 #include "Bzctrl.h"
 
-extern float flMScale[][12];
+extern float flSount[][12];
 extern int beat;
 //********************************************************
 void setup() 
