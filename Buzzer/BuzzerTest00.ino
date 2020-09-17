@@ -6,7 +6,7 @@
 #include "LedCtrl.h"
 #include "Bzctrl.h"
 
-extern float flMelody[][12];
+extern float flMScale[][12];
 
 //********************************************************
 void setup() 
@@ -25,7 +25,7 @@ void loop()
   BzGoUp(10, 10);
   BzStop(200);
 
-  Bz_DragonQuest_First();
+  Bz_DragonQuest_Preface();
 
   BzStop(200);
 
