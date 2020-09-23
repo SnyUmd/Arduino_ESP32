@@ -423,10 +423,22 @@ void BzTest()
     // ledcAttachPin(14, ch4);
     // delay(1000);
 
-    //ledcWrite(ch1, 0);
-    //ledcWrite(ch2, 0);
-    //ledcWrite(ch3, 0);
-    //ledcWrite(ch4, 0);
+    ledcWrite(ch8, 0);
+    delay(1000);
+    ledcWrite(ch7, 0);
+    delay(1000);
+    ledcWrite(ch6, 0);
+    delay(1000);
+    ledcWrite(ch5, 0);
+    delay(1000);
+    ledcWrite(ch4, 0);
+    delay(1000);
+    ledcWrite(ch3, 0);
+    delay(1000);
+    ledcWrite(ch2, 0);
+    delay(1000);
+    ledcWrite(ch1, 0);
+    delay(1000);
 
 }
 

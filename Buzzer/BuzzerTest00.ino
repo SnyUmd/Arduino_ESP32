@@ -31,8 +31,8 @@ void loop()
 
   // LedFlash(50,3,false);
   // BzGoDown(10,10);
-  //BzTest();
-  BzTest2();
+  BzTest();
+  //BzTest2();
 
   //digitalWrite(26, !digitalRead(26));
 
