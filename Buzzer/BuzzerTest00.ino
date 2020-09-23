@@ -6,7 +6,7 @@
 #include "LedCtrl.h"
 #include "Bzctrl.h"
 
-extern float flSount[][12];
+extern float flSound[][12];
 extern int beat;
 //********************************************************
 void setup() 
@@ -15,22 +15,27 @@ void setup()
 
   LedFlash(50,3,false);
 
-  InitBz();
+  //InitBz();
 
 }
 
 //********************************************************
 void loop() 
 {
-  BzGoUp(10, 10);
-  BzStop(200);
+  // BzGoUp(10, 10);
+  // BzStop(200);
 
-  Bz_DragonQuest_Preface();
+  //Bz_DragonQuest_Preface();
 
-  BzStop(200);
+  //BzStop(200);
 
-  LedFlash(50,3,false);
-  BzGoDown(10,10);
+  // LedFlash(50,3,false);
+  // BzGoDown(10,10);
+  //BzTest();
+  BzTest2();
+
+  //digitalWrite(26, !digitalRead(26));
+
 
   while(1);
 

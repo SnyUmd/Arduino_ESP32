@@ -16,7 +16,8 @@ void BzStop(float stopTime);
 void BzRest(float restTime);
 //Music*********************
 
-void Bz_DragonQuest_Preface0(int iBarNum);
+void BzTest();
+void BzTest2();
 void Bz_DragonQuest_Preface();
 
 void BzGoUp(float ringTime, float stopTime);

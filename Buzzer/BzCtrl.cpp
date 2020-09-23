@@ -2,14 +2,14 @@
 #include "LedCtrl.h"
 
 int iDuty = PWM_RESOLUTION / 2;
-//extern float flSount[][12];
+//extern float flSound[][12];
 
 float beat0 = 1000;
 float beat1 = 2000;
 
 
 //*******************************************************
-float flSount[][12] =
+float flSound[][12] =
     {
         {130.813, 138.591, 146.832, 155.563, 164.814, 174.614, 184.997, 195.998, 207.652, 220, 233.082, 246.942},
         {261.626, 277.183, 293.665, 311.127, 329.628, 349.228, 369.994, 391.995, 415.305, 440, 466.164, 493.883},
@@ -55,197 +55,212 @@ float aryScore0[][4] =
 {//{記号種, 記号, 音, ペース}
 //記号
 //0：休符//1：音符//2：伸ばし
-        {1, getScale0(4), flSount[2][mMI], 100},
+        {1, getScale0(4), flSound[2][mMI], 100},
         {2, getScale0(8), 0, 100},
-        {1, getScale0(16), flSount[2][mMI], 100},
+        {1, getScale0(16), flSound[2][mMI], 100},
         {0, getScale0(16), 0, 100},
-        {1, getScale0(8), flSount[2][mMI], 100},
+        {1, getScale0(8), flSound[2][mMI], 100},
         {0, getScale0(8), 0, 100},
-        {1, getScale0(8), flSount[2][mRE], 100},
-        {0, getScale0(8), 0, 100},
-        //---------------------------------------
-        {1, getScale0(8), flSount[2][mRE], 100},
-        {0, getScale0(8), 0, 100},
-        {1, getScale0(8), flSount[2][mRE], 100},
-        {0, getScale0(8), 0, 100},
-        {1, getScale0(8), flSount[2][mDO], 100},
-        {0, getScale0(8), 0, 100},
-        {1, getScale0(8), flSount[2][mRE], 100},
+        {1, getScale0(8), flSound[2][mRE], 100},
         {0, getScale0(8), 0, 100},
         //---------------------------------------
-        {1, getScale0(8), flSount[2][mMI], 100},
+        {1, getScale0(8), flSound[2][mRE], 100},
         {0, getScale0(8), 0, 100},
-        {1, getScale0(8), flSount[2][mFA], 100},
+        {1, getScale0(8), flSound[2][mRE], 100},
         {0, getScale0(8), 0, 100},
-        {1, getScale0(8), flSount[2][mMI], 100},
+        {1, getScale0(8), flSound[2][mDO], 100},
         {0, getScale0(8), 0, 100},
-        {1, getScale0(8), flSount[2][mRE], 100},
-        {0, getScale0(8), 0, 100},
-        //---------------------------------------
-        {1, getScale0(8), flSount[2][mMI], 100},
-        {0, getScale0(8), 0, 100},
-        {1, getScale0(8), flSount[2][mFA], 100},
-        {0, getScale0(8), 0, 100},
-        {1, getScale0(8), flSount[2][mSO], 100},
-        {0, getScale0(8), 0, 100},
-        {1, getScale0(8), flSount[2][mRA], 100},
+        {1, getScale0(8), flSound[2][mRE], 100},
         {0, getScale0(8), 0, 100},
         //---------------------------------------
-        {1, getScale0(8), flSount[3][mDO], 100},
+        {1, getScale0(8), flSound[2][mMI], 100},
         {0, getScale0(8), 0, 100},
-        {1, getScale0(8), flSount[2][mRA], 100},
+        {1, getScale0(8), flSound[2][mFA], 100},
         {0, getScale0(8), 0, 100},
-        {1, getScale0(8), flSount[2][mSO], 100},
+        {1, getScale0(8), flSound[2][mMI], 100},
         {0, getScale0(8), 0, 100},
-        {1, getScale0(8), flSount[2][mFA], 100},
+        {1, getScale0(8), flSound[2][mRE], 100},
         {0, getScale0(8), 0, 100},
         //---------------------------------------
-        {1, getScale0(8), flSount[2][mMI], 100},
+        {1, getScale0(8), flSound[2][mMI], 100},
         {0, getScale0(8), 0, 100},
-        {1, getScale0(4), flSount[2][mRE], 100},
+        {1, getScale0(8), flSound[2][mFA], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flSound[2][mSO], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flSound[2][mRA], 100},
+        {0, getScale0(8), 0, 100},
+        //---------------------------------------
+        {1, getScale0(8), flSound[3][mDO], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flSound[2][mRA], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flSound[2][mSO], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(8), flSound[2][mFA], 100},
+        {0, getScale0(8), 0, 100},
+        //---------------------------------------
+        {1, getScale0(8), flSound[2][mMI], 100},
+        {0, getScale0(8), 0, 100},
+        {1, getScale0(4), flSound[2][mRE], 100},
         {2, getScale0(8), 0, 100},
-        {1, getScale0(16), flSount[2][mRE], 100},
+        {1, getScale0(16), flSound[2][mRE], 100},
         {0, getScale0(16), 0, 100},
-        {1, getScale0(8), flSount[2][mRE], 100},
+        {1, getScale0(8), flSound[2][mRE], 100},
         {0, getScale0(8), 0, 100},
         //---------------------------------------
-        {1, getScale0(4), flSount[2][mMI], 110},
+        {1, getScale0(4), flSound[2][mMI], 110},
         {2, getScale0(8), 0, 110},
-        {1, getScale0(16), flSount[2][mMI], 125},
+        {1, getScale0(16), flSound[2][mMI], 125},
         {0, getScale0(16), 0, 125},
-        {1, getScale0(8), flSount[2][mMI], 125},
+        {1, getScale0(8), flSound[2][mMI], 125},
         {0, getScale0(8), 0, 150},
-        {1, getScale0(8), flSount[2][mMI], 150},
+        {1, getScale0(8), flSound[2][mMI], 150},
         {0, getScale0(8), 0, 150},
         //---------------------------------------
-        {1, getScale0(8), flSount[2][mDO], 180},
+        {1, getScale0(8), flSound[2][mDO], 180},
         {0, getScale0(8), 0, 180},
-        {1, getScale0(4), flSount[2][mMI], 180},
-        {1, getScale0(2), flSount[2][mRE], 200},
+        {1, getScale0(4), flSound[2][mMI], 180},
+        {1, getScale0(2), flSound[2][mRE], 200},
         {2, getScale0(1), 0, 200},
         //---------------------------------------
         {0, getScale0(1), 0, 200}
 };
 
+//*******************************************************
 float aryScore1[][4] = 
 {
-    {1, getScale1(8), flSount[2][mSO], 100},
+    {1, getScale1(8), flSound[2][mSO], 100},
     {2, getScale1(16), 0, 100},
-    {1, getScale1(16), flSount[2][mSO], 100},
-    {1, getScale1(4), flSount[3][mDO], 100},
-    {1, getScale1(4), flSount[3][mRE], 100},
+    {1, getScale1(16), flSound[2][mSO], 100},
+    {1, getScale1(4), flSound[3][mDO], 100},
+    {1, getScale1(4), flSound[3][mRE], 100},
     //------------------------
-    {1, getScale1(4), flSount[3][mMI], 100},
-    {1, getScale1(4), flSount[3][mFA], 100},
-    {1, getScale1(8), flSount[3][mSO], 100},
+    {1, getScale1(4), flSound[3][mMI], 100},
+    {1, getScale1(4), flSound[3][mFA], 100},
+    {1, getScale1(8), flSound[3][mSO], 100},
     {2, getScale1(16), 0, 100},//楽譜では無し
     {0, getScale1(16), 0, 100},//楽譜では8分音符
-    {1, getScale1(4), flSount[4][mDO], 100},
+    {1, getScale1(4), flSound[4][mDO], 100},
     ////------------------------
     {2, getScale1(4), 0, 100},
-    {1, getScale1(8), flSount[3][mSI], 100},
+    {1, getScale1(8), flSound[3][mSI], 100},
     {2, getScale1(16), 0, 100},
-    {1, getScale1(16), flSount[3][mRA], 100},
-    {1, getScale1(4), flSount[3][mRA], 100},
+    {1, getScale1(16), flSound[3][mRA], 100},
+    {1, getScale1(4), flSound[3][mRA], 100},
     {2, getScale1(8), 0, 100},
-    {1, getScale1(8), flSount[3][mSO], 100},
+    {1, getScale1(8), flSound[3][mSO], 100},
     //------------------------
     {2, getScale1(8), 0, 100},
-    {1, getScale1(16), flSount[3][mFAs], 100},
+    {1, getScale1(16), flSound[3][mFAs], 100},
     {0, getScale1(16), 0, 100},
-    {1, getScale1(8), flSount[3][mFAs], 100},//楽譜ではファ
-    {1, getScale1(8), flSount[3][mRA], 100},
-    {1, getScale1(4), flSount[3][mSO], 100},
-    {1, getScale1(4), flSount[3][mMI], 100},
+    {1, getScale1(8), flSound[3][mFAs], 100},//楽譜ではファ
+    {1, getScale1(8), flSound[3][mRA], 100},
+    {1, getScale1(4), flSound[3][mSO], 100},
+    {1, getScale1(4), flSound[3][mMI], 100},
     //------------------------
     {2, getScale1(4), 0, 100},
-    {1, getScale1(8), flSount[2][mMI], 100},
+    {1, getScale1(8), flSound[2][mMI], 100},
     {2, getScale1(16), 0, 100},
-    {1, getScale1(16), flSount[2][mMI], 100},
-    {1, getScale1(4), flSount[2][mMI], 100},
-    {1, getScale1(4), flSount[2][mMI], 100},
+    {1, getScale1(16), flSound[2][mMI], 100},
+    {1, getScale1(4), flSound[2][mMI], 100},
+    {1, getScale1(4), flSound[2][mMI], 100},
     //------------------------
-    {1, getScale1(4), flSount[2][mFAs], 100},
-    {1, getScale1(4), flSount[2][mSOs], 100},
-    {1, getScale1(2), flSount[2][mRA], 100},
-    //------------------------
-    {2, getScale1(8), 0, 100},
-    {1, getScale1(16), flSount[2][mRA], 100},
-    {0, getScale1(16), 0, 100},
-    {1, getScale1(16), flSount[2][mSI], 100},
-    {0, getScale1(16), 0, 100},
-    {1, getScale1(16), flSount[3][mDO], 100},
-    {0, getScale1(16), 0, 100},
-    {1, getScale1(2), flSount[3][mRE], 100},
+    {1, getScale1(4), flSound[2][mFAs], 100},
+    {1, getScale1(4), flSound[2][mSOs], 100},
+    {1, getScale1(2), flSound[2][mRA], 100},
     //------------------------
     {2, getScale1(8), 0, 100},
-    {1, getScale1(16), flSount[2][mRA], 100},
+    {1, getScale1(16), flSound[2][mRA], 100},
     {0, getScale1(16), 0, 100},
-    {1, getScale1(16), flSount[2][mRA], 100},
+    {1, getScale1(16), flSound[2][mSI], 100},
     {0, getScale1(16), 0, 100},
-    {1, getScale1(16), flSount[3][mRE], 100},
+    {1, getScale1(16), flSound[3][mDO], 100},
     {0, getScale1(16), 0, 100},
-    {1, getScale1(4), flSount[3][mRE], 100},
-    {1, getScale1(4), flSount[2][mSI], 100},
+    {1, getScale1(2), flSound[3][mRE], 100},
     //------------------------
-    {1, getScale1(4), flSount[2][mRA], 100},
-    {1, getScale1(4), flSount[2][mSO], 100},
-    {1, getScale1(2), flSount[3][mMI], 100}
+    {2, getScale1(8), 0, 100},
+    {1, getScale1(16), flSound[2][mRA], 100},
+    {0, getScale1(16), 0, 100},
+    {1, getScale1(16), flSound[2][mRA], 100},
+    {0, getScale1(16), 0, 100},
+    {1, getScale1(16), flSound[3][mRE], 100},
+    {0, getScale1(16), 0, 100},
+    {1, getScale1(4), flSound[3][mRE], 100},
+    {1, getScale1(4), flSound[2][mSI], 100},
+    //------------------------
+    {1, getScale1(4), flSound[2][mRA], 100},
+    {1, getScale1(4), flSound[2][mSO], 100},
+    {1, getScale1(2), flSound[3][mMI], 100}
 };
+//*******************************************************
 float aryScore2[][4] = 
 {
     {2, getScale1(8), 0, 100},
-    {1, getScale1(8), flSount[3][mFA], 100},
-    {1, getScale1(8), flSount[3][mMI], 100},
-    {1, getScale1(8), flSount[3][mRE], 100},
-    {1, getScale1(2), flSount[3][mDO], 100},
+    {1, getScale1(8), flSound[3][mFA], 100},
+    {1, getScale1(8), flSound[3][mMI], 100},
+    {1, getScale1(8), flSound[3][mRE], 100},
+    {1, getScale1(2), flSound[3][mDO], 100},
     //------------------------
-    {1, getScale1(4), flSount[2][mRA], 100},
-    {1, getScale1(4), flSount[3][mDO], 100},
-    {1, getScale1(2), flSount[3][mRE], 100},
-    //------------------------
-    {2, getScale1(8), 0, 100},
-    {1, getScale1(8), flSount[3][mMI], 100},
-    {1, getScale1(8), flSount[3][mRE], 100},
-    {1, getScale1(8), flSount[3][mDO], 100},
-    {1, getScale1(2), flSount[3][mDO], 100},
-    //------------------------
-    {1, getScale1(4), flSount[2][mSI], 100},
-    {1, getScale1(4), flSount[2][mSO], 100},
-    {1, getScale1(2), flSount[3][mSO], 100},
+    {1, getScale1(4), flSound[2][mRA], 100},
+    {1, getScale1(4), flSound[3][mDO], 100},
+    {1, getScale1(2), flSound[3][mRE], 100},
     //------------------------
     {2, getScale1(8), 0, 100},
-    {1, getScale1(8), flSount[3][mMI], 100},
-    {1, getScale1(8), flSount[3][mFA], 100},
-    {1, getScale1(8), flSount[3][mSO], 100},
-    {1, getScale1(2), flSount[3][mRA], 100},
+    {1, getScale1(8), flSound[3][mMI], 100},
+    {1, getScale1(8), flSound[3][mRE], 100},
+    {1, getScale1(8), flSound[3][mDO], 100},
+    {1, getScale1(2), flSound[3][mDO], 100},
+    //------------------------
+    {1, getScale1(4), flSound[2][mSI], 100},
+    {1, getScale1(4), flSound[2][mSO], 100},
+    {1, getScale1(2), flSound[3][mSO], 100},
     //------------------------
     {2, getScale1(8), 0, 100},
-    {1, getScale1(8), flSount[2][mRA], 100},
-    {1, getScale1(8), flSount[2][mSI], 100},
-    {1, getScale1(8), flSount[3][mDO], 100},
-    {1, getScale1(2), flSount[3][mFA], 100},
+    {1, getScale1(8), flSound[3][mMI], 100},
+    {1, getScale1(8), flSound[3][mFA], 100},
+    {1, getScale1(8), flSound[3][mSO], 100},
+    {1, getScale1(2), flSound[3][mRA], 100},
     //------------------------
-    {1, getScale1(2), flSount[3][mMI], 100},
-    {1, getScale1(2), flSount[3][mDO], 100},
+    {2, getScale1(8), 0, 100},
+    {1, getScale1(8), flSound[2][mRA], 100},
+    {1, getScale1(8), flSound[2][mSI], 100},
+    {1, getScale1(8), flSound[3][mDO], 100},
+    {1, getScale1(2), flSound[3][mFA], 100},
+    //------------------------
+    {1, getScale1(2), flSound[3][mMI], 100},
+    {1, getScale1(2), flSound[3][mDO], 100},
     //------------------------
     {2, getScale1(16), 0, 100},
     {0, getScale1(16), 0, 100},
     {0, getScale1(8), 0, 100},
-    {1, getScale1(8), flSount[2][mSO], 100},
+    {1, getScale1(8), flSound[2][mSO], 100},
     {2, getScale1(16), 0, 100},
-    {1, getScale1(16), flSount[2][mSO], 100},
-    {1, getScale1(4), flSount[3][mDO], 100},
-    {1, getScale1(4), flSount[3][mRE], 100},
+    {1, getScale1(16), flSound[2][mSO], 100},
+    {1, getScale1(4), flSound[3][mDO], 100},
+    {1, getScale1(4), flSound[3][mRE], 100},
     //------------------------
-    {1, getScale1(4), flSount[3][mMI], 100},
-    {1, getScale1(4), flSount[3][mFA], 100},
-    {1, getScale1(8), flSount[3][mSO], 100},
+    {1, getScale1(4), flSound[3][mMI], 100},
+    {1, getScale1(4), flSound[3][mFA], 100},
+    {1, getScale1(8), flSound[3][mSO], 100},
     {0, getScale1(8), 0, 100},
-    {1, getScale1(4), flSount[4][mDO], 100}
+    {1, getScale1(4), flSound[4][mDO], 100}
 };
 
+//*******************************************************
+void InitBz()
+{
+    ledcSetup(PWM_CHANNEL0, PWM_FRQ1000, PWM_BIT_NUM);
+    ledcAttachPin(PWM_PIN, PWM_CHANNEL0);
+    //ledcWrite(PWM_CHANNEL0, PWM_DUTY);
+}
+
+//*******************************************************
 void BzNote(float type, float iTime, float scale, float iPase)
+//type 0:給付,　1：音符,　2：伸ばし
+//iTime：時間
+//scale：音階
+//iPase：長さ微調整
 {
     float iPaseBuf = iPase / 100;
     switch (int(type))
@@ -265,22 +280,22 @@ void BzNote(float type, float iTime, float scale, float iPase)
         break;
     }
 }
-
+//*******************************************************
+float getrScale(float iNote)
+{
+    return 1000/iNote;
+}
+//*******************************************************
 float getScale0(float iNote)
 {
     return beat0/iNote;
 }
+//*******************************************************
 float getScale1(float iNote)
 {
     return beat1/iNote;
 }
-//*******************************************************
-void InitBz()
-{
-    ledcSetup(PWM_CHANNEL0, PWM_FRQ1000, PWM_BIT_NUM);
-    ledcAttachPin(PWM_PIN, PWM_CHANNEL0);
-    //ledcWrite(PWM_CHANNEL0, PWM_DUTY);
-}
+
 
 //*******************************************************
 void BuzzerRing_Dot(int ringNum, int iPeriod)
@@ -326,11 +341,119 @@ void BzRest(float restTime)
 //*******************************************************
 //*******************************************************
 //*******************************************************
-void Bz_DragonQuest_Preface0(int iBarNum)
+void BzTest()
 {
-    
+    int ch1 = 0;
+    int ch2 = 2;
+    int ch3 = 4;
+    int ch4 = 6;
+    int ch5 = 8;
+    int ch6 = 10;
+    int ch7 = 12;
+    int ch8 = 14;
+
+    int bit = 2;
+    float rsl = 4;
+
+    ledcSetup(ch1, 1000, bit);
+    ledcWrite(ch1, rsl/2);
+    ledcAttachPin(25, ch1);
+    delay(1000);
+    //ledcWrite(ch1, 0);
+
+    ledcSetup(ch2, 2000, bit);
+    ledcWrite(ch2, rsl/2);
+    ledcAttachPin(26, ch2);
+    delay(1000);
+    //ledcWrite(ch2, 0);
+
+    ledcSetup(ch3, 3000, bit);
+    ledcWrite(ch3, rsl/2);
+    ledcAttachPin(27, ch3);
+    delay(1000);
+    //ledcWrite(ch3, 0);
+
+    ledcSetup(ch4, 4000, bit);
+    ledcWrite(ch4, rsl/2);
+    ledcAttachPin(14, ch4);
+    delay(1000);
+
+
+
+
+    ledcSetup(ch5, 5000, bit);
+    ledcWrite(ch5, rsl/2);
+    ledcAttachPin(12, ch5);
+    delay(1000);
+
+    ledcSetup(ch6, 6000, bit);
+    ledcWrite(ch6, rsl/2);
+    ledcAttachPin(13, ch6);
+    delay(1000);
+
+    ledcSetup(ch7, 7000, bit);
+    ledcWrite(ch7, rsl/2);
+    ledcAttachPin(33, ch7);
+    delay(1000);
+
+    ledcSetup(ch8, 8000, bit);
+    ledcWrite(ch8, rsl/2);
+    ledcAttachPin(32, ch8);
+    delay(1000);
+
+//-----------------
+
+    // ledcSetup(ch1, flSound[2][mDO], PWM_BIT_NUM);
+    // ledcWrite(ch1, iDuty);
+    // ledcAttachPin(25, ch1);
+    // delay(1000);
+
+    // ledcSetup(ch2, flSound[2][mMI], PWM_BIT_NUM);
+    // ledcWrite(ch2, iDuty);
+    // ledcAttachPin(26, ch2);
+    // delay(1000);
+
+    // ledcSetup(ch3, flSound[2][mSO], PWM_BIT_NUM);
+    // ledcWrite(ch3, iDuty);
+    // ledcAttachPin(27, ch3);
+    // delay(1000);
+
+    // ledcSetup(ch4, flSound[3][mDO], PWM_BIT_NUM);
+    // ledcWrite(ch4, iDuty);
+    // ledcAttachPin(14, ch4);
+    // delay(1000);
+
+    //ledcWrite(ch1, 0);
+    //ledcWrite(ch2, 0);
+    //ledcWrite(ch3, 0);
+    //ledcWrite(ch4, 0);
+
 }
 
+void BzTest2()
+{
+    float flq = 1;     //周波数
+    int bit = 8;            //ビット
+    float rsl = 256;         //分解能
+    int prt = 25;           //ポート番号
+    int pwm_ch = 0;         //PWMチャンネル
+
+    ledcSetup(pwm_ch, flq, bit);
+    ledcWrite(pwm_ch, rsl/2);
+    ledcAttachPin(prt, pwm_ch);
+    delay(1000);
+    //ledcWrite(pwm_ch, rsl/4);
+    ledcSetup(pwm_ch, 10, bit);
+    ledcWrite(pwm_ch, rsl/2);
+    //ledcAttachPin(prt, pwm_ch);
+    delay(1000);
+    //ledcWrite(pwm_ch, rsl/8);
+    ledcSetup(pwm_ch, 20, bit);
+    ledcWrite(pwm_ch, rsl/2);
+    //ledcAttachPin(prt, pwm_ch);
+
+    //ledcWrite(ch2, 0);
+}
 //*******************************************************
 void Bz_DragonQuest_Preface()
 {
@@ -361,7 +484,7 @@ void BzGoUp(float ringTime, float stopTime)
 
     for (int i = 0; i < 12; i++)
     {
-        BzRing(flSount[3][i], ringTime);
+        BzRing(flSound[3][i], ringTime);
         BzStop(stopTime);
     }
 }
@@ -372,7 +495,7 @@ void BzGoDown(float ringTime, float stopTime)
 
     for (int i = 12; i > 0; i--)
     {
-        BzRing(flSount[3][i], ringTime);
+        BzRing(flSound[3][i], ringTime);
         BzStop(stopTime);
     }
 }

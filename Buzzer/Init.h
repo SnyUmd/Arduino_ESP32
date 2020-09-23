@@ -1,4 +1,4 @@
 //変数宣言
-//extern float float flSount[][12] ;
+//extern float float flSound[][12] ;
 
 void Initialize_Port();

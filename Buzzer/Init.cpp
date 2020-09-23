@@ -2,7 +2,7 @@
 #include "init.h"
 #include "def.h"
 
-// float flSount[][12] =
+// float flSound[][12] =
 //     {
 //         {130.813, 138.591, 146.832, 155.563, 164.814, 174.614, 184.997, 195.998, 207.652, 220, 233.082, 246.942},
 //         {261.626, 277.183, 293.665, 311.127, 329.628, 349.228, 369.994, 391.995, 415.305, 440, 466.164, 493.883},
@@ -37,6 +37,10 @@ void Initialize_Port()
     //ブザー
     //pinMode(BUZZER_PWM, OUTPUT);
     //digitalWrite(BUZZER_PWM, LOW);
+    
+    //テスト用
+    pinMode(26, OUTPUT);
+    digitalWrite(26, LOW);
 
     //タクトスイッチ
     pinMode(SWITCH0, INPUT_PULLUP);

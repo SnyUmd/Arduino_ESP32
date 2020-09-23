@@ -9,7 +9,9 @@
             "includePath": [
                 "${workspaceFolder}",
                 "C:\\Users\\shiny\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.2\\**",
-                "C:\\Users\\shiny\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\**"
+                "C:\\Users\\shiny\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\**",
+                "C:\\Users\\sny-acer\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.4\\**",
+                "C:\\Users\\sny-acer\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\**"
             ],
             "browse": {
                 "path": [
