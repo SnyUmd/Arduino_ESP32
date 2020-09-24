@@ -16,7 +16,7 @@ void BzStop(float stopTime);
 void BzRest(float restTime);
 //Music*********************
 
-void BzTest();
+void PwmTest();
 void BzTest2();
 void Bz_DragonQuest_Preface();
 
