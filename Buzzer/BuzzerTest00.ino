@@ -15,29 +15,43 @@ void setup()
 
   LedFlash(50,3,false);
 
-  //InitBz();
+  InitBz();
+
+  BzGoUp(10, 10);
+  BzStop(200);
 
 }
 
 //********************************************************
 void loop() 
 {
-  // BzGoUp(10, 10);
+
+  // Bz_DragonQuest_Preface();
   // BzStop(200);
-
-  //Bz_DragonQuest_Preface();
-
-  //BzStop(200);
 
   // LedFlash(50,3,false);
   // BzGoDown(10,10);
-  BzTest();
+  // BzTest();
   //BzTest2();
 
   //digitalWrite(26, !digitalRead(26));
 
 
-  while(1);
+
+  LedFlash(100,1,false);
+  if(digitalRead(SWITCH0) == 0)
+  {
+    while(1)
+    {
+      LedFlash(10,1,false);
+      if(digitalRead(SWITCH0) == 1)
+      {
+        Bz_DragonQuest_Preface();
+        break;
+      }
+    }
+  }
+
 
 }
 

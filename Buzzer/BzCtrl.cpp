@@ -182,20 +182,19 @@ float aryScore1[][4] =
     {2, getScale1(8), 0, 100},
     {1, getScale1(16), flSound[2][mRA], 100},
     {0, getScale1(16), 0, 100},
-    {1, getScale1(16), flSound[2][mRA], 100},
+    {1, getScale1(16), flSound[2][mRA], 100},//**
     {0, getScale1(16), 0, 100},
-    {1, getScale1(16), flSound[3][mRE], 100},
+    // {1, getScale1(16), flSound[3][mRE], 100},
+    {1, getScale1(16), flSound[3][mDO], 100},
     {0, getScale1(16), 0, 100},
-    {1, getScale1(4), flSound[3][mRE], 100},
+    // {1, getScale1(4), flSound[3][mRE], 100},
+    {1, getScale1(4), flSound[3][mDO], 100},
     {1, getScale1(4), flSound[2][mSI], 100},
     //------------------------
     {1, getScale1(4), flSound[2][mRA], 100},
     {1, getScale1(4), flSound[2][mSO], 100},
-    {1, getScale1(2), flSound[3][mMI], 100}
-};
-//*******************************************************
-float aryScore2[][4] = 
-{
+    {1, getScale1(2), flSound[3][mMI], 100},
+    //------------------------
     {2, getScale1(8), 0, 100},
     {1, getScale1(8), flSound[3][mFA], 100},
     {1, getScale1(8), flSound[3][mMI], 100},
@@ -229,9 +228,47 @@ float aryScore2[][4] =
     {1, getScale1(2), flSound[3][mFA], 100},
     //------------------------
     {1, getScale1(2), flSound[3][mMI], 100},
+    {1, getScale1(2), flSound[3][mDO], 100}
+};
+//*******************************************************
+float aryScore2[][4] = 
+{
+    /*{2, getScale1(8), 0, 100},
+    {1, getScale1(8), flSound[3][mFA], 100},
+    {1, getScale1(8), flSound[3][mMI], 100},
+    {1, getScale1(8), flSound[3][mRE], 100},
     {1, getScale1(2), flSound[3][mDO], 100},
     //------------------------
-    {2, getScale1(16), 0, 100},
+    {1, getScale1(4), flSound[2][mRA], 100},
+    {1, getScale1(4), flSound[3][mDO], 100},
+    {1, getScale1(2), flSound[3][mRE], 100},
+    //------------------------
+    {2, getScale1(8), 0, 100},
+    {1, getScale1(8), flSound[3][mMI], 100},
+    {1, getScale1(8), flSound[3][mRE], 100},
+    {1, getScale1(8), flSound[3][mDO], 100},
+    {1, getScale1(2), flSound[3][mDO], 100},
+    //------------------------
+    {1, getScale1(4), flSound[2][mSI], 100},
+    {1, getScale1(4), flSound[2][mSO], 100},
+    {1, getScale1(2), flSound[3][mSO], 100},
+    //------------------------
+    {2, getScale1(8), 0, 100},
+    {1, getScale1(8), flSound[3][mMI], 100},
+    {1, getScale1(8), flSound[3][mFA], 100},
+    {1, getScale1(8), flSound[3][mSO], 100},
+    {1, getScale1(2), flSound[3][mRA], 100},
+    //------------------------
+    {2, getScale1(8), 0, 100},
+    {1, getScale1(8), flSound[2][mRA], 100},
+    {1, getScale1(8), flSound[2][mSI], 100},
+    {1, getScale1(8), flSound[3][mDO], 100},
+    {1, getScale1(2), flSound[3][mFA], 100},
+    //------------------------
+    {1, getScale1(2), flSound[3][mMI], 100},
+    {1, getScale1(2), flSound[3][mDO], 100},*/
+    //------------------------
+    /*{2, getScale1(16), 0, 100},
     {0, getScale1(16), 0, 100},
     {0, getScale1(8), 0, 100},
     {1, getScale1(8), flSound[2][mSO], 100},
@@ -244,7 +281,7 @@ float aryScore2[][4] =
     {1, getScale1(4), flSound[3][mFA], 100},
     {1, getScale1(8), flSound[3][mSO], 100},
     {0, getScale1(8), 0, 100},
-    {1, getScale1(4), flSound[4][mDO], 100}
+    {1, getScale1(4), flSound[4][mDO], 100}*/
 };
 
 //*******************************************************
@@ -475,15 +512,20 @@ void Bz_DragonQuest_Preface()
     for(int i0 = 0; i0 < iRow; i0++)
        BzNote(aryScore0[i0][0],aryScore0[i0][1],aryScore0[i0][2],aryScore0[i0][3]);
     
+    if (digitalRead(SWITCH0) == 0)
+    {
+        BzStop(200);
+        return;
+    }
     iRow = sizeof(aryScore1) / sizeof(aryScore1[0]);
     for(int i1 = 0; i1 < iRow; i1++)
-      BzNote(aryScore1[i1][0],aryScore1[i1][1],aryScore1[i1][2],aryScore1[i1][3]);
+        BzNote(aryScore1[i1][0],aryScore1[i1][1],aryScore1[i1][2],aryScore1[i1][3]);
     
-    iRow = sizeof(aryScore2) / sizeof(aryScore2[0]);
-    for(int i2 = 0; i2 < iRow; i2++)
-        BzNote(aryScore2[i2][0],aryScore2[i2][1],aryScore2[i2][2],aryScore2[i2][3]);
+    // iRow = sizeof(aryScore2) / sizeof(aryScore2[0]);
+    // for(int i2 = 0; i2 < iRow; i2++)
+    //     BzNote(aryScore2[i2][0],aryScore2[i2][1],aryScore2[i2][2],aryScore2[i2][3]);
 
-
+    BzStop(200);
 }
 
 //*************************************************************************************
