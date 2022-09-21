@@ -1,0 +1,8 @@
+#define PORT_LED 2
+#define LED_ON HIGH
+#define LED_OFF LOW
+
+#define PORT_MOTER_IN1 32
+#define PORT_MOTER_IN2 33
+#define PORT_MOTER_IN3 34
+#define PORT_MOTER_IN4 35
