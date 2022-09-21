@@ -12,7 +12,7 @@ void setup()
 
 void loop()
 {
-    LC.LedFlash(PORT_LED, 10, 1);
+    LC.LedFlash(PORT_LED, 100, 1);
 }
 
 
