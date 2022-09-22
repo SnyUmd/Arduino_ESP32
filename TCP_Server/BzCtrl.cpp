@@ -1,5 +1,5 @@
 #include "BzCtrl.h"
-#include "LedCtrl.h"
+// #include "LedCtrl.h"
 
 int iDuty = PWM_RESOLUTION / 2;
 //extern float flSound[][12];
