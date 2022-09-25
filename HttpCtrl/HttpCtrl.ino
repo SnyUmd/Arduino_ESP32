@@ -9,7 +9,7 @@ String hostname = "esp32";
 WebServer server(80);
 String target = "test"; // この変数をPOSTメソッドで書き換える
 
-ClsHttp clsHttp;
+
 // auto testFn(bool bl_port_sts);
 // auto testFn = [](int port_sts){
 auto testFn = [](int sts){
@@ -42,7 +42,7 @@ void setup() {
   // digitalWrite(2, clsHttp.call(testFn, 0));
   // digitalWrite(2, clsHttp.test(testFn, 1));
   // while(1);
-
+  ClsHttp clsHttp(server);
 
   // シリアルコンソールのセットアップ
   Serial.begin(115200);
@@ -80,7 +80,7 @@ void setup() {
     server.send(200, "text/plain", "aaa"); // 値をクライアントに返す
   });
 
-  clsHttp.httpSet(server, "/led/on", setLED, 0);
+  // clsHttp.httpSet(server, "/led/on", setLED, 0);
 
   // 登録されてないパスにアクセスがあった場合
   server.onNotFound([](){
@@ -99,5 +99,3 @@ void init_port()
 {
   
 }
-
-

@@ -43,7 +43,6 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp",
-        "xstring": "cpp"
+        "typeinfo": "cpp"
     }
 }
