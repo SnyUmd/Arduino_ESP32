@@ -71,7 +71,8 @@ void SetLED0(WebServer & sv, int sts)
 
 // ****************************************************************
 void setup() {
-  LC.LedFlash(1, 10, 10);
+  pinMode(2, OUTPUT);
+  LC.LedFlash(2, 5, 5);
 
   // シリアルコンソールのセットアップ
   Serial.begin(115200);
