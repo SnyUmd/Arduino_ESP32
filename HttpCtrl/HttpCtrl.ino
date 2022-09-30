@@ -1,6 +1,8 @@
 #include <WiFi.h>
 #include <string>
 #include <WebServer.h>
+#include <map>
+#include <iostream>
 #include "Http.h"
 #include "LED_Ctrl.h"
 
@@ -16,9 +18,47 @@ LED_Ctrl LC;
 WebServer server(80);
 String target = "test"; // この変数をPOSTメソッドで書き換える
 
+enum EnmUriNum
+{
+  led_off = 0,
+  led_on
+};
+enum EnmUriNum enmUriNum;
+
+typedef struct{
+  Uri uri;
+  int function;
+  String returnMess;
+}dictionary;
+
+const dictionary dic[]
+{
+  {"/led/off/1", 0, "LED OFF 1"},
+  {"/led/on/1", 1, "LED ON 1"}
+};
+
+
+auto actions = [&dic](WebServer& sv, int function)
+{
+  String resultMess = "";
+  if (sv.method() == HTTP_POST) { // POSTメソッドでアクセスされた場合
+      resultMess = sv.arg("plain"); // server.arg("plain")でリクエストボディが取れる。targetに格納
+  }
+  switch(function)
+  {
+    case 0:
+      digitalWrite(2, 0);
+      resultMess = dic[0].returnMess;
+      break;
+    case 1:
+      digitalWrite(2,1);
+      resultMess = dic[1].returnMess;
+  }
+  sv.send(200, "text/plain", resultMess);
+};
 
 // ****************************************************************
-// auto testFn(bool bl_port_sts);
+// auto testFn(bool bl_port_sts0);
 // auto testFn = [](int port_sts){
 auto testFn = [](int sts){
   pinMode(2, OUTPUT);
@@ -37,27 +77,22 @@ auto setLED = [](int sts)
 };
 
 // ****************************************************************
-template<class Fn>
-void sv_on(WebServer & sv, const Uri & uri, Fn & fn, int fn_sts, String return_mess)
+void sv_on(WebServer & sv, Uri uri, int led_sts, String return_mess)
 {
-  sv.on(uri, HTTP_ANY, [&sv, &fn, &fn_sts, &return_mess](){
-    if (sv.method() == HTTP_POST) { // POSTメソッドでアクセスされた場合
-      return_mess = sv.arg("plain"); // server.arg("plain")でリクエストボディが取れる。targetに格納
-    }
-    fn(fn_sts);
-    sv.send(200, "text/plain", return_mess); // 値をクライアントに返す
-  });
-}
+  // int sts = led_sts;
+  String mess = return_mess;
 
-// ****************************************************************
-template<class Fn>
-void sv_on00(WebServer & sv, const Uri & uri, Fn & fn, int fn_sts, const String & return_mess)
-{
-  String mss = "";
-  sv.on(uri, HTTP_ANY, [&sv, &fn, &fn_sts, &return_mess](){
-    fn(fn_sts);
-    sv.send(200, "text/plain", return_mess); // 値をクライアントに返す
-  })();
+  auto fn = [&](){
+    if (sv.method() == HTTP_POST) { // POSTメソッドでアクセスされた場合
+      mess = sv.arg("plain"); // server.arg("plain")でリクエストボディが取れる。targetに格納
+    }
+    setLED(led_sts);
+    sv.send(200, "text/plain", mess); // 値をクライアントに返す
+    Serial.println(mess);
+    Serial.println(led_sts);
+  };
+
+  sv.on(uri, HTTP_ANY, fn);
 }
 
 // ****************************************************************
@@ -89,6 +124,7 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
+  LC.LedFlash(2, 2, 10);
 
   Serial.println();
   Serial.println("WiFi connected.");
@@ -110,35 +146,28 @@ void setup() {
     server.send(200, "text/plain", "aaa"); // 値をクライアントに返す
   });
 
-  server.on("/led/on", HTTP_ANY, [](){
+  server.on("/led/on/0", HTTP_ANY, [](){
     if (server.method() == HTTP_POST) { // POSTメソッドでアクセスされた場合
       target = server.arg("plain"); // server.arg("plain")でリクエストボディが取れる。targetに格納
     }
     setLED(1);
-    server.send(200, "text/plain", "LED on"); // 値をクライアントに返す
+    server.send(200, "text/plain", "LED on0"); // 値をクライアントに返す
   });
 
-  server.on("/led/off", HTTP_ANY, [](){
+  server.on("/led/off/0", HTTP_ANY, [](){
     if (server.method() == HTTP_POST) { // POSTメソッドでアクセスされた場合
       target = server.arg("plain"); // server.arg("plain")でリクエストボディが取れる。targetに格納
     }
     setLED(0);
-    server.send(200, "text/plain", "LED off"); // 値をクライアントに返す
+    server.send(200, "text/plain", "LED off0"); // 値をクライアントに返す
   });
 
-  // httpSet(server, "/led/on", setLED, 1);
-  // httpSet(server, "/led/off", setLED, 0);
-
-  // server.on("/led/on", HTTP_ANY, [](){setLED(1);});
-  // server.on("/led/off", HTTP_ANY, [](){setLED(0);});
-
-  // server.on("/led/on", HTTP_ANY, [](){SetLED0(server, 1);});
-  // server.on("/led/off", HTTP_ANY, [](){SetLED(server, 0);});
-
-  // SetLED1(server, "/led/on");
-  // sv_on(server, "/led/on", setLED, 1, "LED on");
-  // sv_on(server, "/led/off", setLED, 0, "LED off");
-
+  server.on(dic[(int)enmUriNum.led_off], HTTP_ANY, [](){
+    actions(server, dic[enmUriNum.led_off].function);
+  });
+  server.on("/led/on/1", HTTP_ANY, [](){
+    actions(server, dic[1].function);
+  });
 
   // 登録されてないパスにアクセスがあった場合
   server.onNotFound([](){
@@ -157,7 +186,7 @@ void loop() {
 // ****************************************************************
 void init_port()
 {
-  
+  pinMode(2, OUTPUT);
 }
 
 // ****************************************************************
@@ -175,5 +204,8 @@ void httpSet(WebServer& w_sv, const Uri& uri, Fn0 fn, int sts)
 }
 
 
+void setFunctions()
+{
 
+}
 
