@@ -1,5 +1,4 @@
-#define LED_ON 1
-#define LED_OFF 0
+#include "def_items.h"
 
 class LED_Ctrl
 {

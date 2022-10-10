@@ -1,14 +1,14 @@
 #include <WiFi.h>
 #include <string>
 #include <WebServer.h>
-#include <map>
 #include <iostream>
 #include "Http.h"
 #include "LED_Ctrl.h"
+#include "def_items.h"
+#include "Actions.h"
 
 const char* ssid     = "Wi-ko1225_G"; // 自分のSSIDに書き換える
 const char* password = "n17e92@53S19n"; // 自分のパスワードに書き換える
-
 // const char* ssid     = "Gal51-sn"; // 自分のSSIDに書き換える
 // const char* password = "noenoe0714"; // 自分のパスワードに書き換える
 
@@ -17,6 +17,15 @@ LED_Ctrl LC;
 
 WebServer server(80);
 String target = "test"; // この変数をPOSTメソッドで書き換える
+
+int motorSts[5][4] = 
+{
+  {0, 0, 0, 0},
+  {1, 0, 0, 0},
+  {0, 1, 0, 0},
+  {0, 0, 1, 0},
+  {0, 0, 0, 1},
+};
 
 enum EnmUriNum
 {
@@ -34,10 +43,13 @@ typedef struct{
 const dictionary dic[]
 {
   {"/led/off/1", 0, "LED OFF 1"},
-  {"/led/on/1", 1, "LED ON 1"}
+  {"/led/on/1", 1, "LED ON 1"},
+  {"/motor", 2, "Motor Set"},
+  {"/test", 100, "test"}
 };
 
 
+// ****************************************************************
 auto actions = [&dic](WebServer& sv, int function)
 {
   String resultMess = "";
@@ -47,26 +59,38 @@ auto actions = [&dic](WebServer& sv, int function)
   switch(function)
   {
     case 0:
-      digitalWrite(2, 0);
+      digitalWrite(PORT_LED, 0);
       resultMess = dic[0].returnMess;
       break;
+
     case 1:
-      digitalWrite(2,1);
+      digitalWrite(PORT_LED,1);
       resultMess = dic[1].returnMess;
+      break;
+
+    case 2:
+      int aryMotorPort[] = {0, 0, 0, 0};
+      for(int i = 0; i < 1000; i++)
+      {
+        motorAction(motorSts[1]);
+        delay(5);
+        motorAction(motorSts[2]);
+        delay(5);
+        motorAction(motorSts[3]);
+        delay(5);
+        motorAction(motorSts[4]);
+        delay(5);
+      }
+      motorAction(motorSts[0]);
+      resultMess = dic[2].returnMess;
+      break;
+
+    // case 100:
+    //   digitalWrite(PORT_LED, 1);
+    //   resultMess = "test";
+    //   break;
   }
   sv.send(200, "text/plain", resultMess);
-};
-
-// ****************************************************************
-// auto testFn(bool bl_port_sts0);
-// auto testFn = [](int port_sts){
-auto testFn = [](int sts){
-  pinMode(2, OUTPUT);
-  digitalWrite(2, HIGH);
-  delay(500);
-  digitalWrite(2, LOW);
-  delay(500);
-  return sts;
 };
 
 // ****************************************************************
@@ -75,25 +99,6 @@ auto setLED = [](int sts)
   pinMode(2, OUTPUT);
   digitalWrite(2, sts);
 };
-
-// ****************************************************************
-void sv_on(WebServer & sv, Uri uri, int led_sts, String return_mess)
-{
-  // int sts = led_sts;
-  String mess = return_mess;
-
-  auto fn = [&](){
-    if (sv.method() == HTTP_POST) { // POSTメソッドでアクセスされた場合
-      mess = sv.arg("plain"); // server.arg("plain")でリクエストボディが取れる。targetに格納
-    }
-    setLED(led_sts);
-    sv.send(200, "text/plain", mess); // 値をクライアントに返す
-    Serial.println(mess);
-    Serial.println(led_sts);
-  };
-
-  sv.on(uri, HTTP_ANY, fn);
-}
 
 // ****************************************************************
 void SetLED0(WebServer & sv, int sts)
@@ -106,7 +111,8 @@ void SetLED0(WebServer & sv, int sts)
 
 // ****************************************************************
 void setup() {
-  pinMode(2, OUTPUT);
+  init_port();
+
   LC.LedFlash(2, 5, 5);
 
   // シリアルコンソールのセットアップ
@@ -131,42 +137,19 @@ void setup() {
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-  // アクセスされた際に行う関数を登録する
-  server.on("/target", HTTP_ANY, [](){
-    if (server.method() == HTTP_POST) { // POSTメソッドでアクセスされた場合
-      target = server.arg("plain"); // server.arg("plain")でリクエストボディが取れる。targetに格納
-    }
-    server.send(200, "text/plain", target); // 値をクライアントに返す
+  // auto testFn = [](){delay(1);};
+
+
+  server.on(dic[0].uri, HTTP_ANY, [](){
+    actions(server, dic[0].function);
   });
 
-  server.on("/aaa", HTTP_ANY, [](){
-    if (server.method() == HTTP_POST) { // POSTメソッドでアクセスされた場合
-      target = server.arg("plain"); // server.arg("plain")でリクエストボディが取れる。targetに格納
-    }
-    server.send(200, "text/plain", "aaa"); // 値をクライアントに返す
-  });
-
-  server.on("/led/on/0", HTTP_ANY, [](){
-    if (server.method() == HTTP_POST) { // POSTメソッドでアクセスされた場合
-      target = server.arg("plain"); // server.arg("plain")でリクエストボディが取れる。targetに格納
-    }
-    setLED(1);
-    server.send(200, "text/plain", "LED on0"); // 値をクライアントに返す
-  });
-
-  server.on("/led/off/0", HTTP_ANY, [](){
-    if (server.method() == HTTP_POST) { // POSTメソッドでアクセスされた場合
-      target = server.arg("plain"); // server.arg("plain")でリクエストボディが取れる。targetに格納
-    }
-    setLED(0);
-    server.send(200, "text/plain", "LED off0"); // 値をクライアントに返す
-  });
-
-  server.on(dic[(int)enmUriNum.led_off], HTTP_ANY, [](){
-    actions(server, dic[enmUriNum.led_off].function);
-  });
-  server.on("/led/on/1", HTTP_ANY, [](){
+  server.on(dic[1].uri, HTTP_ANY, [](){
     actions(server, dic[1].function);
+  });
+
+  server.on(dic[2].uri, HTTP_ANY, [](){
+    actions(server, dic[2].function);
   });
 
   // 登録されてないパスにアクセスがあった場合
@@ -186,26 +169,15 @@ void loop() {
 // ****************************************************************
 void init_port()
 {
-  pinMode(2, OUTPUT);
+  pinMode(PORT_LED, OUTPUT);
+  digitalWrite(PORT_LED, LED_OFF);
+
+  pinMode(PORT_MOTER1, OUTPUT);
+  pinMode(PORT_MOTER2, OUTPUT);
+  pinMode(PORT_MOTER3, OUTPUT);
+  pinMode(PORT_MOTER4, OUTPUT);
+  digitalWrite(PORT_MOTER1, LOW);
+  digitalWrite(PORT_MOTER2, LOW);
+  digitalWrite(PORT_MOTER3, LOW);
+  digitalWrite(PORT_MOTER4, LOW);
 }
-
-// ****************************************************************
-template<class Fn0>
-void httpSet(WebServer& w_sv, const Uri& uri, Fn0 fn, int sts)
-// void httpSet(const Uri uri, Fn0 fn, int sts)
-{
-    // auto ab = fn(sts);
-
-    // WebServer sv(80); //WebServer情報に関する変数（インスタンス）
-    //省略--アクセスポイントを設定--
-    w_sv.on(uri, HTTP_ANY, fn(sts)); //URLを指定して処理する関数を指定
-    // w_sv.onNotFound(handleNotFound); //URLが存在しない場合の処理する関数を指定
-    // w_sv.begin(); //Webサーバーの開始
-}
-
-
-void setFunctions()
-{
-
-}
-
