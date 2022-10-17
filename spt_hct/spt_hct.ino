@@ -6,17 +6,13 @@
 //*************************************
 void setup()
 {
-    // timer = timerBegin(0, 80, true);
-    // timerAttachInterrupt(timer, &onTimer, true);
     init();
-    // attachInterrupt(PORT_SW, funcInterrupt, FALLING);
     Serial.println("-----Start-----");
 }
 
 //*************************************
 void loop()
 {
-    // if(interruptWait)
     digitalWrite(PORT_LED_G, !digitalRead(PORT_LED_G));
     delay(1000);
 }
@@ -57,8 +53,7 @@ void IRAM_ATTR onTimer()
 void funcInterrupt()
 {
     attachInterrupt(PORT_SW, NULL, FALLING);
-    initTimerInterrupt(&onTimer);
-    timerInterruptSet(true, 300000, false);
+    setTimerInterrupt(&onTimer, 300000, false);
 
     int portLogic = !digitalRead(PORT_MOTOR0);
     digitalWrite(PORT_MOTOR0, portLogic);
@@ -70,5 +65,4 @@ void funcInterrupt()
     digitalWrite(PORT_LED_R, portLogic);
 
     Serial.println(GetTime());
-    // delay(1000);
 }

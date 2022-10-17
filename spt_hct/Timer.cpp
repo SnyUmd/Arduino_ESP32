@@ -5,33 +5,24 @@
 
 //*********************************************************************************
 hw_timer_t * timer = NULL;
-// void initTimerInterrupt()
-// {
-//     timer = timerBegin(0, 80, true);
-//     timerAttachInterrupt(timer, &onTimer0, true);
-// }
-//-------------------------------------------------
+
+//*********************************************************************************
 //実行方法　
 // void IRAMATTR onTimer{
 // }
-// initTimerInterrupt(&onTimer);
-// 
-void initTimerInterrupt(void(* fn)(void))
+// initTimerInterrupt(true, &onTimer);
+void setTimerInterrupt(void(* fn)(void), int count_time = 1000000, bool regular = true)
 {
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, fn, true);
+    timerAlarmWrite(timer, count_time, regular);
+    timerAlarmEnable(timer);
 }
 
 //*********************************************************************************
-void timerInterruptSet(bool bl_run, int count_time = 1000000, bool regular = true)
+void stopTimerInterrupt()
 {
-    if(bl_run)
-    {
-        timerAlarmWrite(timer, count_time, regular);
-        timerAlarmEnable(timer);
-    }
-    else
-        timerAlarmDisable(timer);
+    timerAlarmDisable(timer);
 }
 
 //*********************************************************************************
