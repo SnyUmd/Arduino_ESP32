@@ -123,7 +123,7 @@ void setup() {
   // WiFiに接続
   Serial.print("Connecting to ");
   Serial.println(ssid);
-  WiFi.setHostname(hostname.c_str());//ここでホスト名を設定します
+  WiFi.setHostname(hostname.c_str());//ホスト名を設定
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {

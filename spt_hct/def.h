@@ -7,3 +7,9 @@
 
 #define PORT_LED_G 16
 #define PORT_LED_R 4
+
+#define PORT_BUZZER 25
+
+#define SSID "Wi-ko1225_G"
+#define PASS "n17e92@53S19n"
+#define HOST_NAME "ESP32"
