@@ -552,3 +552,27 @@ void BzGoDown(float ringTime, float stopTime)
         BzStop(stopTime);
     }
 }
+
+void bz(int num)
+{
+    for(int i = 0; i < num; i++)
+    {
+        BzNote(1, getrScale(16), flSound[4][mDO], 50);
+        BzNote(0, getScale1(16), 0, 100);
+    }
+    // BzNote(1, getrScale(8), flSound[2][mDO], 50);
+    // BzNote(0, getScale1(8), 0, 50);
+    // BzNote(1, getrScale(8), flSound[2][mDO], 50);
+    // BzNote(0, getScale1(8), 0, 50);
+    // BzNote(1, getrScale(8), flSound[2][mDO], 50);
+    // BzNote(0, getScale1(8), 0, 50);
+    // BzNote(1, getrScale(8), flSound[2][mDO], 50);
+    BzStop(200);
+}
+
+void receivedRing()
+{
+    BzNote(1, getrScale(16), flSound[0][mDO], 100);
+    BzNote(0, getScale1(16), 0, 100);
+    BzStop(200);
+}

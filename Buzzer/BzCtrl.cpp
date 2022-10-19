@@ -532,6 +532,7 @@ void Bz_DragonQuest_Preface()
 //*************************************************************************************
 //*************************************************************************************
 
+//*******************************************************
 void BzGoUp(float ringTime, float stopTime)
 {
     InitBz();
@@ -543,6 +544,7 @@ void BzGoUp(float ringTime, float stopTime)
     }
 }
 
+//*******************************************************
 void BzGoDown(float ringTime, float stopTime)
 {
     InitBz();
@@ -552,4 +554,19 @@ void BzGoDown(float ringTime, float stopTime)
         BzRing(flSound[3][i], ringTime);
         BzStop(stopTime);
     }
+}
+
+//*******************************************************
+void bz()
+{
+    BzNote(1, getrScale(8), flSound[2][mDO], 50);
+    BzNote{0, getScale1(8), 0, 50},
+    BzNote(1, getrScale(8), flSound[2][mDO], 50);
+    BzNote{0, getScale1(8), 0, 50},
+    BzNote(1, getrScale(8), flSound[2][mDO], 50);
+    BzNote{0, getScale1(8), 0, 50},
+    BzNote(1, getrScale(8), flSound[2][mDO], 50);
+    BzNote{0, getScale1(8), 0, 50},
+    BzNote(1, getrScale(8), flSound[2][mDO], 50);
+    BzStop(200);
 }

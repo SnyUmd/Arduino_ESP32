@@ -22,3 +22,6 @@ void Bz_DragonQuest_Preface();
 
 void BzGoUp(float ringTime, float stopTime);
 void BzGoDown(float ringTime, float stopTime);
+
+void bz(int num);
+void receivedRing();

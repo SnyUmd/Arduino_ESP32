@@ -5,12 +5,23 @@
 // ****************************************************************
 void wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char* host_name)
 {
-    wifi.setHostname(host_name);//ホスト名を設定
-    wifi.begin(ssid, pass);
-    while(wifi.status() != WL_CONNECTED) {
-        sr.print('.');
-        delay(500);
+    while(1)
+    {
+        int waitTime = 0;
+        wifi.setHostname(host_name);//ホスト名を設定
+        // delay(500);
+        wifi.begin(ssid, pass);
+        // delay(500);
+        while(wifi.status() != WL_CONNECTED) {
+            sr.print('.');
+            delay(500);
+            waitTime++;
+            if(waitTime > 5) break;
+        }
+        if(waitTime <= 5) break;
+        else sr.println("retry");
     }
+
     configTime(JST, 0, "ntp.nict.jp", "time.google.com", "ntp.jst.mfeed.ad.jp");//NTPの設定
     sr.println("");
     sr.println("Wi-Fi connected");

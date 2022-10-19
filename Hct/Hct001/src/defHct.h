@@ -14,12 +14,7 @@
 #define PASS "n17e92@53S19n"
 #define HOST_NAME "ESP32"
 
-// #define ADR_RTC_READ 0x65   //0110010 1
-// #define ADR_RTC_READ 0x65   //0110010 1
-
- #define ADR_RTC 0x32  //0110010
-//  #define ADR_RTC_WRITE 50  //0110010
-
+#define ADR_RTC 0x32  //0110010
 
 #define BUZZER_PWM 25
 #define SWITCH0 0

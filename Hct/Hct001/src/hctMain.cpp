@@ -1,34 +1,23 @@
 #include <Arduino.h>
+#include <string>
 #include <WiFi.h>
+#include <WebServer.h>
 #include <Wire.h>
 #include "defHct.h"
-#include "Timer.h"
-#include "wifiCtrl.h"
-#include "ledCtrl.h"
-#include "rx8035.h"
-#include "BzCtrl.h"
+#include "common.h"
+#include "module/Timer.h"
+#include "module/wifiCtrl.h"
+#include "module/ledCtrl.h"
+#include "module/rx8035.h"
+#include "module/BzCtrl.h"
 
-// HardwareSerial sr(0);
-HardwareSerial sr(1);
 ledCtrl LC;
-
-// hw_timer_t * timer = NULL;
-struct tm timeInf;
-struct tm timeInfRTC;
-char s[20];//文字格納用
-
-int aryMotorSts[4][4] = 
-{
-    {1, 0, 0, 0},
-    {0, 1, 0, 0},
-    {0, 0, 1, 0},
-    {0, 0, 0, 1}
-};
 
 void init();
 void IRAM_ATTR onTimer();
 void funcInterrupt();
-void motorAction();
+void motorAction(int setNum);
+void action();
 
 //*************************************
 void init()
@@ -56,13 +45,9 @@ void init()
     digitalWrite(PORT_MOTOR2, 0);
     digitalWrite(PORT_MOTOR3, 0);
 
-    // LC.ledFlash(sr, PORT_LED_R, 10, 5);
-    LC.ledFlash(sr, PORT_LED_R, 10, 5);
+    LC.ledFlash(PORT_LED_R, 10, 5);
     
-    // InitBz();
-    // BzGoUp(10, 10);
-    // BzStop(200);
-
+    InitBz();
 }
 
 //*************************************
@@ -98,9 +83,9 @@ void funcInterrupt()
     // Wire.beginTransmission(ADR_RTC);
     // Wire.read(0);
     // error = Wire.endTransmission();
-   
 }
 
+//*************************************
 void motorAction(int setNum)
 {
     const int loop = 4;
@@ -108,9 +93,8 @@ void motorAction(int setNum)
     int num;
     int cnt = 0;
     int repetitionNum = 0;
-    LC.ledFlash(sr, PORT_LED_G, 10, 5);
+    // LC.ledFlash(PORT_LED_G, 10, 5);
 
-    BzGoUp(10, 10);
     while(blLoop){
         for(int i = 0; i < loop; i++)
         {
@@ -134,29 +118,110 @@ void motorAction(int setNum)
         }
         if(repetitionNum >= setNum) blLoop = false;
     }
-    BzGoDown(10, 10);
 }
 
+//*************************************
+void setHttpAction()
+{
+    //赤LED　フラッシュ
+    server.on(httpSts[enmLedFlashR].uri, HTTP_ANY, [](){
+        // if (server.method() == HTTP_POST) { // POSTメソッドでアクセスされた場合
+        //     target = server.arg("plain"); // server.arg("plain")でリクエストボディが取れる。targetに格納
+        // }
+        receivedRing();
+        httpSts[enmLedFlashR].sts = true;
+        server.send(200, "text/plain", httpSts[enmLedFlashR].returnMess);
+    });
+
+    //緑LED　フラッシュ
+    server.on(httpSts[enmLedFlashG].uri, HTTP_ANY, [](){
+        receivedRing();
+        httpSts[enmLedFlashG].sts = true;
+        server.send(200, "text/plain", httpSts[enmLedFlashG].returnMess);
+    });
+
+    //時刻取得
+    server.on(httpSts[enmGetTime].uri, HTTP_ANY, [](){
+        receivedRing();
+        httpSts[enmGetTime].sts = true;
+        server.send(200, "text/plain", httpSts[enmGetTime].returnMess);
+    });
+
+    //モーター駆動開始
+    server.on(httpSts[enmMotorStart].uri, HTTP_ANY, [](){
+        receivedRing();
+        httpSts[enmMotorStart].sts = true;
+        server.send(200, "text/plain", httpSts[enmMotorStart].returnMess);
+    });
+
+    //モーター駆動停止
+    server.on(httpSts[enmMotorStop].uri, HTTP_ANY, [](){
+        receivedRing();
+        httpSts[enmMotorStart].sts = false;
+        server.send(200, "text/plain", httpSts[enmMotorStop].returnMess);
+    });
+
+    //ブザー駆動開始
+    server.on(httpSts[enmBuzzerRing].uri, HTTP_ANY, [](){
+        receivedRing();
+        httpSts[enmBuzzerRing].sts = true;
+        server.send(200, "text/plain", httpSts[enmBuzzerRing].returnMess);
+    });
+
+    //ブザー駆動停止
+    server.on(httpSts[enmBuzzerStop].uri, HTTP_ANY, [](){
+        receivedRing();
+        httpSts[enmBuzzerRing].sts = false;
+        server.send(200, "text/plain", httpSts[enmBuzzerStop].returnMess);
+    });
+
+    // 登録されてないパスにアクセスがあった場合
+    server.onNotFound([](){
+        server.send(404, "text/plain", "Not Found."); // 404を返す
+    });
+
+    server.begin();
+}
+
+//*************************************
+void action()
+{
+    if(httpSts[enmLedFlashR].sts)
+        LC.ledFlash(PORT_LED_R, 5, 1);
+
+    if(httpSts[enmLedFlashG].sts)
+        LC.ledFlash(PORT_LED_G, 5, 1);
+
+    if(httpSts[enmGetTime].sts);
+
+    if(httpSts[enmMotorStart].sts) motorAction(1);
+    if(httpSts[enmBuzzerRing].sts) bz(1);
+}
 
 //***************************************************************************************************************
 //***************************************************************************************************************
 //***************************************************************************************************************
 void setup()
 {
+    sr.println("");
     init();
+    // sr.println("");
+    delay(1000);
     wifiInit(WiFi, sr, SSID, PASS, HOST_NAME);
-    timeInf = getTimeInf();
-    arrangeTime(s, timeInf);
-    sr.println(s);
+    // timeInf = getTimeInf();
+    // arrangeTime(s, timeInf);
+    // sr.println(s);
+    setHttpAction();
     sr.println("-----loop Start-----");
-    Bz_DragonQuest_Preface();
+    BzGoUp(10, 10);
 }
 
 //*************************************
 void loop()
 {
-    byte val[8] = {};
-    int loopNum = sizeof(val)/sizeof(val[0]);
+    server.handleClient();
+    // byte val[8] = {};
+    // int loopNum = sizeof(val)/sizeof(val[0]);
 
     // readI2C(val, Wire, ADR_RTC, 0, 7);
     // for(int i = 1; i <= loopNum; i++) sr.print(val[loopNum - i]);
@@ -165,8 +230,9 @@ void loop()
     // timeInfRTC.tm_sec = val;
     // sr.println(timeInfRTC.tm_sec);
     
-    motorAction(2);
-    delay(1000);
+    // motorAction(2);
+    // delay(1000);
+    action();
 }
 
 
