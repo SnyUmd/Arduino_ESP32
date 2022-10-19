@@ -1,24 +1,34 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <Wire.h>
-#include "def.h"
+#include "defHct.h"
 #include "Timer.h"
 #include "wifiCtrl.h"
 #include "ledCtrl.h"
 #include "rx8035.h"
+#include "BzCtrl.h"
 
+// HardwareSerial sr(0);
+HardwareSerial sr(1);
 ledCtrl LC;
-HardwareSerial sr = Serial;
-// HardwareSerial sr = Serial1;
 
 // hw_timer_t * timer = NULL;
 struct tm timeInf;
 struct tm timeInfRTC;
 char s[20];//文字格納用
 
+int aryMotorSts[4][4] = 
+{
+    {1, 0, 0, 0},
+    {0, 1, 0, 0},
+    {0, 0, 1, 0},
+    {0, 0, 0, 1}
+};
+
 void init();
 void IRAM_ATTR onTimer();
 void funcInterrupt();
+void motorAction();
 
 //*************************************
 void init()
@@ -46,7 +56,13 @@ void init()
     digitalWrite(PORT_MOTOR2, 0);
     digitalWrite(PORT_MOTOR3, 0);
 
-    LC.ledFlash(PORT_LED_R, 10, 5);
+    // LC.ledFlash(sr, PORT_LED_R, 10, 5);
+    LC.ledFlash(sr, PORT_LED_R, 10, 5);
+    
+    // InitBz();
+    // BzGoUp(10, 10);
+    // BzStop(200);
+
 }
 
 //*************************************
@@ -85,6 +101,41 @@ void funcInterrupt()
    
 }
 
+void motorAction(int setNum)
+{
+    const int loop = 4;
+    bool blLoop = true;
+    int num;
+    int cnt = 0;
+    int repetitionNum = 0;
+    LC.ledFlash(sr, PORT_LED_G, 10, 5);
+
+    BzGoUp(10, 10);
+    while(blLoop){
+        for(int i = 0; i < loop; i++)
+        {
+            if(cnt < 50) num = i;
+            else num = loop - i - 1;
+
+            digitalWrite(PORT_MOTOR0, aryMotorSts[num][0]);
+            delay(1);
+            digitalWrite(PORT_MOTOR1, aryMotorSts[num][1]);
+            delay(1);
+            digitalWrite(PORT_MOTOR2, aryMotorSts[num][2]);
+            delay(1);
+            digitalWrite(PORT_MOTOR3, aryMotorSts[num][3]);
+            delay(1);
+        }
+        cnt++;
+        if(cnt > 100) 
+        {
+            cnt = 0;
+            repetitionNum++;
+        }
+        if(repetitionNum >= setNum) blLoop = false;
+    }
+    BzGoDown(10, 10);
+}
 
 
 //***************************************************************************************************************
@@ -94,24 +145,27 @@ void setup()
 {
     init();
     wifiInit(WiFi, sr, SSID, PASS, HOST_NAME);
-    sr.println("-----Start-----");
     timeInf = getTimeInf();
     arrangeTime(s, timeInf);
     sr.println(s);
+    sr.println("-----loop Start-----");
+    Bz_DragonQuest_Preface();
 }
 
 //*************************************
 void loop()
 {
-    
-    // byte val[] = readI2C(ADR_RTC, 0, 7);
     byte val[8] = {};
     int loopNum = sizeof(val)/sizeof(val[0]);
-    readI2C(val, Wire, ADR_RTC, 0, 7);
-    for(int i = 1; i <= loopNum; i++) sr.print(val[loopNum - i]);
-    sr.println("");
+
+    // readI2C(val, Wire, ADR_RTC, 0, 7);
+    // for(int i = 1; i <= loopNum; i++) sr.print(val[loopNum - i]);
+    // sr.println("");
+    
     // timeInfRTC.tm_sec = val;
     // sr.println(timeInfRTC.tm_sec);
+    
+    motorAction(2);
     delay(1000);
 }
 

@@ -1,7 +1,7 @@
 #define TIME_MAX_VALUE 4294967295//PGM開始からの時間カウント最大値
 
 #include "Timer.h"
-#include "Def.h"
+#include "defHct.h"
 
 //*********************************************************************************
 hw_timer_t * timer = NULL;

@@ -1,12 +1,11 @@
 #include "BzCtrl.h"
-#include "LedCtrl.h"
+// #include "LedCtrl.h"
 
 int iDuty = PWM_RESOLUTION / 2;
 //extern float flSound[][12];
 
 float beat0 = 1000;
 float beat1 = 2000;
-
 
 //*******************************************************
 float flSound[][12] =
@@ -506,9 +505,9 @@ void BzTest2()
 //*******************************************************
 void Bz_DragonQuest_Preface()
 {
-    InitBz();
     int iRow = sizeof(aryScore0) / sizeof(aryScore0[0]);
     int iCol = sizeof(aryScore0[0]) / sizeof(aryScore0[0][0]);
+
     for(int i0 = 0; i0 < iRow; i0++)
        BzNote(aryScore0[i0][0],aryScore0[i0][1],aryScore0[i0][2],aryScore0[i0][3]);
     
