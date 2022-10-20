@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <Wire.h>
+#include <iostream>
 #include "defHct.h"
 #include "common.h"
 #include "module/Timer.h"
@@ -10,14 +11,78 @@
 #include "module/ledCtrl.h"
 #include "module/rx8035.h"
 #include "module/BzCtrl.h"
+#include "module/htu21d.h"
+
+using namespace std;
 
 ledCtrl LC;
+
 
 void init();
 void IRAM_ATTR onTimer();
 void funcInterrupt();
 void motorAction(int setNum);
 void action();
+void setHttpAction();
+string getTemp();
+string getHumd();
+
+//***************************************************************************************************************
+//***************************************************************************************************************
+//***************************************************************************************************************
+void setup()
+{
+    sr.println("");
+    init();
+    // sr.println("");
+    delay(1000);
+    wifiInit(WiFi, sr, SSID, PASS, HOST_NAME);
+    // timeInf = getTimeInf();
+    // arrangeTime(s, timeInf);
+    // sr.println(s);
+    setHttpAction();
+    sr.println("-----loop Start-----");
+    BzGoUp(10, 10);
+}
+
+//*************************************
+void loop()
+{
+    server.handleClient();
+
+    //RTC時刻取得-------------------
+    // byte val[8] = {};
+    // int loopNum = sizeof(val)/sizeof(val[0]);
+    // getTimeRX8035(val, Wire);
+    // for(int i = 1; i <= loopNum; i++) sr.print(val[loopNum - i]);
+    // sr.println("");
+    //------------------------------
+    
+    // timeInfRTC.tm_sec = val;
+    // sr.println(timeInfRTC.tm_sec);
+
+    //温度取得------------------------------
+    // byte val[3] = {};
+    // sr.println(readTempHTD21D(val, Wire, sr));
+    // sr.println(readHumdHTD21D(val, Wire, sr));
+    // for(int i = 1; i <= loopNum; i++) sr.print(val[loopNum - i]);
+    // sr.println("");
+    //------------------------------
+
+    // motorAction(2);
+    // delay(1000);
+    
+    action();
+
+
+    delay(1000);
+}
+
+//***************************************************************************************************************
+//***************************************************************************************************************
+//***************************************************************************************************************
+
+
 
 //*************************************
 void init()
@@ -143,8 +208,11 @@ void setHttpAction()
     //時刻取得
     server.on(httpSts[enmGetTime].uri, HTTP_ANY, [](){
         receivedRing();
-        httpSts[enmGetTime].sts = true;
-        server.send(200, "text/plain", httpSts[enmGetTime].returnMess);
+        tm nowTime = getTimeInf();
+        char s[20] = {};
+        arrangeTime(s, nowTime);
+        // server.send(200, "text/plain", httpSts[enmGetTime].returnMess);
+        server.send(200, "text/plain", s);
     });
 
     //モーター駆動開始
@@ -175,6 +243,20 @@ void setHttpAction()
         server.send(200, "text/plain", httpSts[enmBuzzerStop].returnMess);
     });
 
+    //温度取得
+    server.on(httpSts[enmGetTemperture].uri, HTTP_ANY, [](){
+        receivedRing();
+        string sTemp = getTemp();
+        server.send(200, "text/plain", sTemp.c_str());
+    });
+
+    //湿度取得
+    server.on(httpSts[enmGetHumidity].uri, HTTP_ANY, [](){
+        receivedRing();
+        string sHumd = getHumd();
+        server.send(200, "text/plain", sHumd.c_str());
+    });
+
     // 登録されてないパスにアクセスがあった場合
     server.onNotFound([](){
         server.send(404, "text/plain", "Not Found."); // 404を返す
@@ -196,47 +278,23 @@ void action()
 
     if(httpSts[enmMotorStart].sts) motorAction(1);
     if(httpSts[enmBuzzerRing].sts) bz(1);
-}
-
-//***************************************************************************************************************
-//***************************************************************************************************************
-//***************************************************************************************************************
-void setup()
-{
-    sr.println("");
-    init();
-    // sr.println("");
-    delay(1000);
-    wifiInit(WiFi, sr, SSID, PASS, HOST_NAME);
-    // timeInf = getTimeInf();
-    // arrangeTime(s, timeInf);
-    // sr.println(s);
-    setHttpAction();
-    sr.println("-----loop Start-----");
-    BzGoUp(10, 10);
+    
 }
 
 //*************************************
-void loop()
-{
-    server.handleClient();
-    // byte val[8] = {};
-    // int loopNum = sizeof(val)/sizeof(val[0]);
+// float getTemp()
+// {
+//     return readTempHTD21D(Wire);
+// }
 
-    // readI2C(val, Wire, ADR_RTC, 0, 7);
-    // for(int i = 1; i <= loopNum; i++) sr.print(val[loopNum - i]);
-    // sr.println("");
-    
-    // timeInfRTC.tm_sec = val;
-    // sr.println(timeInfRTC.tm_sec);
-    
-    // motorAction(2);
-    // delay(1000);
-    action();
+string getTemp()
+{
+    float fTemp = readTempHTD21D(Wire);
+    return to_string(fTemp).substr(0, 5);
 }
 
-
-
-//*************************************
-
-
+string getHumd()
+{
+    float fHumd = readHumdHTD21D(Wire);
+    return to_string(fHumd).substr(0, 5);
+}

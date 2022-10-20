@@ -37,7 +37,9 @@ httpStatus httpSts[]
   {"/motor/start", "Motor start", false},
   {"/motor/stop", "Motor stop", false},
   {"/buzzer/start", "Buzzer ring", false},
-  {"/buzzer/stop", "Buzzer stop", false}
+  {"/buzzer/stop", "Buzzer stop", false},
+  {"/temperture", "Temperture", false},
+  {"/humidity", "Humidity", false}
 };
 
 enum enmHttpState
@@ -48,5 +50,7 @@ enum enmHttpState
     enmMotorStart,
     enmMotorStop,
     enmBuzzerRing,
-    enmBuzzerStop
+    enmBuzzerStop,
+    enmGetTemperture,
+    enmGetHumidity
 };
