@@ -3,7 +3,7 @@
 
 
 // ****************************************************************
-void wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char* host_name)
+void wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char* host_name, bool bl_ota)
 {
     while(1)
     {
@@ -31,6 +31,7 @@ void wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char*
 }
 
 // ****************************************************************
+//使い方　//struct tm t = getTimeInf();
 struct tm getTimeInf()
 {
     struct tm resultTimeInf;
@@ -42,7 +43,7 @@ struct tm getTimeInf()
 //sに使う変数：char s[20];
 void arrangeTime(char* s, tm time_inf)
 {
-    sprintf(s, "%04d.%02d.%02d  %02d:%02d:%02d", 
+    sprintf(s, "%04d.%02d.%02d %02d:%02d:%02d", 
                 time_inf.tm_year + 1900,
                 time_inf.tm_mon + 1,
                 time_inf.tm_mday,

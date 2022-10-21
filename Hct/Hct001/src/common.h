@@ -31,8 +31,10 @@ struct httpStatus{
 
 httpStatus httpSts[]
 {
-  {"/led/flash/r", "LED red flash", false},
-  {"/led/flash/g", "LED green flash", false},
+  {"/led/on/r", "LED red on", false},
+  {"/led/off/r", "LED red off", false},
+  {"/led/on/g", "LED green on", false},
+  {"/led/off/g", "LED green off", false},
   {"/get_time", "Time", false},
   {"/motor/start", "Motor start", false},
   {"/motor/stop", "Motor stop", false},
@@ -44,8 +46,10 @@ httpStatus httpSts[]
 
 enum enmHttpState
 {
-    enmLedFlashR,
-    enmLedFlashG,
+    enmLedOnR,
+    enmLedOffR,
+    enmLedOnG,
+    enmLedOffG,
     enmGetTime,
     enmMotorStart,
     enmMotorStop,

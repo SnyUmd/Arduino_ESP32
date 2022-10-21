@@ -36,7 +36,7 @@ void setup()
     init();
     // sr.println("");
     delay(1000);
-    wifiInit(WiFi, sr, SSID, PASS, HOST_NAME);
+    wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, true);
     // timeInf = getTimeInf();
     // arrangeTime(s, timeInf);
     // sr.println(s);
@@ -120,7 +120,7 @@ void init()
 //*************************************
 void IRAM_ATTR onTimer()
 {
-    sr.println(GetTime());
+    // sr.println(GetTime());
     attachInterrupt(PORT_SW, funcInterrupt, FALLING);
 }
 
@@ -131,23 +131,9 @@ void funcInterrupt()
 {
     //チャタリング対策------------------------
     attachInterrupt(PORT_SW, NULL, FALLING);
-    setTimerInterrupt(&onTimer, 300000, false);//300ms間割り込み停止
+    setTimerInterrupt(&onTimer, 200000, false);//300ms間割り込み停止
     //---------------------------------------
-
-    // int portLogic = !digitalRead(PORT_MOTOR0);
-    // digitalWrite(PORT_MOTOR0, portLogic);
-    // digitalWrite(PORT_MOTOR1, portLogic);
-    // digitalWrite(PORT_MOTOR2, portLogic);
-    // digitalWrite(PORT_MOTOR3, portLogic);
-
-    // digitalWrite(PORT_LED_G, portLogic);
-    // digitalWrite(PORT_LED_R, portLogic);
-
-    // sr.println(GetTime());
-    byte val;
-    // Wire.beginTransmission(ADR_RTC);
-    // Wire.read(0);
-    // error = Wire.endTransmission();
+    sr.println(WiFi.localIP());
 }
 
 //*************************************
@@ -188,27 +174,41 @@ void motorAction(int setNum)
 //*************************************
 void setHttpAction()
 {
-    //赤LED　フラッシュ
-    server.on(httpSts[enmLedFlashR].uri, HTTP_ANY, [](){
+    //赤LED　ON
+    server.on(httpSts[enmLedOnR].uri, HTTP_ANY, [](){
         // if (server.method() == HTTP_POST) { // POSTメソッドでアクセスされた場合
         //     target = server.arg("plain"); // server.arg("plain")でリクエストボディが取れる。targetに格納
         // }
         receivedRing();
-        httpSts[enmLedFlashR].sts = true;
-        server.send(200, "text/plain", httpSts[enmLedFlashR].returnMess);
+        digitalWrite(PORT_LED_R, 0);
+        server.send(200, "text/plain", httpSts[enmLedOnR].returnMess);
     });
 
-    //緑LED　フラッシュ
-    server.on(httpSts[enmLedFlashG].uri, HTTP_ANY, [](){
+    //赤LED　OFF
+    server.on(httpSts[enmLedOffR].uri, HTTP_ANY, [](){
         receivedRing();
-        httpSts[enmLedFlashG].sts = true;
-        server.send(200, "text/plain", httpSts[enmLedFlashG].returnMess);
+        digitalWrite(PORT_LED_R, 1);
+        server.send(200, "text/plain", httpSts[enmLedOffR].returnMess);
+    });
+
+    //緑LED　ON
+    server.on(httpSts[enmLedOnG].uri, HTTP_ANY, [](){
+        receivedRing();
+        digitalWrite(PORT_LED_G, 0);
+        server.send(200, "text/plain", httpSts[enmLedOnG].returnMess);
+    });
+
+    //緑LED　OFF
+    server.on(httpSts[enmLedOffG].uri, HTTP_ANY, [](){
+        receivedRing();
+        digitalWrite(PORT_LED_G, 1);
+        server.send(200, "text/plain", httpSts[enmLedOffG].returnMess);
     });
 
     //時刻取得
     server.on(httpSts[enmGetTime].uri, HTTP_ANY, [](){
         receivedRing();
-        tm nowTime = getTimeInf();
+        struct tm nowTime = getTimeInf();
         char s[20] = {};
         arrangeTime(s, nowTime);
         // server.send(200, "text/plain", httpSts[enmGetTime].returnMess);
@@ -268,14 +268,6 @@ void setHttpAction()
 //*************************************
 void action()
 {
-    if(httpSts[enmLedFlashR].sts)
-        LC.ledFlash(PORT_LED_R, 5, 1);
-
-    if(httpSts[enmLedFlashG].sts)
-        LC.ledFlash(PORT_LED_G, 5, 1);
-
-    if(httpSts[enmGetTime].sts);
-
     if(httpSts[enmMotorStart].sts) motorAction(1);
     if(httpSts[enmBuzzerRing].sts) bz(1);
     
