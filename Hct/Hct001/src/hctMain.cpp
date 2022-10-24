@@ -12,11 +12,11 @@
 #include "module/rx8035.h"
 #include "module/BzCtrl.h"
 #include "module/htu21d.h"
+#include "module/i2cCtrl.h"
 
 using namespace std;
 
 ledCtrl LC;
-
 
 void init();
 void IRAM_ATTR onTimer();
@@ -53,7 +53,7 @@ void loop()
     //RTC時刻取得-------------------
     // byte val[8] = {};
     // int loopNum = sizeof(val)/sizeof(val[0]);
-    // getTimeRX8035(val, Wire);
+    // getTimeRX8035(val, wr);
     // for(int i = 1; i <= loopNum; i++) sr.print(val[loopNum - i]);
     // sr.println("");
     //------------------------------
@@ -63,8 +63,8 @@ void loop()
 
     //温度取得------------------------------
     // byte val[3] = {};
-    // sr.println(readTempHTD21D(val, Wire, sr));
-    // sr.println(readHumdHTD21D(val, Wire, sr));
+    // sr.println(readTempHTD21D(val, wr, sr));
+    // sr.println(readHumdHTD21D(val, wr, sr));
     // for(int i = 1; i <= loopNum; i++) sr.print(val[loopNum - i]);
     // sr.println("");
     //------------------------------
@@ -73,8 +73,6 @@ void loop()
     // delay(1000);
     
     action();
-
-
     delay(1000);
 }
 
@@ -88,7 +86,7 @@ void loop()
 void init()
 {
     sr.begin(115200);
-    Wire.begin();
+    initI2C(wr);
     
     //ポート割り込み処理
     pinMode(PORT_SW, INPUT_PULLUP);
@@ -276,17 +274,17 @@ void action()
 //*************************************
 // float getTemp()
 // {
-//     return readTempHTD21D(Wire);
+//     return readTempHTD21D(wr);
 // }
 
 string getTemp()
 {
-    float fTemp = readTempHTD21D(Wire);
+    float fTemp = readTempHTD21D(wr);
     return to_string(fTemp).substr(0, 5);
 }
 
 string getHumd()
 {
-    float fHumd = readHumdHTD21D(Wire);
+    float fHumd = readHumdHTD21D(wr);
     return to_string(fHumd).substr(0, 5);
 }

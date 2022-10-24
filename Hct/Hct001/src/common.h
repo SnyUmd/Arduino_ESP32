@@ -1,13 +1,16 @@
 // #include <Arduino.h>
+#include <Wire.h>
 #include <WiFi.h>
 #include <string>
 #include <WebServer.h>
+
 // #include <iostream>
 
 // int actionState = 0;
 
 HardwareSerial sr(1);
 WebServer server(80);
+TwoWire wr = Wire;
 String target = ""; // この変数をPOSTメソッドで書き換える
 
 struct tm timeInf;
