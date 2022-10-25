@@ -26,12 +26,14 @@ void action();
 void setHttpAction();
 string getTemp();
 string getHumd();
+void outputTime();
 
 //***************************************************************************************************************
 //***************************************************************************************************************
 //***************************************************************************************************************
 void setup()
 {
+    powerOn();
     sr.println("");
     init();
     // sr.println("");
@@ -153,13 +155,74 @@ void setLED(int portNum)
     }
     else{
         errorSound();
-        returnMessage = "LED red parameter error";
+        returnMessage = "LED red parameter error --- '?sts=on' or '?sts=off'";
     }
 
     digitalWrite(portNum, ledStatus);
     server.send(200, "text/plain", returnMessage);
-
 }
+
+//*************************************
+void setMotor()
+{
+    String paramSts = server.arg("sts");
+    String returnMEssage = "";
+
+    if(paramSts == "start"){
+        receivedRing();
+        httpSts[enmMotor].sts = true;
+        returnMEssage = "Motor on";
+    }
+    else if(paramSts == "stop"){
+        receivedRing();
+        httpSts[enmMotor].sts = false;
+        returnMEssage = "Motor off";
+    }
+    else{
+        errorSound();
+        httpSts[enmMotor].sts = false;
+        returnMEssage = "Motor parameter error --- '?sts=start' or '?sts=stop'";
+    }
+
+    server.send(200, "text/plain", returnMEssage);
+}
+
+//*************************************
+void setBuzzer()
+{
+    String paramSts = server.arg("sts");
+    String returnMEssage = "";
+
+    if(paramSts == "start"){
+        receivedRing();
+        httpSts[enmBuzzer].sts = true;
+        returnMEssage = "Sound buzzer";
+    }
+    else if(paramSts == "stop"){
+        receivedRing();
+        httpSts[enmBuzzer].sts = false;
+        returnMEssage = "Stop Buzzer";
+    }
+    else{
+        errorSound();
+        httpSts[enmBuzzer].sts = false;
+        returnMEssage = "Buzzer parameter error --- '?sts=start' or '?sts=stop'";
+    }
+
+    server.send(200, "text/plain", returnMEssage);
+}
+
+//*************************************
+void outputTime()
+{
+    receivedRing();
+    struct tm nowTime = getTimeInf();
+    char s[20] = {};
+    arrangeTime(s, nowTime);
+    // server.send(200, "text/plain", httpSts[enmGetTime].returnMess);
+    server.send(200, "text/plain", s);
+}
+
 
 //*************************************
 void motorAction(int setNum)
@@ -206,42 +269,33 @@ void setHttpAction()
     server.on(httpSts[enmLedG].uri, HTTP_ANY, [](){setLED(PORT_LED_G);});
 
     //時刻取得
-    server.on(httpSts[enmGetTime].uri, HTTP_ANY, [](){
-        receivedRing();
-        struct tm nowTime = getTimeInf();
-        char s[20] = {};
-        arrangeTime(s, nowTime);
-        // server.send(200, "text/plain", httpSts[enmGetTime].returnMess);
-        server.send(200, "text/plain", s);
-    });
+    // server.on(httpSts[enmGetTime].uri, HTTP_ANY, [](){
+    // server.on(httpSts[enmGetTime].uri, HTTP_ANY, outputTime);
+    //     receivedRing();
+    //     struct tm nowTime = getTimeInf();
+    //     char s[20] = {};
+    //     arrangeTime(s, nowTime);
+    //     // server.send(200, "text/plain", httpSts[enmGetTime].returnMess);
+    //     server.send(200, "text/plain", s);
+    // });
 
-    //モーター駆動開始
-    server.on(httpSts[enmMotor].uri, HTTP_ANY, [](){
-        receivedRing();
-        httpSts[enmMotor].sts = true;
-        server.send(200, "text/plain", httpSts[enmMotor].returnMess);
-    });
-
-    //モーター駆動停止
-    server.on(httpSts[enmMotor].uri, HTTP_ANY, [](){
-        receivedRing();
-        httpSts[enmMotor].sts = false;
-        server.send(200, "text/plain", httpSts[enmMotor].returnMess);
-    });
+    //モーター
+    server.on(httpSts[enmMotor].uri, HTTP_ANY, setMotor);
 
     //ブザー駆動開始
-    server.on(httpSts[enmBuzzer].uri, HTTP_ANY, [](){
-        receivedRing();
-        httpSts[enmBuzzer].sts = true;
-        server.send(200, "text/plain", httpSts[enmBuzzer].returnMess);
-    });
+    server.on(httpSts[enmBuzzer].uri, HTTP_ANY, setBuzzer);
+    // server.on(httpSts[enmBuzzer].uri, HTTP_ANY, [](){setBuzzer
+    //     receivedRing();
+    //     httpSts[enmBuzzer].sts = true;
+    //     server.send(200, "text/plain", httpSts[enmBuzzer].returnMess);
+    // });
 
-    //ブザー駆動停止
-    server.on(httpSts[enmBuzzer].uri, HTTP_ANY, [](){
-        receivedRing();
-        httpSts[enmBuzzer].sts = false;
-        server.send(200, "text/plain", httpSts[enmBuzzer].returnMess);
-    });
+    // //ブザー駆動停止
+    // server.on(httpSts[enmBuzzer].uri, HTTP_ANY, [](){
+    //     receivedRing();
+    //     httpSts[enmBuzzer].sts = false;
+    //     server.send(200, "text/plain", httpSts[enmBuzzer].returnMess);
+    // });
 
     //温度取得
     server.on(httpSts[enmGet].uri, HTTP_ANY, [](){
@@ -259,6 +313,7 @@ void setHttpAction()
 
     // 登録されてないパスにアクセスがあった場合
     server.onNotFound([](){
+        errorSound();
         server.send(404, "text/plain", "Not Found."); // 404を返す
     });
 

@@ -26,3 +26,4 @@ void BzGoDown(float ringTime, float stopTime);
 void bz(int num);
 void receivedRing();
 void errorSound();
+void powerOn();

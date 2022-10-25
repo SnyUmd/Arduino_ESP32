@@ -36,7 +36,7 @@ httpStatus httpSts[]
 {
   {"/led/r", "", false},
   {"/led/g", "", false},
-  {"/get_time", "Time", false},
+  // {"/get_time", "Time", false},
   {"/motor", "Motor start", false},
   {"/buzzer", "Buzzer ring", false},
   {"/get", "Temperture", false}
@@ -61,7 +61,7 @@ enum enmHttpState
 {
     enmLedR = 0,
     enmLedG,
-    enmGetTime,
+    // enmGetTime,
     enmMotor,
     enmBuzzer,
     enmGet
@@ -81,6 +81,8 @@ enum enmHttpState
 //     enmGetHumidity
 // };
 
-const String paramLED[] = {"on", "off"};
+const String paramWord_set[] = {"on", "off"};
+const string paramWord_led[] = {"g", "r"};
+const String paramWord_get[] = {"time", "temparture", "Humidity"};
 
-enum enmLedParams{led_on = 0, led_off};
+enum enmLedParams{enm_on = 0, enm_off};
