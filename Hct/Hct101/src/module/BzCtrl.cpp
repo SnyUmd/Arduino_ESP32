@@ -531,6 +531,7 @@ void Bz_DragonQuest_Preface()
 //*************************************************************************************
 //*************************************************************************************
 
+// 仕様例)BzGoUp(10, 10);
 void BzGoUp(float ringTime, float stopTime)
 {
     InitBz();
@@ -604,4 +605,27 @@ void prgBug()
 {
     BzNote(1, getrScale(1), flSound[0][mDO], 100);
     BzStop(1);
+}
+
+void bzModeChange(int modeNum)
+{
+    if(modeNum == 0)
+    {
+        BzGoUp(10, 10);
+    }
+    else
+    {
+        BzNote(1, getrScale(32), flSound[4][mDO], 100);
+        BzNote(0, getScale1(32), 0, 100);
+        BzNote(1, getrScale(32), flSound[4][mDO], 100);
+        BzNote(0, getScale1(32), 0, 100);
+        BzNote(1, getrScale(32), flSound[4][mDO], 100);
+        BzNote(0, getScale1(32), 0, 100);
+    }
+    // BzNote(1, getrScale(32), flSound[4][mDO], 100);
+    // BzNote(0, getScale1(32), 0, 100);
+    // BzNote(1, getrScale(32), flSound[4][mDO], 100);
+    // BzNote(0, getScale1(32), 0, 100);
+    // BzNote(1, getrScale(32), flSound[4][mDO], 100);
+    // BzNote(0, getScale1(32), 0, 100);
 }

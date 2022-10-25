@@ -4,9 +4,12 @@
 #include <string>
 #include <WebServer.h>
 
-// #include <iostream>
-
-// int actionState = 0;
+int mode = 0;
+enum enmMode
+{
+  enmNormal,
+  enmSetting
+};
 
 HardwareSerial sr(1);
 WebServer server(80);
@@ -77,12 +80,14 @@ enum enmContentNum_Get
 
 const String errorMessage[] = 
 {
+  "Not found",
   "Program Error <setDevice ledColor error>",
   "Status error --- '?sts=on' or '?sts=off'",
   "Status error --- '?sts=time' or '?sts=temparture' or '?sts=humidity'"
 };
 enum enmErrorMessage
 {
+  enmNotFound,
   enmPrgError,
   enmStsError_set,
   enmStsError_get

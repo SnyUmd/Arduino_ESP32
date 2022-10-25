@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <string>
+// #include <string>
 #include <WiFi.h>
 #include <WebServer.h>
 #include <Wire.h>
@@ -27,6 +27,7 @@ void setHttpAction();
 string getTemp();
 string getHumd();
 void outputTime();
+void modeSetting();
 
 //***************************************************************************************************************
 //***************************************************************************************************************
@@ -38,7 +39,7 @@ void setup()
     init();
     // sr.println("");
     delay(1000);
-    wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, true);
+    wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, false);
     // timeInf = getTimeInf();
     // arrangeTime(s, timeInf);
     // sr.println(s);
@@ -59,22 +60,18 @@ void loop()
     // for(int i = 1; i <= loopNum; i++) sr.print(val[loopNum - i]);
     // sr.println("");
     //------------------------------
+    switch(mode)
+    {
+        case enmNormal:
+            action();
+            break;
+        case enmSetting:
+            bzModeChange(1);
+            modeSetting();
+            bzModeChange(0);
+            break;
+    }
     
-    // timeInfRTC.tm_sec = val;
-    // sr.println(timeInfRTC.tm_sec);
-
-    //温度取得------------------------------
-    // byte val[3] = {};
-    // sr.println(readTempHTD21D(val, wr, sr));
-    // sr.println(readHumdHTD21D(val, wr, sr));
-    // for(int i = 1; i <= loopNum; i++) sr.print(val[loopNum - i]);
-    // sr.println("");
-    //------------------------------
-
-    // motorAction(2);
-    // delay(1000);
-    
-    action();
     delay(1000);
 }
 
@@ -131,10 +128,58 @@ void funcInterrupt()
 {
     //チャタリング対策------------------------
     attachInterrupt(PORT_SW, NULL, FALLING);
-    setTimerInterrupt(&onTimer, 200000, false);//300ms間割り込み停止
     //---------------------------------------
+
     sr.println(WiFi.localIP());
+    sr.println("Setting mode");
+    mode = enmSetting;
+
+    // setTimerInterrupt(&onTimer, 200000, false);//300ms間割り込み停止
+    // bzModeChange(1);
+    // digitalWrite(PORT_LED_G, LED_ON);
+    // digitalWrite(PORT_LED_R, LED_ON);
+    // modeSetting();
+    // delay(10000);
+    // sr.println("Normal mode");
+    // modeChange(0);
+    // setTimerInterrupt(&onTimer, 5000000, false);//300ms間割り込み停止
 }
+
+//*************************************
+void modeSetting()
+{
+    int swCnt_L = 0;
+    int swCnt_H = 0;
+    digitalWrite(PORT_LED_G, LED_ON);
+    digitalWrite(PORT_LED_R, LED_ON);
+
+    while(1)
+    {
+
+
+
+
+        if(digitalRead(PORT_SW) == LOW)
+        {
+            swCnt_L++;
+            if(swCnt_L > 100){break;}
+            else if(swCnt_H > 0 && swCnt_L > 50){swCnt_H = 0;}
+        }
+        else
+        {
+            swCnt_H++;
+            if(swCnt_L > 0 && swCnt_H > 50){swCnt_L = 0;}
+            if(swCnt_H > 100){swCnt_H = 0;}
+        }
+        delay(5);
+    }
+
+    digitalWrite(PORT_LED_G, LED_OFF);
+    digitalWrite(PORT_LED_R, LED_OFF);
+    mode = enmNormal;
+    setTimerInterrupt(&onTimer, 1000000, false);//300ms間割り込み停止
+}
+
 
 //*************************************
 void setDevice(int contentNum, String ledColor = "")
@@ -224,7 +269,8 @@ void outputValue()
         struct tm nowTime = getTimeInf();
         char s[20] = {};
         arrangeTime(s, nowTime);
-        server.send(200, "text/plain", s);
+        returnMessage = s;
+        // server.send(200, "text/plain", s);
     }
     else if(paramSts == paramWord_get[enm_temperture])
     {
@@ -310,7 +356,7 @@ void setHttpAction()
     // 登録されてないパスにアクセスがあった場合
     server.onNotFound([](){
         errorSound();
-        server.send(404, "text/plain", "Not Found."); // 404を返す
+        server.send(404, "text/plain", errorMessage[enmNotFound]); // 404を返す
     });
 
     server.begin();
@@ -321,15 +367,9 @@ void action()
 {
     if(httpSts[enmMotor].sts) motorAction(1);
     if(httpSts[enmBuzzer].sts) bz(1);
-    
 }
 
 //*************************************
-// float getTemp()
-// {
-//     return readTempHTD21D(wr);
-// }
-
 string getTemp()
 {
     float fTemp = readTempHTD21D(wr);
@@ -337,6 +377,7 @@ string getTemp()
     return to_string(fTemp).substr(0, 5);
 }
 
+//*************************************
 string getHumd()
 {
     float fHumd = readHumdHTD21D(wr);

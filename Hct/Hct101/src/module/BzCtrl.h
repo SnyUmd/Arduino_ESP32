@@ -28,3 +28,4 @@ void receivedRing();
 void errorSound();
 void powerOn();
 void prgBug();
+void bzModeChange(int modeNum);
