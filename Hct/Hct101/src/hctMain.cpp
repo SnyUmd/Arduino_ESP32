@@ -137,79 +137,110 @@ void funcInterrupt()
 }
 
 //*************************************
-void setLED(int portNum)
+void setDevice(int contentNum, String ledColor = "")
 {
-    int ledStatus = 1;
     String returnMessage = "";
-
     String paramSts = server.arg("sts");
 
-    if(paramSts == paramLED[led_on]){
+    if(paramSts == paramWord_set[enm_on]){
         receivedRing();
-        ledStatus = 0;
-        returnMessage = "LED red on";
+        switch(contentNum)
+        {
+            case enm_led:
+                if (ledColor == "g"){
+                    returnMessage = "LED green on";
+                    digitalWrite(PORT_LED_G, LED_ON);
+                }
+                else if(ledColor == "r"){
+                    returnMessage = "LED red on";
+                    digitalWrite(PORT_LED_R, LED_ON);
+                }
+                else {
+                    sr.println("*****setDevice ledColor error*****");
+                    returnMessage = "Program Error <setDevice ledColor error>";
+                    prgBug();
+                }
+                break;
+            case enm_motor:
+                httpSts[enmMotor].sts = true;
+                returnMessage = "Motor on";
+                break;
+            case enm_buzzer:
+                httpSts[enmBuzzer].sts = true;
+                returnMessage = "Sound buzzer";
+                break;
+            default:
+                break;
+        }
     }
-    else if(paramSts == paramLED[led_off]){
+    else if(paramSts == paramWord_set[enm_off]){
         receivedRing();
-        returnMessage = "LED red off";
+        switch(contentNum)
+        {
+            case enm_led:
+                if (ledColor == "g"){
+                    returnMessage = "LED green off";
+                    digitalWrite(PORT_LED_G, LED_OFF);
+                }
+                else if(ledColor == "r"){
+                    returnMessage = "LED red off";
+                    digitalWrite(PORT_LED_R, LED_OFF);
+                }
+                else {
+                    sr.println("*****setDevice ledColor error*****");
+                    returnMessage = errorMessage[enmPrgError];
+                    prgBug();
+                }
+                break;
+            case enm_motor:
+                httpSts[enmMotor].sts = false;
+                returnMessage = "Motor off";
+                break;
+            case enm_buzzer:
+                httpSts[enmBuzzer].sts = false;
+                returnMessage = "Stop buzzer";
+                break;
+            default:
+                break;
+        }
     }
     else{
         errorSound();
-        returnMessage = "LED red parameter error --- '?sts=on' or '?sts=off'";
+        returnMessage = errorMessage[enmStsError_set];
     }
 
-    digitalWrite(portNum, ledStatus);
     server.send(200, "text/plain", returnMessage);
 }
 
 //*************************************
-void setMotor()
+void outputValue()
 {
+    String returnMessage = "";
     String paramSts = server.arg("sts");
-    String returnMEssage = "";
-
-    if(paramSts == "start"){
+    
+    if(paramSts == paramWord_get[enm_time])
+    {
         receivedRing();
-        httpSts[enmMotor].sts = true;
-        returnMEssage = "Motor on";
+        struct tm nowTime = getTimeInf();
+        char s[20] = {};
+        arrangeTime(s, nowTime);
+        server.send(200, "text/plain", s);
     }
-    else if(paramSts == "stop"){
+    else if(paramSts == paramWord_get[enm_temperture])
+    {
         receivedRing();
-        httpSts[enmMotor].sts = false;
-        returnMEssage = "Motor off";
+        returnMessage = getTemp().c_str();
+    }
+    else if(paramSts == paramWord_get[enm_humidity])
+    {
+        receivedRing();
+        returnMessage = getHumd().c_str();
     }
     else{
         errorSound();
-        httpSts[enmMotor].sts = false;
-        returnMEssage = "Motor parameter error --- '?sts=start' or '?sts=stop'";
+        returnMessage = errorMessage[enmStsError_get];
     }
-
-    server.send(200, "text/plain", returnMEssage);
-}
-
-//*************************************
-void setBuzzer()
-{
-    String paramSts = server.arg("sts");
-    String returnMEssage = "";
-
-    if(paramSts == "start"){
-        receivedRing();
-        httpSts[enmBuzzer].sts = true;
-        returnMEssage = "Sound buzzer";
-    }
-    else if(paramSts == "stop"){
-        receivedRing();
-        httpSts[enmBuzzer].sts = false;
-        returnMEssage = "Stop Buzzer";
-    }
-    else{
-        errorSound();
-        httpSts[enmBuzzer].sts = false;
-        returnMEssage = "Buzzer parameter error --- '?sts=start' or '?sts=stop'";
-    }
-
-    server.send(200, "text/plain", returnMEssage);
+    server.send(200, "text/plain", returnMessage);
 }
 
 //*************************************
@@ -222,7 +253,6 @@ void outputTime()
     // server.send(200, "text/plain", httpSts[enmGetTime].returnMess);
     server.send(200, "text/plain", s);
 }
-
 
 //*************************************
 void motorAction(int setNum)
@@ -263,53 +293,19 @@ void motorAction(int setNum)
 void setHttpAction()
 {
     //赤LED
-    server.on(httpSts[enmLedR].uri, HTTP_ANY, [](){setLED(PORT_LED_R);});
+    server.on(httpSts[enmLedR].uri, HTTP_ANY, [](){setDevice(enm_led, "r");});
 
     //緑LED　ON
-    server.on(httpSts[enmLedG].uri, HTTP_ANY, [](){setLED(PORT_LED_G);});
-
-    //時刻取得
-    // server.on(httpSts[enmGetTime].uri, HTTP_ANY, [](){
-    // server.on(httpSts[enmGetTime].uri, HTTP_ANY, outputTime);
-    //     receivedRing();
-    //     struct tm nowTime = getTimeInf();
-    //     char s[20] = {};
-    //     arrangeTime(s, nowTime);
-    //     // server.send(200, "text/plain", httpSts[enmGetTime].returnMess);
-    //     server.send(200, "text/plain", s);
-    // });
+    server.on(httpSts[enmLedG].uri, HTTP_ANY, [](){setDevice(enm_led, "g");});
 
     //モーター
-    server.on(httpSts[enmMotor].uri, HTTP_ANY, setMotor);
+    server.on(httpSts[enmMotor].uri, HTTP_ANY, [](){setDevice(enm_motor);});
 
-    //ブザー駆動開始
-    server.on(httpSts[enmBuzzer].uri, HTTP_ANY, setBuzzer);
-    // server.on(httpSts[enmBuzzer].uri, HTTP_ANY, [](){setBuzzer
-    //     receivedRing();
-    //     httpSts[enmBuzzer].sts = true;
-    //     server.send(200, "text/plain", httpSts[enmBuzzer].returnMess);
-    // });
+    //ブザー
+    server.on(httpSts[enmBuzzer].uri, HTTP_ANY, [](){setDevice(enm_buzzer);});
 
-    // //ブザー駆動停止
-    // server.on(httpSts[enmBuzzer].uri, HTTP_ANY, [](){
-    //     receivedRing();
-    //     httpSts[enmBuzzer].sts = false;
-    //     server.send(200, "text/plain", httpSts[enmBuzzer].returnMess);
-    // });
-
-    //温度取得
-    server.on(httpSts[enmGet].uri, HTTP_ANY, [](){
-        receivedRing();
-        string sTemp = getTemp();
-        server.send(200, "text/plain", sTemp.c_str());
-    });
-
-    //湿度取得
-    server.on(httpSts[enmGet].uri, HTTP_ANY, [](){
-        receivedRing();
-        string sHumd = getHumd();
-        server.send(200, "text/plain", sHumd.c_str());
-    });
+    //値取得
+    server.on(httpSts[enmGet].uri, HTTP_ANY, [](){outputValue();});
 
     // 登録されてないパスにアクセスがあった場合
     server.onNotFound([](){
@@ -337,6 +333,7 @@ void action()
 string getTemp()
 {
     float fTemp = readTempHTD21D(wr);
+    sr.println(fTemp);
     return to_string(fTemp).substr(0, 5);
 }
 

@@ -573,9 +573,10 @@ void bz(int num)
 
 void receivedRing()
 {
-    BzNote(1, getrScale(16), flSound[0][mDO], 100);
-    BzNote(0, getScale1(16), 0, 100);
-    // BzStop(200);
+    BzNote(1, getrScale(32), flSound[0][mDO], 100);
+    BzNote(0, getScale1(32), 0, 100);
+    BzNote(1, getrScale(32), flSound[2][mDO], 100);
+    BzNote(0, getScale1(2), 0, 100);
 }
 
 void errorSound()
@@ -596,4 +597,11 @@ void powerOn()
     BzNote(0, getScale1(4), 0, 100);
     BzNote(1, getrScale(32), flSound[4][mDO], 100);
     BzNote(0, getScale1(4), 0, 100);
+}
+
+
+void prgBug()
+{
+    BzNote(1, getrScale(1), flSound[0][mDO], 100);
+    BzStop(1);
 }

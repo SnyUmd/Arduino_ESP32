@@ -28,61 +28,62 @@ const int aryMotorSts[4][4] =
 
 struct httpStatus{
   Uri uri;
-  String returnMess;
   bool sts;
 };
 
 httpStatus httpSts[]
 {
-  {"/led/r", "", false},
-  {"/led/g", "", false},
-  // {"/get_time", "Time", false},
-  {"/motor", "Motor start", false},
-  {"/buzzer", "Buzzer ring", false},
-  {"/get", "Temperture", false}
+  {"/led/r", false},
+  {"/led/g", false},
+  {"/motor", false},
+  {"/buzzer", false},
+  {"/get", false}
 };
-
-// httpStatus httpSts[]
-// {
-//   {"/led/on/r", "LED red on", false},
-//   {"/led/off/r", "LED red off", false},
-//   {"/led/on/g", "LED green on", false},
-//   {"/led/off/g", "LED green off", false},
-//   {"/get_time", "Time", false},
-//   {"/motor/start", "Motor start", false},
-//   {"/motor/stop", "Motor stop", false},
-//   {"/buzzer/start", "Buzzer ring", false},
-//   {"/buzzer/stop", "Buzzer stop", false},
-//   {"/temperture", "Temperture", false},
-//   {"/humidity", "Humidity", false}
-// };
 
 enum enmHttpState
 {
     enmLedR = 0,
     enmLedG,
-    // enmGetTime,
     enmMotor,
     enmBuzzer,
     enmGet
 };
-// enum enmHttpState
-// {
-//     enmLedOnR,
-//     enmLedOffR,
-//     enmLedOnG,
-//     enmLedOffG,
-//     enmGetTime,
-//     enmMotorStart,
-//     enmMotorStop,
-//     enmBuzzerRing,
-//     enmBuzzerStop,
-//     enmGetTemperture,
-//     enmGetHumidity
-// };
 
 const String paramWord_set[] = {"on", "off"};
-const string paramWord_led[] = {"g", "r"};
-const String paramWord_get[] = {"time", "temparture", "Humidity"};
-
 enum enmLedParams{enm_on = 0, enm_off};
+
+const String paramWord_led[] = {"g", "r"};
+
+enum enmContentNum_Set
+{
+  enm_non,
+  enm_led,
+  enm_motor,
+  enm_buzzer
+};
+
+const String paramWord_get[] = 
+{
+  "time", 
+  "temperature", 
+  "humidity"
+};
+enum enmContentNum_Get
+{
+  enm_time,
+  enm_temperture,
+  enm_humidity
+};
+
+const String errorMessage[] = 
+{
+  "Program Error <setDevice ledColor error>",
+  "Status error --- '?sts=on' or '?sts=off'",
+  "Status error --- '?sts=time' or '?sts=temparture' or '?sts=humidity'"
+};
+enum enmErrorMessage
+{
+  enmPrgError,
+  enmStsError_set,
+  enmStsError_get
+};

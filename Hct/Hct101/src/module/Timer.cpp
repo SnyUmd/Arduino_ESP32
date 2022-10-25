@@ -11,7 +11,8 @@ hw_timer_t * timer = NULL;
 // void IRAMATTR onTimer{
 // }
 // initTimerInterrupt(true, &onTimer);
-void setTimerInterrupt(void(* fn)(void), int count_time = 1000000, bool regular = true)
+
+void setTimerInterrupt(void(* fn)(void), int count_time, bool regular)
 {
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, fn, true);
@@ -52,7 +53,5 @@ bool CheckElapsedTime(long startTime, long targetTime)
         if(nowTime - startTime >= targetTime){ return true;}
         else {return false;}
     }
+    return false;
 }
-
-
-

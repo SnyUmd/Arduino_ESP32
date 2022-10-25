@@ -3,6 +3,9 @@
 #define PORT_MOTOR2 15
 #define PORT_MOTOR3 2
 
+#define LED_ON 0
+#define LED_OFF 1
+
 #define PORT_SW 0
 
 #define PORT_LED_G 16

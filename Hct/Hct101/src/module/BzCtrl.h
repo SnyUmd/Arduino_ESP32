@@ -27,3 +27,4 @@ void bz(int num);
 void receivedRing();
 void errorSound();
 void powerOn();
+void prgBug();
