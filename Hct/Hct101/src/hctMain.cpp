@@ -272,6 +272,18 @@ void outputValue()
         receivedRing();
         returnMessage = getHumd().c_str();
     }
+
+    else if(paramSts == paramWord_get[enm_all])
+    {
+        receivedRing();
+        struct tm nowTime = getTimeInf();
+        arrangeTime(s, nowTime);
+        returnMessage = s;
+        returnMessage += "\r";
+        returnMessage += getTemp().c_str();
+        returnMessage += "\r";
+        returnMessage += getHumd().c_str();
+    }
     else{
         errorSound();
         returnMessage = errorMessage[enmStsError_get];

@@ -68,14 +68,16 @@ enum enmContentNum_Set
 const String paramWord_get[] = 
 {
   "time", 
-  "temperature", 
-  "humidity"
+  "temperture", 
+  "humidity",
+  "all"
 };
 enum enmContentNum_Get
 {
   enm_time,
   enm_temperture,
-  enm_humidity
+  enm_humidity,
+  enm_all
 };
 
 const String errorMessage[] = 
@@ -83,7 +85,7 @@ const String errorMessage[] =
   "Not found",
   "Program Error <setDevice ledColor error>",
   "Status error --- '?sts=on' or '?sts=off'",
-  "Status error --- '?sts=time' or '?sts=temparture' or '?sts=humidity'"
+  "Status error --- '?sts=time' or '?sts=temperture' or '?sts=humidity'"
 };
 enum enmErrorMessage
 {
