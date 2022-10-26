@@ -155,22 +155,12 @@ void modeSetting()
 
     while(1)
     {
-
-
-
-
         if(digitalRead(PORT_SW) == LOW)
         {
             swCnt_L++;
-            if(swCnt_L > 100){break;}
-            else if(swCnt_H > 0 && swCnt_L > 50){swCnt_H = 0;}
+            if(swCnt_L > 40){ break; }
         }
-        else
-        {
-            swCnt_H++;
-            if(swCnt_L > 0 && swCnt_H > 50){swCnt_L = 0;}
-            if(swCnt_H > 100){swCnt_H = 0;}
-        }
+        else{ swCnt_L = 0; }
         delay(5);
     }
 
