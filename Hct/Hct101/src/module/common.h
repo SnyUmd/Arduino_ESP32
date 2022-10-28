@@ -15,6 +15,10 @@ HardwareSerial sr(1);
 WebServer server(80);
 TwoWire wr = Wire;
 String target = ""; // この変数をPOSTメソッドで書き換える
+bool blOpening = false;
+bool blClosing = false;
+bool blOpened = false;
+int openTime = 1000000;
 
 struct tm timeInf;
 struct tm timeInfRTC;
@@ -40,7 +44,8 @@ httpStatus httpSts[]
   {"/led/g", false},
   {"/motor", false},
   {"/buzzer", false},
-  {"/get", false}
+  {"/get", false},
+  {"/now", false}
 };
 
 enum enmHttpState
@@ -49,7 +54,8 @@ enum enmHttpState
     enmLedG,
     enmMotor,
     enmBuzzer,
-    enmGet
+    enmGet,
+    enmNow
 };
 
 const String paramWord_set[] = {"on", "off"};

@@ -4,8 +4,8 @@
 #include <WebServer.h>
 #include <Wire.h>
 #include <iostream>
-#include "defHct.h"
-#include "common.h"
+#include "module/defHct.h"
+#include "module/common.h"
 #include "module/Timer.h"
 #include "module/wifiCtrl.h"
 #include "module/ledCtrl.h"
@@ -13,6 +13,7 @@
 #include "module/BzCtrl.h"
 #include "module/htu21d.h"
 #include "module/i2cCtrl.h"
+#include "module/motorCtrl.h"
 
 using namespace std;
 
@@ -21,13 +22,15 @@ ledCtrl LC;
 void init();
 void IRAM_ATTR onTimer();
 void funcInterrupt();
-void motorAction(int setNum);
 void action();
 void setHttpAction();
 string getTemp();
 string getHumd();
 void outputTime();
 void modeSetting();
+void openValve(int open_time);
+void closeValve();
+void IRAM_ATTR setClosing();
 
 //***************************************************************************************************************
 //***************************************************************************************************************
@@ -53,6 +56,10 @@ void loop()
 {
     server.handleClient();
 
+    if(blOpening) openValve(openTime);
+    if(blClosing) closeValve();
+
+    if(httpSts[enmBuzzer].sts) bz(1);
     //RTC時刻取得-------------------
     // byte val[8] = {};
     // int loopNum = sizeof(val)/sizeof(val[0]);
@@ -60,19 +67,19 @@ void loop()
     // for(int i = 1; i <= loopNum; i++) sr.print(val[loopNum - i]);
     // sr.println("");
     //------------------------------
-    switch(mode)
-    {
-        case enmNormal:
-            action();
-            break;
-        case enmSetting:
-            bzModeChange(1);
-            modeSetting();
-            bzModeChange(0);
-            break;
-    }
+    // switch(mode)
+    // {
+    //     case enmNormal:
+    //         action();
+    //         break;
+    //     case enmSetting:
+    //         bzModeChange(1);
+    //         modeSetting();
+    //         bzModeChange(0);
+    //         break;
+    // }
     
-    delay(1000);
+    // delay(1000);
 }
 
 //***************************************************************************************************************
@@ -110,6 +117,7 @@ void init()
     LC.ledFlash(PORT_LED_R, 10, 5);
     
     InitBz();
+    digitalWrite(PORT_LED_R, 1);
 }
 
 //*************************************
@@ -167,7 +175,7 @@ void modeSetting()
     digitalWrite(PORT_LED_G, LED_OFF);
     digitalWrite(PORT_LED_R, LED_OFF);
     mode = enmNormal;
-    setTimerInterrupt(&onTimer, 1000000, false);//300ms間割り込み停止
+    setTimerInterrupt(&onTimer, 1000000, false);
 }
 
 
@@ -176,72 +184,88 @@ void setDevice(int contentNum, String ledColor = "")
 {
     String returnMessage = "";
     String paramSts = server.arg("sts");
+    String paramLength = server.arg("length");
 
-    if(paramSts == paramWord_set[enm_on]){
-        receivedRing();
-        switch(contentNum)
-        {
-            case enm_led:
-                if (ledColor == "g"){
-                    returnMessage = "LED green on";
-                    digitalWrite(PORT_LED_G, LED_ON);
+    switch(contentNum)
+    {
+        case enmNow:
+            receivedRing();
+            // httpSts[enmMotor].sts = true;
+            if(paramLength != "") openTime = atoi(paramLength.c_str()) * 1000000;
+            else openTime = 1000000;
+            blOpening = true;
+            returnMessage = "received 'now'.";
+            break;
+        
+        default:
+            if(paramSts == paramWord_set[enm_on]){
+                receivedRing();
+                switch(contentNum)
+                {
+                    case enm_led:
+                        if (ledColor == "g"){
+                            returnMessage = "LED green on";
+                            digitalWrite(PORT_LED_G, LED_ON);
+                        }
+                        else if(ledColor == "r"){
+                            returnMessage = "LED red on";
+                            digitalWrite(PORT_LED_R, LED_ON);
+                        }
+                        else {
+                            sr.println("*****setDevice ledColor error*****");
+                            returnMessage = "Program Error <setDevice ledColor error>";
+                            prgBug();
+                        }
+                        break;
+                    //モーターセット
+                    case enm_motor:
+                        motorAction(false, 100);
+                        returnMessage = "Motor on";
+                        break;
+                    case enm_buzzer:
+                        httpSts[enmBuzzer].sts = true;
+                        returnMessage = "Buzzer on";
+                        break;
+                    default:
+                        break;
                 }
-                else if(ledColor == "r"){
-                    returnMessage = "LED red on";
-                    digitalWrite(PORT_LED_R, LED_ON);
+            }
+            else if(paramSts == paramWord_set[enm_off]){
+                receivedRing();
+                switch(contentNum)
+                {
+                    case enm_led:
+                        if (ledColor == "g"){
+                            returnMessage = "LED green off";
+                            digitalWrite(PORT_LED_G, LED_OFF);
+                        }
+                        else if(ledColor == "r"){
+                            returnMessage = "LED red off";
+                            digitalWrite(PORT_LED_R, LED_OFF);
+                        }
+                        else {
+                            sr.println("*****setDevice ledColor error*****");
+                            returnMessage = errorMessage[enmPrgError];
+                            prgBug();
+                        }
+                        break;
+                    case enm_motor:
+                        httpSts[enmMotor].sts = false;
+                        returnMessage = "Motor off";
+                        break;
+                    case enm_buzzer:
+                        httpSts[enmBuzzer].sts = false;
+                        returnMessage = "Buzzer off";
+                        break;
+                    default:
+                        break;
                 }
-                else {
-                    sr.println("*****setDevice ledColor error*****");
-                    returnMessage = "Program Error <setDevice ledColor error>";
-                    prgBug();
-                }
-                break;
-            case enm_motor:
-                httpSts[enmMotor].sts = true;
-                returnMessage = "Motor on";
-                break;
-            case enm_buzzer:
-                httpSts[enmBuzzer].sts = true;
-                returnMessage = "Sound buzzer";
-                break;
-            default:
-                break;
-        }
-    }
-    else if(paramSts == paramWord_set[enm_off]){
-        receivedRing();
-        switch(contentNum)
-        {
-            case enm_led:
-                if (ledColor == "g"){
-                    returnMessage = "LED green off";
-                    digitalWrite(PORT_LED_G, LED_OFF);
-                }
-                else if(ledColor == "r"){
-                    returnMessage = "LED red off";
-                    digitalWrite(PORT_LED_R, LED_OFF);
-                }
-                else {
-                    sr.println("*****setDevice ledColor error*****");
-                    returnMessage = errorMessage[enmPrgError];
-                    prgBug();
-                }
-                break;
-            case enm_motor:
-                httpSts[enmMotor].sts = false;
-                returnMessage = "Motor off";
-                break;
-            case enm_buzzer:
-                httpSts[enmBuzzer].sts = false;
-                returnMessage = "Stop buzzer";
-                break;
-            default:
-                break;
-        }
-    }
-    else{
-        errorSound();
-        returnMessage = errorMessage[enmStsError_set];
+            }
+            else{
+                errorSound();
+                returnMessage = errorMessage[enmStsError_set];
+            }
+            break;
     }
 
     server.send(200, "text/plain", returnMessage);
@@ -302,40 +326,6 @@ void outputTime()
     server.send(200, "text/plain", s);
 }
 
-//*************************************
-void motorAction(int setNum)
-{
-    const int loop = 4;
-    bool blLoop = true;
-    int num;
-    int cnt = 0;
-    int repetitionNum = 0;
-    // LC.ledFlash(PORT_LED_G, 10, 5);
-
-    while(blLoop){
-        for(int i = 0; i < loop; i++)
-        {
-            if(cnt < 50) num = i;
-            else num = loop - i - 1;
-
-            digitalWrite(PORT_MOTOR0, aryMotorSts[num][0]);
-            delay(1);
-            digitalWrite(PORT_MOTOR1, aryMotorSts[num][1]);
-            delay(1);
-            digitalWrite(PORT_MOTOR2, aryMotorSts[num][2]);
-            delay(1);
-            digitalWrite(PORT_MOTOR3, aryMotorSts[num][3]);
-            delay(1);
-        }
-        cnt++;
-        if(cnt > 100) 
-        {
-            cnt = 0;
-            repetitionNum++;
-        }
-        if(repetitionNum >= setNum) blLoop = false;
-    }
-}
 
 //*************************************
 void setHttpAction()
@@ -348,6 +338,8 @@ void setHttpAction()
 
     //モーター
     server.on(httpSts[enmMotor].uri, HTTP_ANY, [](){setDevice(enm_motor);});
+    //バルブオープン
+    server.on(httpSts[enmNow].uri, HTTP_ANY, [](){setDevice(enmNow);});
 
     //ブザー
     server.on(httpSts[enmBuzzer].uri, HTTP_ANY, [](){setDevice(enm_buzzer);});
@@ -367,7 +359,7 @@ void setHttpAction()
 //*************************************
 void action()
 {
-    if(httpSts[enmMotor].sts) motorAction(1);
+    if(httpSts[enmMotor].sts) motorAction(true, 1);
     if(httpSts[enmBuzzer].sts) bz(1);
 }
 
@@ -384,4 +376,28 @@ string getHumd()
 {
     float fHumd = readHumdHTD21D(wr);
     return to_string(fHumd).substr(0, 5);
+}
+
+//*************************************
+void openValve(int open_time)
+{
+    blOpened = true;
+    motorAction(false, 100);
+    blOpening = false;
+    setTimerInterrupt(&setClosing, open_time, false);
+}
+
+//*************************************
+void closeValve()
+{
+    blClosing = false;
+    motorAction(true, 100);
+    blOpened = false;
+}
+
+//*************************************
+void IRAM_ATTR setClosing()
+{
+    // digitalWrite(PORT_LED_G, !digitalRead(PORT_LED_G));
+    blClosing = true;
 }
