@@ -34,5 +34,9 @@ void motorAction(bool bl_left, int loop_num)
             delay(1);
         }
     }
+    digitalWrite(PORT_MOTOR0, 0);
+    digitalWrite(PORT_MOTOR1, 0);
+    digitalWrite(PORT_MOTOR2, 0);
+    digitalWrite(PORT_MOTOR3, 0);
 }
 

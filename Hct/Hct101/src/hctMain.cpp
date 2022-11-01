@@ -30,7 +30,16 @@ void outputTime();
 void modeSetting();
 void openValve(int open_time);
 void closeValve();
+// void setAfter(int adjustment_time);
+void setAfter(int next_time, int adjustment_time);
+void IRAM_ATTR setClosing_Now();
+// void IRAM_ATTR setClosing_Regular();
+void IRAM_ATTR afterOpenValve();
+// void IRAM_ATTR setClosing_Regular();
 void IRAM_ATTR setClosing();
+int getNextTime();
+void setDevice(int contentNum);
+void outputValue();
 
 //***************************************************************************************************************
 //***************************************************************************************************************
@@ -49,6 +58,10 @@ void setup()
     setHttpAction();
     sr.println("-----loop Start-----");
     BzGoUp(10, 10);
+    
+    // setVal.interval = 20;
+    // operationReservation = enmRegularOppenning;
+    // setAfter(setVal.interval, setVal.length);
 }
 
 //*************************************
@@ -56,30 +69,62 @@ void loop()
 {
     server.handleClient();
 
-    if(blOpening) openValve(openTime);
-    if(blClosing) closeValve();
+    switch(operationReservation)
+    {
+        case enmNon:
+            break;
+        case enmNowOppenning://1
+            if (!deviceSts.opened){
+                deviceSts.opened = true;
+                motorAction(false, 100);
+                deviceSts.nowOppenning = false;
+                setTimerInterrupt(&setClosing, setVal.nowOpenLength * 1000000, false);
+                operationReservation = enmNowClosing;
+            }
+            break;
+        case enmNowClosing://2
+            if (deviceSts.closingRun){
+                motorAction(true, 100);
+                if(setVal.interval != 0) {
+                    setVal.nextTime = getNextTime();
+                    sr.print("next ");
+                    sr.println(setVal.nextTime);
+                    if(setVal.nextTime < 3) setVal.nextTime = 3;
+                    setAfter(setVal.nextTime, setVal.nowOpenLength + timeAdjuster + 1);
+                    operationReservation = enmRegularOppenning;
+                }
+                else operationReservation = enmNon;
+                deviceSts.opened = false;
+                deviceSts.closingRun = false;
+            }
+            break;
+        case enmRegularOppenning://3
+            if (!deviceSts.opened && deviceSts.regularOppenning){
+                deviceSts.opened = true;
+                motorAction(false, 100);
+                deviceSts.nowOppenning = false;
+                setTimerInterrupt(&setClosing, 1 * 1000000, false);
+                operationReservation = enmRegularClosing;
+                deviceSts.regularOppenning = false;
+            }
+            break;
+        case enmRegularClosing://4
+            if (deviceSts.closingRun){
+                motorAction(true, 100);
+                deviceSts.opened = false;
+                setAfter(setVal.interval, setVal.length + timeAdjuster);
+                deviceSts.closingRun = false;
+                operationReservation = enmRegularOppenning;
+            }
+            break;
+    }
+
+    if(setVal.settingReserv && !deviceSts.opened) {
+        setAfter(setVal.interval, 0);
+        setVal.settingReserv = false;
+    }
 
     if(httpSts[enmBuzzer].sts) bz(1);
-    //RTC時刻取得-------------------
-    // byte val[8] = {};
-    // int loopNum = sizeof(val)/sizeof(val[0]);
-    // getTimeRX8035(val, wr);
-    // for(int i = 1; i <= loopNum; i++) sr.print(val[loopNum - i]);
-    // sr.println("");
-    //------------------------------
-    // switch(mode)
-    // {
-    //     case enmNormal:
-    //         action();
-    //         break;
-    //     case enmSetting:
-    //         bzModeChange(1);
-    //         modeSetting();
-    //         bzModeChange(0);
-    //         break;
-    // }
-    
-    // delay(1000);
 }
 
 //***************************************************************************************************************
@@ -121,6 +166,29 @@ void init()
 }
 
 //*************************************
+void setHttpAction()
+{
+    //バルブオープン
+    server.on(httpSts[enmNow].uri, HTTP_ANY, [](){setDevice(enmNow);});
+    //アフター設定
+    server.on(httpSts[enmSet].uri, HTTP_ANY, [](){setDevice(enmSet);});
+
+    //ブザー
+    server.on(httpSts[enmBuzzer].uri, HTTP_ANY, [](){setDevice(enm_buzzer);});
+
+    //値取得
+    server.on(httpSts[enmGet].uri, HTTP_ANY, [](){outputValue();});
+
+    // 登録されてないパスにアクセスがあった場合
+    server.onNotFound([](){
+        errorSound();
+        server.send(404, "text/plain", errorMessage[enmNotFound]); // 404を返す
+    });
+
+    server.begin();
+}
+
+//*************************************
 //タイマー割り込み処理
 //*************************************
 void IRAM_ATTR onTimer()
@@ -141,16 +209,6 @@ void funcInterrupt()
     sr.println(WiFi.localIP());
     sr.println("Setting mode");
     mode = enmSetting;
-
-    // setTimerInterrupt(&onTimer, 200000, false);//300ms間割り込み停止
-    // bzModeChange(1);
-    // digitalWrite(PORT_LED_G, LED_ON);
-    // digitalWrite(PORT_LED_R, LED_ON);
-    // modeSetting();
-    // delay(10000);
-    // sr.println("Normal mode");
-    // modeChange(0);
-    // setTimerInterrupt(&onTimer, 5000000, false);//300ms間割り込み停止
 }
 
 //*************************************
@@ -178,50 +236,70 @@ void modeSetting()
     setTimerInterrupt(&onTimer, 1000000, false);
 }
 
+//*************************************
+void setNowOpen(int open_time)
+{
+    openTime = open_time;
+    deviceSts.nowOppenning = true;
+}
 
 //*************************************
-void setDevice(int contentNum, String ledColor = "")
+void setAfter(int next_time, int adjustment_time = 0)
+{
+    if(setVal.interval == 0){
+        setTimerInterrupt(NULL, 1000000000 , true);
+        digitalWrite(PORT_LED_G, LED_OFF);
+    }
+    else
+    {
+        operationReservation = enmRegularOppenning;
+        setTimerInterrupt(&afterOpenValve, (next_time - adjustment_time) * 1000000 , false);
+        digitalWrite(PORT_LED_G, LED_ON);
+        setVal.setTime = GetTime();
+        setVal.settingReserv = false;
+    }
+}
+
+//*************************************
+void setDevice(int contentNum)
 {
     String returnMessage = "";
     String paramSts = server.arg("sts");
     String paramLength = server.arg("length");
-
+    String paraminterval = server.arg("interval");
     switch(contentNum)
     {
-        case enmNow:
-            receivedRing();
-            // httpSts[enmMotor].sts = true;
-            if(paramLength != "") openTime = atoi(paramLength.c_str()) * 1000000;
-            else openTime = 1000000;
-            blOpening = true;
-            returnMessage = "received 'now'.";
+        case enmNow://-------------------------------------------------------
+            if(!deviceSts.opened)
+            {
+                receivedRing();
+                if(paramLength != "") setVal.nowOpenLength = atoi(paramLength.c_str());
+                else setVal.nowOpenLength = 1;
+                // setVal.nextTime = getNextTime();
+                deviceSts.nowRun = true;
+                operationReservation = enmNowOppenning;
+                returnMessage = "successed";
+            }
+            else{
+                errorSound();
+                returnMessage = "error";
+            }
             break;
-        
+        case enmSet://-------------------------------------------------------
+            if(paramLength != "") setVal.length = atoi(paramLength.c_str());
+            if(paraminterval != "") {
+                setVal.interval = atoi(paraminterval.c_str());
+                setVal.settingReserv = true;
+                operationReservation = enmRegularOppenning;
+                receivedRing();
+                returnMessage = "successed";
+            }
+            break;
         default:
             if(paramSts == paramWord_set[enm_on]){
                 receivedRing();
                 switch(contentNum)
                 {
-                    case enm_led:
-                        if (ledColor == "g"){
-                            returnMessage = "LED green on";
-                            digitalWrite(PORT_LED_G, LED_ON);
-                        }
-                        else if(ledColor == "r"){
-                            returnMessage = "LED red on";
-                            digitalWrite(PORT_LED_R, LED_ON);
-                        }
-                        else {
-                            sr.println("*****setDevice ledColor error*****");
-                            returnMessage = "Program Error <setDevice ledColor error>";
-                            prgBug();
-                        }
-                        break;
-                    //モーターセット
-                    case enm_motor:
-                        motorAction(false, 100);
-                        returnMessage = "Motor on";
-                        break;
                     case enm_buzzer:
                         httpSts[enmBuzzer].sts = true;
                         returnMessage = "Buzzer on";
@@ -234,25 +312,6 @@ void setDevice(int contentNum, String ledColor = "")
                 receivedRing();
                 switch(contentNum)
                 {
-                    case enm_led:
-                        if (ledColor == "g"){
-                            returnMessage = "LED green off";
-                            digitalWrite(PORT_LED_G, LED_OFF);
-                        }
-                        else if(ledColor == "r"){
-                            returnMessage = "LED red off";
-                            digitalWrite(PORT_LED_R, LED_OFF);
-                        }
-                        else {
-                            sr.println("*****setDevice ledColor error*****");
-                            returnMessage = errorMessage[enmPrgError];
-                            prgBug();
-                        }
-                        break;
-                    case enm_motor:
-                        httpSts[enmMotor].sts = false;
-                        returnMessage = "Motor off";
-                        break;
                     case enm_buzzer:
                         httpSts[enmBuzzer].sts = false;
                         returnMessage = "Buzzer off";
@@ -263,11 +322,11 @@ void setDevice(int contentNum, String ledColor = "")
             }
             else{
                 errorSound();
-                returnMessage = errorMessage[enmStsError_set];
+                // returnMessage = errorMessage[enmStsError_set];
+                returnMessage = "error";
             }
             break;
     }
-
     server.send(200, "text/plain", returnMessage);
 }
 
@@ -322,45 +381,7 @@ void outputTime()
     struct tm nowTime = getTimeInf();
     char s[20] = {};
     arrangeTime(s, nowTime);
-    // server.send(200, "text/plain", httpSts[enmGetTime].returnMess);
     server.send(200, "text/plain", s);
-}
-
-
-//*************************************
-void setHttpAction()
-{
-    //赤LED
-    server.on(httpSts[enmLedR].uri, HTTP_ANY, [](){setDevice(enm_led, "r");});
-
-    //緑LED　ON
-    server.on(httpSts[enmLedG].uri, HTTP_ANY, [](){setDevice(enm_led, "g");});
-
-    //モーター
-    server.on(httpSts[enmMotor].uri, HTTP_ANY, [](){setDevice(enm_motor);});
-    //バルブオープン
-    server.on(httpSts[enmNow].uri, HTTP_ANY, [](){setDevice(enmNow);});
-
-    //ブザー
-    server.on(httpSts[enmBuzzer].uri, HTTP_ANY, [](){setDevice(enm_buzzer);});
-
-    //値取得
-    server.on(httpSts[enmGet].uri, HTTP_ANY, [](){outputValue();});
-
-    // 登録されてないパスにアクセスがあった場合
-    server.onNotFound([](){
-        errorSound();
-        server.send(404, "text/plain", errorMessage[enmNotFound]); // 404を返す
-    });
-
-    server.begin();
-}
-
-//*************************************
-void action()
-{
-    if(httpSts[enmMotor].sts) motorAction(true, 1);
-    if(httpSts[enmBuzzer].sts) bz(1);
 }
 
 //*************************************
@@ -379,25 +400,38 @@ string getHumd()
 }
 
 //*************************************
-void openValve(int open_time)
-{
-    blOpened = true;
-    motorAction(false, 100);
-    blOpening = false;
-    setTimerInterrupt(&setClosing, open_time, false);
-}
-
-//*************************************
-void closeValve()
+void closeValve_Now()
 {
     blClosing = false;
     motorAction(true, 100);
     blOpened = false;
+    if(!deviceSts.nowRun)setVal.settingReserv = true;
+    else deviceSts.nowRun = false;
+}
+
+//*************************************
+int getNextTime()
+{
+    long nowT = GetTime();
+    if(nowT < setVal.setTime) nowT + 4294967295;
+    return setVal.interval - ((nowT - setVal.setTime)/1000);
 }
 
 //*************************************
 void IRAM_ATTR setClosing()
 {
-    // digitalWrite(PORT_LED_G, !digitalRead(PORT_LED_G));
-    blClosing = true;
+    deviceSts.closingRun = true;
+
+}
+//*************************************
+// void IRAM_ATTR setClosing_Regular()
+// {
+//     deviceSts.closingRun = true;
+// }
+
+//*************************************
+void IRAM_ATTR afterOpenValve()
+{
+    openTime = setVal.length * 1000000;
+    deviceSts.regularOppenning = true;
 }

@@ -15,10 +15,12 @@ HardwareSerial sr(1);
 WebServer server(80);
 TwoWire wr = Wire;
 String target = ""; // この変数をPOSTメソッドで書き換える
-bool blOpening = false;
+// bool blOpening = false;
 bool blClosing = false;
 bool blOpened = false;
 int openTime = 1000000;
+int timeAdjuster = 3;
+
 
 struct tm timeInf;
 struct tm timeInfRTC;
@@ -33,6 +35,39 @@ const int aryMotorSts[4][4] =
     {0, 0, 0, 1}
 };
 
+struct setValue{
+  int interval;
+  int length;
+  long setTime;
+  int nextTime;
+  int nowOpenLength;
+  bool settingReserv;
+};
+
+setValue setVal = {0, 1, 0, 0, 1,false};
+
+struct deviceStatus{
+  bool opened;
+  bool nowRun;
+  bool regularRun;
+  bool nowOppenning;
+  bool regularOppenning;
+  bool nowClosing;
+  bool regularClosing;
+  bool closingRun;
+};
+
+deviceStatus deviceSts = {false, false, false, false, false, false, false};
+
+int operationReservation = 0;
+enum operationType{
+  enmNon = 0,
+  enmNowOppenning,
+  enmNowClosing,
+  enmRegularOppenning,
+  enmRegularClosing,
+};
+
 struct httpStatus{
   Uri uri;
   bool sts;
@@ -40,22 +75,18 @@ struct httpStatus{
 
 httpStatus httpSts[]
 {
-  {"/led/r", false},
-  {"/led/g", false},
-  {"/motor", false},
   {"/buzzer", false},
   {"/get", false},
-  {"/now", false}
+  {"/now", false},
+  {"/set", false}
 };
 
 enum enmHttpState
 {
-    enmLedR = 0,
-    enmLedG,
-    enmMotor,
     enmBuzzer,
     enmGet,
-    enmNow
+    enmNow,
+    enmSet
 };
 
 const String paramWord_set[] = {"on", "off"};
