@@ -15,7 +15,7 @@
 
 #define SSID "Wi-ko1225_G"
 #define PASS "n17e92@53S19n"
-#define HOST_NAME "ESP32"
+#define HOST_NAME "petoasis"
 
 #define BUZZER_PWM 25
 #define SWITCH0 0

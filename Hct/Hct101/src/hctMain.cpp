@@ -290,7 +290,6 @@ void setDevice(int contentNum)
             if(paraminterval != "") {
                 setVal.interval = atoi(paraminterval.c_str());
                 setVal.settingReserv = true;
-                operationReservation = enmRegularOppenning;
                 receivedRing();
                 returnMessage = "successed";
             }
