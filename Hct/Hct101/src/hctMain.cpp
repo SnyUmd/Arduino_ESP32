@@ -20,26 +20,21 @@ using namespace std;
 ledCtrl LC;
 
 void init();
+void setHttpAction();
 void IRAM_ATTR onTimer();
 void funcInterrupt();
-void action();
-void setHttpAction();
-string getTemp();
-string getHumd();
-void outputTime();
 void modeSetting();
-void openValve(int open_time);
-void closeValve();
-// void setAfter(int adjustment_time);
+void setNowOpen(int open_time);
 void setAfter(int next_time, int adjustment_time);
-void IRAM_ATTR setClosing_Now();
-// void IRAM_ATTR setClosing_Regular();
-void IRAM_ATTR afterOpenValve();
-// void IRAM_ATTR setClosing_Regular();
-void IRAM_ATTR setClosing();
-int getNextTime();
 void setDevice(int contentNum);
 void outputValue();
+void outputTime();
+string getTemp();
+string getHumd();
+void closeValve_Now();
+int getNextTime();
+void IRAM_ATTR setClosing();
+void IRAM_ATTR afterOpenValve();
 
 //***************************************************************************************************************
 //***************************************************************************************************************
@@ -103,7 +98,7 @@ void loop()
                 deviceSts.opened = true;
                 motorAction(false, 100);
                 deviceSts.nowOppenning = false;
-                setTimerInterrupt(&setClosing, 1 * 1000000, false);
+                setTimerInterrupt(&setClosing, 2 * 1000000, false);
                 operationReservation = enmRegularClosing;
                 deviceSts.regularOppenning = false;
             }
@@ -172,7 +167,7 @@ void setHttpAction()
     server.on(httpSts[enmNow].uri, HTTP_ANY, [](){setDevice(enmNow);});
     //アフター設定
     server.on(httpSts[enmSet].uri, HTTP_ANY, [](){setDevice(enmSet);});
-
+    
     //ブザー
     server.on(httpSts[enmBuzzer].uri, HTTP_ANY, [](){setDevice(enm_buzzer);});
 

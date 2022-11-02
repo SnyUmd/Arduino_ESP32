@@ -44,7 +44,7 @@ struct setValue{
   bool settingReserv;
 };
 
-setValue setVal = {0, 1, 0, 0, 1,false};
+setValue setVal = {0, 2, 0, 0, 2,false};
 
 struct deviceStatus{
   bool opened;
