@@ -57,6 +57,9 @@ void setup()
     // setVal.interval = 20;
     // operationReservation = enmRegularOppenning;
     // setAfter(setVal.interval, setVal.length);
+
+    motorAction(false, 100, true);
+    motorAction(true, 100, true);
 }
 
 //*************************************
@@ -71,7 +74,7 @@ void loop()
         case enmNowOppenning://1
             if (!deviceSts.opened){
                 deviceSts.opened = true;
-                motorAction(false, 100);
+                motorAction(false, 100, false);
                 deviceSts.nowOppenning = false;
                 setTimerInterrupt(&setClosing, setVal.nowOpenLength * 1000000, false);
                 operationReservation = enmNowClosing;
@@ -79,7 +82,7 @@ void loop()
             break;
         case enmNowClosing://2
             if (deviceSts.closingRun){
-                motorAction(true, 100);
+                motorAction(true, 100, false);
                 if(setVal.interval != 0) {
                     setVal.nextTime = getNextTime();
                     sr.print("next ");
@@ -96,7 +99,7 @@ void loop()
         case enmRegularOppenning://3
             if (!deviceSts.opened && deviceSts.regularOppenning){
                 deviceSts.opened = true;
-                motorAction(false, 100);
+                motorAction(false, 100, false);
                 deviceSts.nowOppenning = false;
                 setTimerInterrupt(&setClosing, 2 * 1000000, false);
                 operationReservation = enmRegularClosing;
@@ -105,7 +108,7 @@ void loop()
             break;
         case enmRegularClosing://4
             if (deviceSts.closingRun){
-                motorAction(true, 100);
+                motorAction(true, 100, false);
                 deviceSts.opened = false;
                 setAfter(setVal.interval, setVal.length + timeAdjuster);
                 deviceSts.closingRun = false;
@@ -145,14 +148,22 @@ void init()
     digitalWrite(PORT_LED_R, 1);
 
     //ステッピングモータ　ポート
-    pinMode(PORT_MOTOR0, OUTPUT);
-    pinMode(PORT_MOTOR1, OUTPUT);
-    pinMode(PORT_MOTOR2, OUTPUT);
-    pinMode(PORT_MOTOR3, OUTPUT);
-    digitalWrite(PORT_MOTOR0, 0);
-    digitalWrite(PORT_MOTOR1, 0);
-    digitalWrite(PORT_MOTOR2, 0);
-    digitalWrite(PORT_MOTOR3, 0);
+    pinMode(PORT_MOTOR1_W, OUTPUT);
+    pinMode(PORT_MOTOR2_W, OUTPUT);
+    pinMode(PORT_MOTOR3_W, OUTPUT);
+    pinMode(PORT_MOTOR4_W, OUTPUT);
+    pinMode(PORT_MOTOR1_F, OUTPUT);
+    pinMode(PORT_MOTOR2_F, OUTPUT);
+    pinMode(PORT_MOTOR3_F, OUTPUT);
+    pinMode(PORT_MOTOR4_F, OUTPUT);
+    digitalWrite(PORT_MOTOR1_W, 0);
+    digitalWrite(PORT_MOTOR2_W, 0);
+    digitalWrite(PORT_MOTOR3_W, 0);
+    digitalWrite(PORT_MOTOR4_W, 0);
+    digitalWrite(PORT_MOTOR1_F, 0);
+    digitalWrite(PORT_MOTOR2_F, 0);
+    digitalWrite(PORT_MOTOR3_F, 0);
+    digitalWrite(PORT_MOTOR4_F, 0);
 
     LC.ledFlash(PORT_LED_R, 10, 5);
     
@@ -167,7 +178,7 @@ void setHttpAction()
     server.on(httpSts[enmNow].uri, HTTP_ANY, [](){setDevice(enmNow);});
     //アフター設定
     server.on(httpSts[enmSet].uri, HTTP_ANY, [](){setDevice(enmSet);});
-    
+
     //ブザー
     server.on(httpSts[enmBuzzer].uri, HTTP_ANY, [](){setDevice(enm_buzzer);});
 
@@ -397,7 +408,7 @@ string getHumd()
 void closeValve_Now()
 {
     blClosing = false;
-    motorAction(true, 100);
+    motorAction(true, 100, false);
     blOpened = false;
     if(!deviceSts.nowRun)setVal.settingReserv = true;
     else deviceSts.nowRun = false;

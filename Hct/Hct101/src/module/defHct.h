@@ -1,7 +1,12 @@
-#define PORT_MOTOR0 18
-#define PORT_MOTOR1 5
-#define PORT_MOTOR2 15
-#define PORT_MOTOR3 2
+#define PORT_MOTOR1_W 18
+#define PORT_MOTOR2_W 5
+#define PORT_MOTOR3_W 15
+#define PORT_MOTOR4_W 2
+
+#define PORT_MOTOR1_F 19
+#define PORT_MOTOR2_F 23
+#define PORT_MOTOR3_F 20
+#define PORT_MOTOR4_F 14
 
 #define LED_ON 0
 #define LED_OFF 1
