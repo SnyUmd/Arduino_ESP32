@@ -21,9 +21,7 @@ ledCtrl LC;
 
 void init();
 void setHttpAction();
-void IRAM_ATTR onTimer();
-void funcInterrupt();
-void modeSetting();
+void swInterrupt();
 void setNowOpen(int open_time);
 void setAfter(int next_time, int adjustment_time);
 void setDevice(int contentNum);
@@ -35,6 +33,10 @@ void closeValve_Now();
 int getNextTime();
 void IRAM_ATTR setClosing();
 void IRAM_ATTR afterOpenValve();
+
+void modeSetting();
+void IRAM_ATTR onTimer();
+
 
 //***************************************************************************************************************
 //***************************************************************************************************************
@@ -139,7 +141,7 @@ void init()
     
     //ポート割り込み処理
     pinMode(PORT_SW, INPUT_PULLUP);
-    attachInterrupt(PORT_SW, funcInterrupt, FALLING);
+    attachInterrupt(PORT_SW, swInterrupt, FALLING);
 
     //LEDポート
     pinMode(PORT_LED_G, OUTPUT);
@@ -185,6 +187,9 @@ void setHttpAction()
     //値取得
     server.on(httpSts[enmGet].uri, HTTP_ANY, [](){outputValue();});
 
+    //位置の調整
+    server.on(httpSts[enmAdjust].uri, HTTP_ANY, [](){setDevice(enmAdjust);});
+
     // 登録されてないパスにアクセスがあった場合
     server.onNotFound([](){
         errorSound();
@@ -195,51 +200,18 @@ void setHttpAction()
 }
 
 //*************************************
-//タイマー割り込み処理
-//*************************************
-void IRAM_ATTR onTimer()
-{
-    // sr.println(GetTime());
-    attachInterrupt(PORT_SW, funcInterrupt, FALLING);
-}
-
-//*************************************
 //ポート割り込み処理
 //*************************************
-void funcInterrupt()
+void swInterrupt()
 {
     //チャタリング対策------------------------
     attachInterrupt(PORT_SW, NULL, FALLING);
     //---------------------------------------
-
-    sr.println(WiFi.localIP());
-    sr.println("Setting mode");
-    mode = enmSetting;
-}
-
-//*************************************
-void modeSetting()
-{
-    int swCnt_L = 0;
-    int swCnt_H = 0;
-    digitalWrite(PORT_LED_G, LED_ON);
-    digitalWrite(PORT_LED_R, LED_ON);
-
-    while(1)
-    {
-        if(digitalRead(PORT_SW) == LOW)
-        {
-            swCnt_L++;
-            if(swCnt_L > 40){ break; }
-        }
-        else{ swCnt_L = 0; }
-        delay(5);
-    }
-
-    digitalWrite(PORT_LED_G, LED_OFF);
-    digitalWrite(PORT_LED_R, LED_OFF);
-    mode = enmNormal;
-    setTimerInterrupt(&onTimer, 1000000, false);
+    motorAction(true, 100, false);
+    // sr.println(WiFi.localIP());
+    // sr.println("Setting mode");
+    // mdeo = enmSetting;
+    attachInterrupt(PORT_SW, swInterrupt, FALLING);
 }
 
 //*************************************
@@ -272,7 +244,8 @@ void setDevice(int contentNum)
     String returnMessage = "";
     String paramSts = server.arg("sts");
     String paramLength = server.arg("length");
-    String paraminterval = server.arg("interval");
+    String paramInterval = server.arg("interval");
+    String paramArea = server.arg("area");
     switch(contentNum)
     {
         case enmNow://-------------------------------------------------------
@@ -293,11 +266,28 @@ void setDevice(int contentNum)
             break;
         case enmSet://-------------------------------------------------------
             if(paramLength != "") setVal.length = atoi(paramLength.c_str());
-            if(paraminterval != "") {
-                setVal.interval = atoi(paraminterval.c_str());
+            if(paramInterval != "") {
+                setVal.interval = atoi(paramInterval.c_str());
                 setVal.settingReserv = true;
                 receivedRing();
                 returnMessage = "successed";
+            }
+            break;
+        case enmAdjust:
+            if(paramArea && !deviceSts.opened)
+            {
+                bool blF = false;
+                receivedRing();
+                deviceSts.opened = true;
+                if(paramArea == "food") blF = true;
+                motorAction(true, 10, blF);
+                deviceSts.opened = false;
+                returnMessage = "successed";
+            }
+            else
+            {
+                errorSound();
+                returnMessage = "error";
             }
             break;
         default:
@@ -439,4 +429,47 @@ void IRAM_ATTR afterOpenValve()
 {
     openTime = setVal.length * 1000000;
     deviceSts.regularOppenning = true;
+}
+
+
+
+
+
+//*************************************
+//*************************************
+//*************************************
+//*************************************
+
+//*************************************
+//タイマー割り込み処理
+//*************************************
+void IRAM_ATTR setSwInterrupt()
+{
+    // sr.println(GetTime());
+    attachInterrupt(PORT_SW, swInterrupt, FALLING);
+}
+
+//*************************************
+void modeSetting()
+{
+    int swCnt_L = 0;
+    int swCnt_H = 0;
+    digitalWrite(PORT_LED_G, LED_ON);
+    digitalWrite(PORT_LED_R, LED_ON);
+
+    while(1)
+    {
+        if(digitalRead(PORT_SW) == LOW)
+        {
+            swCnt_L++;
+            if(swCnt_L > 40){ break; }
+        }
+        else{ swCnt_L = 0; }
+        delay(5);
+    }
+
+    digitalWrite(PORT_LED_G, LED_OFF);
+    digitalWrite(PORT_LED_R, LED_OFF);
+    mode = enmNormal;
+    setTimerInterrupt(&onTimer, 1000000, false);
 }

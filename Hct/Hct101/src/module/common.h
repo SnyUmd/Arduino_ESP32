@@ -78,7 +78,8 @@ httpStatus httpSts[]
   {"/buzzer", false},
   {"/get", false},
   {"/now", false},
-  {"/set", false}
+  {"/set", false},
+  {"/adjust", false}
 };
 
 enum enmHttpState
@@ -86,7 +87,8 @@ enum enmHttpState
     enmBuzzer,
     enmGet,
     enmNow,
-    enmSet
+    enmSet,
+    enmAdjust
 };
 
 const String paramWord_set[] = {"on", "off"};
