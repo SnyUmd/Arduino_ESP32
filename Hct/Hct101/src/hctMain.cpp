@@ -4,6 +4,7 @@
 #include <WebServer.h>
 #include <Wire.h>
 #include <iostream>
+#include "taskMotor.h"
 #include "module/initialize.h"
 #include "module/defHct.h"
 #include "module/common.h"
@@ -70,7 +71,7 @@ void loop()
 {
     server.handleClient();
 
-    switch(operationReservation)
+    /*switch(operationReservation)
     {
         case enmNon:
             break;
@@ -118,7 +119,7 @@ void loop()
                 operationReservation = enmRegularOppenning;
             }
             break;
-    }
+    }*/
 
     if(setVal.settingReserv && !deviceSts.opened) {
         setAfter(setVal.interval, 0);
@@ -159,7 +160,7 @@ void setHttpAction()
 }
 
 //*************************************
-//ポート割り込み処理
+//SWポート割り込み処理
 //*************************************
 void swInterrupt()
 {

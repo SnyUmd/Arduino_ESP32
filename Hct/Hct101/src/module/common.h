@@ -73,6 +73,9 @@ struct httpStatus{
   bool sts;
 };
 
+
+
+//==============================================
 httpStatus httpSts[]
 {
   {"/buzzer", false},
@@ -90,6 +93,8 @@ enum enmHttpState
     enmSet,
     enmAdjust
 };
+//==============================================
+
 
 const String paramWord_set[] = {"on", "off"};
 enum enmLedParams{enm_on = 0, enm_off};
