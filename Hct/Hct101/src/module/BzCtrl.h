@@ -26,6 +26,6 @@ void BzGoDown(float ringTime, float stopTime);
 void bz(int num);
 void receivedRing();
 void errorSound();
-void powerOn();
+void bzPowerOn();
 void prgBug();
 void bzModeChange(int modeNum);

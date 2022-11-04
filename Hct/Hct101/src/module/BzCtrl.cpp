@@ -592,7 +592,7 @@ void errorSound()
     // BzNote(0, getScale1(16), 0, 100);
 }
 
-void powerOn()
+void bzPowerOn()
 {
     BzNote(1, getrScale(32), flSound[4][mDO], 100);
     BzNote(0, getScale1(4), 0, 100);

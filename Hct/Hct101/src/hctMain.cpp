@@ -4,6 +4,7 @@
 #include <WebServer.h>
 #include <Wire.h>
 #include <iostream>
+#include "module/initialize.h"
 #include "module/defHct.h"
 #include "module/common.h"
 #include "module/Timer.h"
@@ -43,15 +44,13 @@ void IRAM_ATTR onTimer();
 //***************************************************************************************************************
 void setup()
 {
-    powerOn();
-    sr.println("");
-    init();
-    // sr.println("");
-    delay(1000);
+    initPort();
+    attachInterrupt(PORT_SW, swInterrupt, FALLING);
+    sr.begin(115200);
+    initI2C(wr);
+    InitBz();
+    bzPowerOn();
     wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, false);
-    // timeInf = getTimeInf();
-    // arrangeTime(s, timeInf);
-    // sr.println(s);
     setHttpAction();
     sr.println("-----loop Start-----");
     BzGoUp(10, 10);
@@ -59,6 +58,8 @@ void setup()
     // setVal.interval = 20;
     // operationReservation = enmRegularOppenning;
     // setAfter(setVal.interval, setVal.length);
+    LC.ledFlash(PORT_LED_R, 10, 5);
+    digitalWrite(PORT_LED_R, 1);
 
     motorAction(false, 100, true);
     motorAction(true, 100, true);
@@ -130,48 +131,6 @@ void loop()
 //***************************************************************************************************************
 //***************************************************************************************************************
 //***************************************************************************************************************
-
-
-
-//*************************************
-void init()
-{
-    sr.begin(115200);
-    initI2C(wr);
-    
-    //ポート割り込み処理
-    pinMode(PORT_SW, INPUT_PULLUP);
-    attachInterrupt(PORT_SW, swInterrupt, FALLING);
-
-    //LEDポート
-    pinMode(PORT_LED_G, OUTPUT);
-    pinMode(PORT_LED_R, OUTPUT);
-    digitalWrite(PORT_LED_G, 1);
-    digitalWrite(PORT_LED_R, 1);
-
-    //ステッピングモータ　ポート
-    pinMode(PORT_MOTOR1_W, OUTPUT);
-    pinMode(PORT_MOTOR2_W, OUTPUT);
-    pinMode(PORT_MOTOR3_W, OUTPUT);
-    pinMode(PORT_MOTOR4_W, OUTPUT);
-    pinMode(PORT_MOTOR1_F, OUTPUT);
-    pinMode(PORT_MOTOR2_F, OUTPUT);
-    pinMode(PORT_MOTOR3_F, OUTPUT);
-    pinMode(PORT_MOTOR4_F, OUTPUT);
-    digitalWrite(PORT_MOTOR1_W, 0);
-    digitalWrite(PORT_MOTOR2_W, 0);
-    digitalWrite(PORT_MOTOR3_W, 0);
-    digitalWrite(PORT_MOTOR4_W, 0);
-    digitalWrite(PORT_MOTOR1_F, 0);
-    digitalWrite(PORT_MOTOR2_F, 0);
-    digitalWrite(PORT_MOTOR3_F, 0);
-    digitalWrite(PORT_MOTOR4_F, 0);
-
-    LC.ledFlash(PORT_LED_R, 10, 5);
-    
-    InitBz();
-    digitalWrite(PORT_LED_R, 1);
-}
 
 //*************************************
 void setHttpAction()
