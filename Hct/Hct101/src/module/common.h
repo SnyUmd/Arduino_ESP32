@@ -21,11 +21,16 @@ bool blOpened = false;
 int openTime = 1000000;
 int timeAdjuster = 3;
 
-
 struct tm timeInf;
 struct tm timeInfRTC;
 
 char s[20];//文字格納用
+
+hw_timer_t* tOpen_W = NULL;
+hw_timer_t* tClose_W = NULL;
+hw_timer_t* tOpen_F = NULL;
+hw_timer_t* tClose_F = NULL;
+hw_timer_t* tSettingOff = NULL;
 
 const int aryMotorSts[4][4] = 
 {
@@ -35,7 +40,15 @@ const int aryMotorSts[4][4] =
     {0, 0, 0, 1}
 };
 
-//==============================================
+enum enmContentNum_Set
+{
+  enm_non,
+  enm_led,
+  enm_motor,
+  enm_buzzer
+};
+
+//↓↓↓↓==============================================
 struct setValue{
   int interval;
   int length;
@@ -46,10 +59,10 @@ struct setValue{
 };
 
 setValue setVal = {0, 1, 0, 0, 1, false};
-//==============================================
+//↑↑↑==============================================
 
 
-//==============================================
+//↓↓↓==============================================
 struct deviceStatus{
   bool opened;
   bool nowRun;
@@ -62,7 +75,7 @@ struct deviceStatus{
 };
 
 deviceStatus deviceSts = {false, false, false, false, false, false, false};
-//==============================================
+//↑↑↑==============================================
 
 int operationReservation = 0;
 enum operationType{
@@ -74,22 +87,7 @@ enum operationType{
 };
 
 
-
-//==============================================
-// struct httpContents{
-//   Uri uri;
-//   bool sts;
-// };
-
-// httpContents httpSts[]
-// {
-//   {"/buzzer", false},
-//   {"/get", false},
-//   {"/now", false},
-//   {"/set", false},
-//   {"/adjust", false}
-// };
-
+//↓↓↓==============================================
 String httpContents[] =
 {
   "/get",
@@ -105,23 +103,11 @@ enum enmHttpContents
     enmSet,
     enmAdjust
 };
-//==============================================
+//↑↑↑==============================================
 
 
-const String paramWord_set[] = {"on", "off"};
-enum enmLedParams{enm_on = 0, enm_off};
 
-const String paramWord_led[] = {"g", "r"};
-
-enum enmContentNum_Set
-{
-  enm_non,
-  enm_led,
-  enm_motor,
-  enm_buzzer
-};
-
-//==============================================
+//↓↓↓==============================================
 const String paramWord_get[] = 
 {
   "time", 
@@ -136,10 +122,10 @@ enum enmContentNum_Get
   enm_humidity,
   enm_all
 };
-//==============================================
+//↑↑↑==============================================
 
 
-//==============================================
+//↓↓↓==============================================
 const String errorMessage[] = 
 {
   "Not found",
@@ -154,4 +140,12 @@ enum enmErrorMessage
   enmStsError_set,
   enmStsError_get
 };
-//==============================================
+//↑↑↑==============================================
+
+struct deviceStatus0{
+  bool opened;
+  bool oppenning;
+  bool closing;
+};
+
+deviceStatus0 deviceSts_W = {false, false, false};

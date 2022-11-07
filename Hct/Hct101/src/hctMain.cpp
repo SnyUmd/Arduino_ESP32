@@ -85,7 +85,7 @@ void loop()
                 deviceSts.opened = true;
                 motorAction(false, 100, false);
                 deviceSts.nowOppenning = false;
-                setTimerInterrupt(&setClosing, setVal.nowOpenLength * 1000000, false);
+                setTimerInterrupt(tClose_W, &setClosing, setVal.nowOpenLength * 1000000, false);
                 operationReservation = enmNowClosing;
             }
             break;
@@ -110,7 +110,7 @@ void loop()
                 deviceSts.opened = true;
                 motorAction(false, 100, false);
                 deviceSts.nowOppenning = false;
-                setTimerInterrupt(&setClosing, 2 * 1000000, false);
+                setTimerInterrupt(tClose_W, &setClosing, 2 * 1000000, false);
                 operationReservation = enmRegularClosing;
                 deviceSts.regularOppenning = false;
             }
@@ -204,13 +204,13 @@ void setNowOpen(int open_time)
 void setAfter(int next_time, int adjustment_time = 0)
 {
     if(setVal.interval == 0){
-        setTimerInterrupt(NULL, 1000000000 , true);
+        setTimerInterrupt(tOpen_W, NULL, 1000000000 , true);
         digitalWrite(PORT_LED_G, LED_OFF);
     }
     else
     {
         operationReservation = enmRegularOppenning;
-        setTimerInterrupt(&afterOpenValve, (next_time - adjustment_time) * 1000000 , false);
+        setTimerInterrupt(tOpen_W, &afterOpenValve, (next_time - adjustment_time) * 1000000 , false);
         digitalWrite(PORT_LED_G, LED_ON);
         setVal.setTime = GetTime();
         setVal.settingReserv = false;
@@ -424,5 +424,5 @@ void modeSetting()
     digitalWrite(PORT_LED_G, LED_OFF);
     digitalWrite(PORT_LED_R, LED_OFF);
     mode = enmNormal;
-    setTimerInterrupt(&onTimer, 1000000, false);
+    setTimerInterrupt(tSettingOff, &onTimer, 1000000, false);
 }

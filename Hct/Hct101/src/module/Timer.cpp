@@ -4,7 +4,7 @@
 // #include "defHct.h"
 
 //*********************************************************************************
-hw_timer_t * timer = NULL;
+// hw_timer_t * timer = NULL;
 
 //*********************************************************************************
 //実行方法　
@@ -12,7 +12,7 @@ hw_timer_t * timer = NULL;
 // }
 // initTimerInterrupt(true, &onTimer);
 
-void setTimerInterrupt(void(* fn)(void), int count_time, bool regular)
+void setTimerInterrupt(hw_timer_t* timer, void(* fn)(void), int count_time, bool regular)
 {
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, fn, true);
@@ -21,7 +21,7 @@ void setTimerInterrupt(void(* fn)(void), int count_time, bool regular)
 }
 
 //*********************************************************************************
-void stopTimerInterrupt()
+void stopTimerInterrupt(hw_timer_t* timer)
 {
     timerAlarmDisable(timer);
 }
