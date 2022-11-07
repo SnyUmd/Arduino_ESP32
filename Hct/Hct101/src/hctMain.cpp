@@ -4,7 +4,7 @@
 #include <WebServer.h>
 #include <Wire.h>
 #include <iostream>
-#include "taskMotor.h"
+// #include "module/taskM.h"
 #include "module/initialize.h"
 #include "module/defHct.h"
 #include "module/common.h"
@@ -36,6 +36,10 @@ int getNextTime();
 void IRAM_ATTR setClosing();
 void IRAM_ATTR afterOpenValve();
 
+void taskMotor_W(void* arg);
+void taskMotor_F(void* arg);
+
+
 void modeSetting();
 void IRAM_ATTR onTimer();
 
@@ -50,6 +54,8 @@ void setup()
     sr.begin(115200);
     initI2C(wr);
     InitBz();
+    xTaskCreatePinnedToCore(taskMotor_W, "taskMotor_W", 4096, NULL, 1, NULL, 0);
+    xTaskCreatePinnedToCore(taskMotor_F, "taskMotor_F", 4096, NULL, 1, NULL, 1);
     bzPowerOn();
     wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, false);
     setHttpAction();
@@ -71,7 +77,7 @@ void loop()
 {
     server.handleClient();
 
-    /*switch(operationReservation)
+    switch(operationReservation)
     {
         case enmNon:
             break;
@@ -119,7 +125,7 @@ void loop()
                 operationReservation = enmRegularOppenning;
             }
             break;
-    }*/
+    }
 
     if(setVal.settingReserv && !deviceSts.opened) {
         setAfter(setVal.interval, 0);
@@ -128,6 +134,25 @@ void loop()
 
     if(httpSts[enmBuzzer].sts) bz(1);
 }
+
+void taskMotor_W(void* arg)
+{
+    while(1)
+    {
+        sr.println("task motor W");
+        delay(500);
+    }
+}
+
+void taskMotor_F(void* arg)
+{
+    while(1)
+    {
+        sr.println("task motor F");
+        delay(500);
+    }
+}
+
 
 //***************************************************************************************************************
 //***************************************************************************************************************

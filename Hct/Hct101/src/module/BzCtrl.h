@@ -1,6 +1,16 @@
-#include <Arduino.h>
-#include "defHct.h"
+#define BUZZER_PWM 25
+#define SWITCH0 0
 
+#define PWM_BIT_NUM 8
+#define PWM_RESOLUTION 256
+#define PWM_FRQ1000 1000
+#define PWM_FRQ5000 5000
+#define PWM_CHANNEL0 0
+#define PWM_PIN 25
+#define PWM_DUTY 128
+
+#include <Arduino.h>
+// #include "defHct.h"
 
 //void BzNote(int type, int iTime, int scale);
 void BzNote(float type, float iTime, float scale, float iPase);
