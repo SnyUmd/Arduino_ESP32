@@ -38,6 +38,8 @@ void IRAM_ATTR afterOpenValve();
 void taskMotor_W(void* arg);
 void taskMotor_F(void* arg);
 
+void IRAM_ATTR openMotorW();
+void IRAM_ATTR openMotorF();
 
 void modeSetting();
 void IRAM_ATTR onTimer();
@@ -53,8 +55,8 @@ void setup()
     sr.begin(115200);
     initI2C(wr);
     InitBz();
-    xTaskCreatePinnedToCore(taskMotor_W, "taskMotor_W", 4096, NULL, 1, NULL, 0);
-    xTaskCreatePinnedToCore(taskMotor_F, "taskMotor_F", 4096, NULL, 1, NULL, 1);
+    // xTaskCreatePinnedToCore(taskMotor_W, "taskMotor_W", 4096, NULL, 1, NULL, 0);
+    // xTaskCreatePinnedToCore(taskMotor_F, "taskMotor_F", 4096, NULL, 1, NULL, 1);
     bzPowerOn();
     wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, false);
     setHttpAction();
@@ -76,62 +78,38 @@ void loop()
 {
     server.handleClient();
 
-    switch(operationReservation)
+    if(deviceSts_W.oppenning && !deviceSts_W.opened)
     {
-        case enmNon:
-            break;
-        case enmNowOppenning://1
-            if (!deviceSts.opened){
-                deviceSts.opened = true;
-                motorAction(false, 100, false);
-                deviceSts.nowOppenning = false;
-                setTimerInterrupt(tClose_W, &setClosing, setVal.nowOpenLength * 1000000, false);
-                operationReservation = enmNowClosing;
-            }
-            break;
-        case enmNowClosing://2
-            if (deviceSts.closingRun){
-                motorAction(true, 100, false);
-                if(setVal.interval != 0) {
-                    setVal.nextTime = getNextTime();
-                    sr.print("next ");
-                    sr.println(setVal.nextTime);
-                    if(setVal.nextTime < 3) setVal.nextTime = 3;
-                    setAfter(setVal.nextTime, setVal.nowOpenLength + timeAdjuster + 1);
-                    operationReservation = enmRegularOppenning;
-                }
-                else operationReservation = enmNon;
-                deviceSts.opened = false;
-                deviceSts.closingRun = false;
-            }
-            break;
-        case enmRegularOppenning://3
-            if (!deviceSts.opened && deviceSts.regularOppenning){
-                deviceSts.opened = true;
-                motorAction(false, 100, false);
-                deviceSts.nowOppenning = false;
-                setTimerInterrupt(tClose_W, &setClosing, 2 * 1000000, false);
-                operationReservation = enmRegularClosing;
-                deviceSts.regularOppenning = false;
-            }
-            break;
-        case enmRegularClosing://4
-            if (deviceSts.closingRun){
-                motorAction(true, 100, false);
-                deviceSts.opened = false;
-                setAfter(setVal.interval, setVal.length + timeAdjuster);
-                deviceSts.closingRun = false;
-                operationReservation = enmRegularOppenning;
-            }
-            break;
+        sr.println("Run = w");
+        motorAction(MOTOR_OPEN, 50, false);
+        deviceSts_W.oppenning = false;
     }
 
-    if(setVal.settingReserv && !deviceSts.opened) {
-        setAfter(setVal.interval, 0);
-        setVal.settingReserv = false;
+    if(deviceSts_F.oppenning && !deviceSts_F.opened)
+    {
+        sr.println("Run = f");
+        motorAction(MOTOR_OPEN, 50, true);
+        deviceSts_F.oppenning = false;
     }
+
+    if(deviceSts_W.closing && deviceSts_W.opened)
+    {
+        motorAction(MOTOR_CLOSE, 50, false);
+        deviceSts_W.closing = false;
+    }
+
+    if(deviceSts_F.closing && deviceSts_F.opened)
+    {
+        motorAction(MOTOR_CLOSE, 50, true);
+        deviceSts_F.closing = false;
+    }
+    // if(setVal.settingReserv && !deviceSts.opened) {
+    //     setAfter(setVal.interval, 0);
+    //     setVal.settingReserv = false;
+    // }
 }
 
+//*************************************
 void taskMotor_W(void* arg)
 {
     while(1)
@@ -141,6 +119,7 @@ void taskMotor_W(void* arg)
     }
 }
 
+//*************************************
 void taskMotor_F(void* arg)
 {
     while(1)
@@ -171,7 +150,7 @@ void setHttpAction()
 
     // 登録されてないパスにアクセスがあった場合
     server.onNotFound([](){
-        errorSound();
+        bzErrorSound();
         server.send(404, "text/plain", errorMessage[enmNotFound]); // 404を返す
     });
 
@@ -179,101 +158,162 @@ void setHttpAction()
 }
 
 //*************************************
-//SWポート割り込み処理
-//*************************************
-void swInterrupt()
-{
-    //チャタリング対策------------------------
-    attachInterrupt(PORT_SW, NULL, FALLING);
-    //---------------------------------------
-    motorAction(true, 100, false);
-    // sr.println(WiFi.localIP());
-    // sr.println("Setting mode");
-    // mdeo = enmSetting;
-    attachInterrupt(PORT_SW, swInterrupt, FALLING);
-}
-
-//*************************************
-void setNowOpen(int open_time)
-{
-    openTime = open_time;
-    deviceSts.nowOppenning = true;
-}
-
-//*************************************
-void setAfter(int next_time, int adjustment_time = 0)
-{
-    if(setVal.interval == 0){
-        setTimerInterrupt(tOpen_W, NULL, 1000000000 , true);
-        digitalWrite(PORT_LED_G, LED_OFF);
-    }
-    else
-    {
-        operationReservation = enmRegularOppenning;
-        setTimerInterrupt(tOpen_W, &afterOpenValve, (next_time - adjustment_time) * 1000000 , false);
-        digitalWrite(PORT_LED_G, LED_ON);
-        setVal.setTime = GetTime();
-        setVal.settingReserv = false;
-    }
-}
-
-//*************************************
 void setDevice(int contentNum)
 {
+    bool *p_blOpened;
+    bool *p_blOppenning;
+    bool *p_blClosing;
+    int *p_interval;
+    int *p_length;
+    int *p_nowLength;
+    hw_timer_t *p_t;
+    deviceStatus *p_device;
+    auto *func = &openMotorF;
+
     String returnMessage = "";
     String paramSts = server.arg("sts");
     String paramLength = server.arg("length");
     String paramInterval = server.arg("interval");
     String paramArea = server.arg("area");
+
     switch(contentNum)
     {
         case enmNow://-------------------------------------------------------
-            if(!deviceSts.opened)
+            if(paramArea == "w")
+            { 
+                // p_device = &deviceSts_W;
+                sr.println("area = w");
+                p_blOpened = &deviceSts_W.opened;
+                p_blOppenning = &deviceSts_W.oppenning;
+                p_blClosing = &deviceSts_W.closing;
+                p_nowLength = &deviceSts_W.nowLength;
+                p_t = tNowOpen_W;
+                func = &openMotorW;
+            }
+            else if(paramArea == "f")
             {
-                receivedRing();
-                if(paramLength != "") setVal.nowOpenLength = atoi(paramLength.c_str());
-                else setVal.nowOpenLength = 1;
-                // setVal.nextTime = getNextTime();
-                deviceSts.nowRun = true;
-                operationReservation = enmNowOppenning;
+                sr.println("area = f");
+                // p_device = &deviceSts_F;
+                p_blOpened = &deviceSts_F.opened;
+                p_blOppenning = &deviceSts_F.oppenning;
+                p_blClosing = &deviceSts_F.closing;
+                p_nowLength = &deviceSts_F.nowLength;
+                p_t = tNowOpen_F;
+                func = &openMotorF;
+            }
+            else
+            {
+                bzErrorSound();
+                returnMessage = "error";
+                break;
+            }
+            
+            if( *p_blOpened == false && 
+                *p_blOppenning == false && 
+                *p_blClosing == false)
+            {
+                bzReceivedRing();
+                if(paramLength != "") *p_nowLength = atoi(paramLength.c_str());
+                else *p_nowLength = DEFAULT_LENGTH;
+                setTimerInterrupt(p_t, *func, 0, false);
                 returnMessage = "successed";
             }
             else{
-                errorSound();
+                bzErrorSound();
                 returnMessage = "error";
             }
             break;
         case enmSet://-------------------------------------------------------
-            if(paramLength != "") setVal.length = atoi(paramLength.c_str());
-            if(paramInterval != "") {
-                setVal.interval = atoi(paramInterval.c_str());
-                setVal.settingReserv = true;
-                receivedRing();
+            if(paramArea == "w")
+            { 
+                // p_device = &deviceSts_W;
+                // p_blOpened = &deviceSts_W.opened;
+                // p_blOppenning = &deviceSts_W.oppenning;
+                // p_blClosing = &deviceSts_W.closing;
+                p_interval = &deviceSts_W.interval;
+                p_length = &deviceSts_W.length;
+                p_t = tOpen_W;
+                func = &openMotorW;
+            }
+            else if(paramArea == "f")
+            {
+                // p_device = &deviceSts_F;
+                // p_blOpened = &deviceSts_F.opened;
+                // p_blOppenning = &deviceSts_F.oppenning;
+                // p_blClosing = &deviceSts_F.closing;
+                p_interval = &deviceSts_F.interval;
+                p_length = &deviceSts_F.length;
+                p_t = tOpen_F;
+                func = &openMotorF;
+            }
+            else
+            {
+                bzErrorSound();
+                returnMessage = "error";
+                break;
+            }
+            if(paramLength != "") *p_length = atoi(paramLength.c_str());
+            if(paramInterval == "0")
+            {
+                *p_interval =  0;
+                stopTimerInterrupt(p_t);
+            }
+            else if(paramInterval != "") {
+                *p_interval =  atoi(paramInterval.c_str());
+                setTimerInterrupt(p_t, func, *p_interval, true);
+                bzReceivedRing();
                 returnMessage = "successed";
             }
             break;
-        case enmAdjust:
-            if(paramArea && !deviceSts.opened)
+
+        case enmAdjust://--------------------------------------------------
+            bool blF = false;
+            if(paramArea == "w")
+            { 
+                // p_device = &deviceSts_W;
+                p_blOpened = &deviceSts_W.opened;
+                p_blOppenning = &deviceSts_W.oppenning;
+                p_blClosing = &deviceSts_W.closing;
+                blF = false;
+            }
+            else if(paramArea == "f")
             {
-                bool blF = false;
-                receivedRing();
-                deviceSts.opened = true;
-                if(paramArea == "food") blF = true;
+                // p_device = &deviceSts_F;
+                p_blOpened = &deviceSts_F.opened;
+                p_blOppenning = &deviceSts_F.oppenning;
+                p_blClosing = &deviceSts_F.closing;
+                blF = true;
+            }
+            else
+            {
+                bzErrorSound();
+                returnMessage = "error";
+                break;
+            }
+
+            if( *p_blOpened == false && 
+                *p_blOppenning == false && 
+                *p_blClosing == false)
+            {
+                bzReceivedRing();
+                *p_blOpened = true;
+                *p_blOppenning = true;
                 motorAction(true, 10, blF);
-                deviceSts.opened = false;
+                *p_blOpened = false;
+                *p_blOppenning = false;
                 returnMessage = "successed";
             }
             else
             {
-                errorSound();
+                bzErrorSound();
                 returnMessage = "error";
             }
             break;
-        default:
-            errorSound();
-            // returnMessage = errorMessage[enmStsError_set];
-            returnMessage = "error";
-            break;
+        // default:
+        //     bzErrorSound();
+        //     // returnMessage = errorMessage[enmStsError_set];
+        //     returnMessage = "error";
+        //     break;
     }
     server.send(200, "text/plain", returnMessage);
 }
@@ -286,7 +326,7 @@ void outputValue()
     
     if(paramSts == paramWord_get[enm_time])
     {
-        receivedRing();
+        bzReceivedRing();
         struct tm nowTime = getTimeInf();
         char s[20] = {};
         arrangeTime(s, nowTime);
@@ -295,18 +335,18 @@ void outputValue()
     }
     else if(paramSts == paramWord_get[enm_temperture])
     {
-        receivedRing();
+        bzReceivedRing();
         returnMessage = getTemp().c_str();
     }
     else if(paramSts == paramWord_get[enm_humidity])
     {
-        receivedRing();
+        bzReceivedRing();
         returnMessage = getHumd().c_str();
     }
 
     else if(paramSts == paramWord_get[enm_all])
     {
-        receivedRing();
+        bzReceivedRing();
         struct tm nowTime = getTimeInf();
         arrangeTime(s, nowTime);
         returnMessage = s;
@@ -316,21 +356,36 @@ void outputValue()
         returnMessage += getHumd().c_str();
     }
     else{
-        errorSound();
+        bzErrorSound();
         returnMessage = errorMessage[enmStsError_get];
     }
     server.send(200, "text/plain", returnMessage);
 }
 
 //*************************************
-void outputTime()
+void IRAM_ATTR openMotorW()
 {
-    receivedRing();
-    struct tm nowTime = getTimeInf();
-    char s[20] = {};
-    arrangeTime(s, nowTime);
-    server.send(200, "text/plain", s);
-}
+    sr.println("intterrupt = w");
+    deviceSts_W.oppenning = true;
+} 
+
+//*************************************
+void IRAM_ATTR openMotorF()
+{
+    sr.println("intterrupt = f");
+    deviceSts_F.oppenning = true;
+} 
+
+//*************************************
+void IRAM_ATTR closeMotorW()
+{
+    deviceSts_W.closing = true;
+} 
+//*************************************
+void IRAM_ATTR closeMotorF()
+{
+    deviceSts_F.closing = true;
+} 
 
 //*************************************
 string getTemp()
@@ -347,30 +402,39 @@ string getHumd()
     return to_string(fHumd).substr(0, 5);
 }
 
-//*************************************
-void closeValve_Now()
-{
-    blClosing = false;
-    motorAction(true, 100, false);
-    blOpened = false;
-    if(!deviceSts.nowRun)setVal.settingReserv = true;
-    else deviceSts.nowRun = false;
-}
+// //*************************************
+// void closeValve_Now()
+// {
+//     blClosing = false;
+//     motorAction(true, 100, false);
+//     blOpened = false;
+//     if(!deviceSts.nowRun)setVal.settingReserv = true;
+//     else deviceSts.nowRun = false;
+// }
 
 //*************************************
-int getNextTime()
+int getNextTime(bool blFood)
 {
+    int *setT;
+    if(!blFood)
+    {
+        setT = &deviceSts_W.setTime;
+    }
+    else
+    {
+        setT = &deviceSts_F.setTime;
+    }
     long nowT = GetTime();
-    if(nowT < setVal.setTime) nowT + 4294967295;
-    return setVal.interval - ((nowT - setVal.setTime)/1000);
+    if(nowT < *setT) nowT + 4294967295;
+    return *setT - ((nowT - *setT)/1000);
 }
 
 //*************************************
-void IRAM_ATTR setClosing()
-{
-    deviceSts.closingRun = true;
+// void IRAM_ATTR setClosing()
+// {
+//     deviceSts.closingRun = true;
 
-}
+// }
 //*************************************
 // void IRAM_ATTR setClosing_Regular()
 // {
@@ -378,14 +442,26 @@ void IRAM_ATTR setClosing()
 // }
 
 //*************************************
-void IRAM_ATTR afterOpenValve()
+// void IRAM_ATTR afterOpenValve()
+// {
+//     openTime = setVal.length * 1000000;
+//     deviceSts.regularOppenning = true;
+// }
+
+//*************************************
+//SWポート割り込み処理
+//*************************************
+void swInterrupt()
 {
-    openTime = setVal.length * 1000000;
-    deviceSts.regularOppenning = true;
+    //チャタリング対策------------------------
+    attachInterrupt(PORT_SW, NULL, FALLING);
+    //---------------------------------------
+    motorAction(true, 100, false);
+    // sr.println(WiFi.localIP());
+    // sr.println("Setting mode");
+    // mdeo = enmSetting;
+    attachInterrupt(PORT_SW, swInterrupt, FALLING);
 }
-
-
-
 
 
 //*************************************
@@ -425,4 +501,15 @@ void modeSetting()
     digitalWrite(PORT_LED_R, LED_OFF);
     mode = enmNormal;
     setTimerInterrupt(tSettingOff, &onTimer, 1000000, false);
+}
+
+//*************************************
+//現在時刻取得
+void outputTime()
+{
+    bzReceivedRing();
+    struct tm nowTime = getTimeInf();
+    char s[20] = {};
+    arrangeTime(s, nowTime);
+    server.send(200, "text/plain", s);
 }

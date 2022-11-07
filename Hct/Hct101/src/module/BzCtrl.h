@@ -34,8 +34,8 @@ void BzGoUp(float ringTime, float stopTime);
 void BzGoDown(float ringTime, float stopTime);
 
 void bz(int num);
-void receivedRing();
-void errorSound();
+void bzReceivedRing();
+void bzErrorSound();
 void bzPowerOn();
 void prgBug();
 void bzModeChange(int modeNum);

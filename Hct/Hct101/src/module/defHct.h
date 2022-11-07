@@ -8,6 +8,11 @@
 #define PORT_MOTOR3_F 12
 #define PORT_MOTOR4_F 14
 
+#define MOTOR_OPEN true
+#define MOTOR_CLOSE false
+
+#define DEFAULT_LENGTH 1
+
 #define LED_ON 0
 #define LED_OFF 1
 

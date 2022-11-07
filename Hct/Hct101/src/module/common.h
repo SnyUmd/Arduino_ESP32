@@ -27,9 +27,13 @@ struct tm timeInfRTC;
 char s[20];//文字格納用
 
 hw_timer_t* tOpen_W = NULL;
+hw_timer_t* tNowOpen_W = NULL;
 hw_timer_t* tClose_W = NULL;
+
 hw_timer_t* tOpen_F = NULL;
+hw_timer_t* tNowOpen_F = NULL;
 hw_timer_t* tClose_F = NULL;
+
 hw_timer_t* tSettingOff = NULL;
 
 const int aryMotorSts[4][4] = 
@@ -49,32 +53,55 @@ enum enmContentNum_Set
 };
 
 //↓↓↓↓==============================================
-struct setValue{
-  int interval;
-  int length;
-  long setTime;
-  int nextTime;
-  int nowOpenLength;
-  bool settingReserv;
-};
+// struct setValue{
+//   int interval;
+//   int length;
+// };
 
-setValue setVal = {0, 1, 0, 0, 1, false};
+// setValue setVal_W = {0, 1, 0, 0, 1, false};
+// setValue setVal_F = {0, 1, 0, 0, 1, false};
+// setValue setVal_W = {0, 1};
+// setValue setVal_F = {0, 1};
 //↑↑↑==============================================
 
 
 //↓↓↓==============================================
+// struct deviceStatus{
+//   bool opened;
+//   bool nowRun;
+//   bool regularRun;
+//   bool nowOppenning;
+//   bool regularOppenning;
+//   bool nowClosing;
+//   bool regularClosing;
+//   bool closingRun;
+// };
+
+// deviceStatus deviceSts = {false, false, false, false, false, false, false};
+
+
 struct deviceStatus{
   bool opened;
-  bool nowRun;
-  bool regularRun;
-  bool nowOppenning;
-  bool regularOppenning;
-  bool nowClosing;
-  bool regularClosing;
-  bool closingRun;
+  bool oppenning;
+  bool closing;
+  int interval;
+  int length;
+  int nowLength;
+  int setTime;
 };
 
-deviceStatus deviceSts = {false, false, false, false, false, false, false};
+deviceStatus deviceSts_W = {false, false, false, 0, DEFAULT_LENGTH, DEFAULT_LENGTH, 0};
+deviceStatus deviceSts_F = {false, false, false, 0, DEFAULT_LENGTH, DEFAULT_LENGTH, 0};
+
+enum enmDevStsAddress
+{
+  enm_opened = 0,
+  enm_oppenning,
+  enm_closing,
+  enm_interval = 6,
+  enm_length = 10
+
+};
 //↑↑↑==============================================
 
 int operationReservation = 0;
@@ -142,10 +169,4 @@ enum enmErrorMessage
 };
 //↑↑↑==============================================
 
-struct deviceStatus0{
-  bool opened;
-  bool oppenning;
-  bool closing;
-};
 
-deviceStatus0 deviceSts_W = {false, false, false};
