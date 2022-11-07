@@ -4,7 +4,6 @@
 #include <WebServer.h>
 #include <Wire.h>
 #include <iostream>
-// #include "module/taskM.h"
 #include "module/initialize.h"
 #include "module/defHct.h"
 #include "module/common.h"
@@ -131,8 +130,6 @@ void loop()
         setAfter(setVal.interval, 0);
         setVal.settingReserv = false;
     }
-
-    if(httpSts[enmBuzzer].sts) bz(1);
 }
 
 void taskMotor_W(void* arg)
@@ -162,18 +159,15 @@ void taskMotor_F(void* arg)
 void setHttpAction()
 {
     //バルブオープン
-    server.on(httpSts[enmNow].uri, HTTP_ANY, [](){setDevice(enmNow);});
+    server.on(httpContents[enmNow], HTTP_ANY, [](){setDevice(enmNow);});
     //アフター設定
-    server.on(httpSts[enmSet].uri, HTTP_ANY, [](){setDevice(enmSet);});
-
-    //ブザー
-    server.on(httpSts[enmBuzzer].uri, HTTP_ANY, [](){setDevice(enm_buzzer);});
+    server.on(httpContents[enmSet], HTTP_ANY, [](){setDevice(enmSet);});
 
     //値取得
-    server.on(httpSts[enmGet].uri, HTTP_ANY, [](){outputValue();});
+    server.on(httpContents[enmGet], HTTP_ANY, [](){outputValue();});
 
     //位置の調整
-    server.on(httpSts[enmAdjust].uri, HTTP_ANY, [](){setDevice(enmAdjust);});
+    server.on(httpContents[enmAdjust], HTTP_ANY, [](){setDevice(enmAdjust);});
 
     // 登録されてないパスにアクセスがあった場合
     server.onNotFound([](){
@@ -276,35 +270,9 @@ void setDevice(int contentNum)
             }
             break;
         default:
-            if(paramSts == paramWord_set[enm_on]){
-                receivedRing();
-                switch(contentNum)
-                {
-                    case enm_buzzer:
-                        httpSts[enmBuzzer].sts = true;
-                        returnMessage = "Buzzer on";
-                        break;
-                    default:
-                        break;
-                }
-            }
-            else if(paramSts == paramWord_set[enm_off]){
-                receivedRing();
-                switch(contentNum)
-                {
-                    case enm_buzzer:
-                        httpSts[enmBuzzer].sts = false;
-                        returnMessage = "Buzzer off";
-                        break;
-                    default:
-                        break;
-                }
-            }
-            else{
-                errorSound();
-                // returnMessage = errorMessage[enmStsError_set];
-                returnMessage = "error";
-            }
+            errorSound();
+            // returnMessage = errorMessage[enmStsError_set];
+            returnMessage = "error";
             break;
     }
     server.send(200, "text/plain", returnMessage);

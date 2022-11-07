@@ -35,6 +35,7 @@ const int aryMotorSts[4][4] =
     {0, 0, 0, 1}
 };
 
+//==============================================
 struct setValue{
   int interval;
   int length;
@@ -45,7 +46,10 @@ struct setValue{
 };
 
 setValue setVal = {0, 1, 0, 0, 1, false};
+//==============================================
 
+
+//==============================================
 struct deviceStatus{
   bool opened;
   bool nowRun;
@@ -58,6 +62,7 @@ struct deviceStatus{
 };
 
 deviceStatus deviceSts = {false, false, false, false, false, false, false};
+//==============================================
 
 int operationReservation = 0;
 enum operationType{
@@ -68,26 +73,33 @@ enum operationType{
   enmRegularClosing,
 };
 
-struct httpStatus{
-  Uri uri;
-  bool sts;
-};
-
 
 
 //==============================================
-httpStatus httpSts[]
+// struct httpContents{
+//   Uri uri;
+//   bool sts;
+// };
+
+// httpContents httpSts[]
+// {
+//   {"/buzzer", false},
+//   {"/get", false},
+//   {"/now", false},
+//   {"/set", false},
+//   {"/adjust", false}
+// };
+
+String httpContents[] =
 {
-  {"/buzzer", false},
-  {"/get", false},
-  {"/now", false},
-  {"/set", false},
-  {"/adjust", false}
+  "/get",
+  "/now",
+  "/set",
+  "/adjust",
 };
 
-enum enmHttpState
+enum enmHttpContents
 {
-    enmBuzzer,
     enmGet,
     enmNow,
     enmSet,
@@ -109,6 +121,7 @@ enum enmContentNum_Set
   enm_buzzer
 };
 
+//==============================================
 const String paramWord_get[] = 
 {
   "time", 
@@ -123,7 +136,10 @@ enum enmContentNum_Get
   enm_humidity,
   enm_all
 };
+//==============================================
 
+
+//==============================================
 const String errorMessage[] = 
 {
   "Not found",
@@ -138,3 +154,4 @@ enum enmErrorMessage
   enmStsError_set,
   enmStsError_get
 };
+//==============================================
