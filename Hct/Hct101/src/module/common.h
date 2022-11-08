@@ -1,3 +1,8 @@
+#define TIMER_NUM_OPEN_W 0
+#define TIMER_NUM_CLOSE_W 1
+#define TIMER_NUM_OPEN_F 2
+#define TIMER_NUM_CLOSE_F 3
+
 // #include <Arduino.h>
 #include <Wire.h>
 #include <WiFi.h>
@@ -84,14 +89,19 @@ struct deviceStatus{
   bool opened;
   bool oppenning;
   bool closing;
+  bool flgNow;
+  bool adjustment;
+  bool adjustmentLeft;
   int interval;
   int length;
   int nowLength;
   int setTime;
+  int timerNumOpen;
+  int timerNumClose;
 };
 
-deviceStatus deviceSts_W = {false, false, false, 0, DEFAULT_LENGTH, DEFAULT_LENGTH, 0};
-deviceStatus deviceSts_F = {false, false, false, 0, DEFAULT_LENGTH, DEFAULT_LENGTH, 0};
+deviceStatus deviceSts_W = {false, false, false, false, false, false, 0, DEFAULT_LENGTH, DEFAULT_LENGTH, 0, TIMER_NUM_OPEN_W, TIMER_NUM_CLOSE_W};
+deviceStatus deviceSts_F = {false, false, false, false, false, false, 0, DEFAULT_LENGTH, DEFAULT_LENGTH, 0, TIMER_NUM_OPEN_F, TIMER_NUM_CLOSE_F};
 
 enum enmDevStsAddress
 {

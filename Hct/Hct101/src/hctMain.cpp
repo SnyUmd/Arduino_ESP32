@@ -40,6 +40,9 @@ void taskMotor_F(void* arg);
 
 void IRAM_ATTR openMotorW();
 void IRAM_ATTR openMotorF();
+void IRAM_ATTR closeMotorW();
+void IRAM_ATTR closeMotorF();
+void IRAM_ATTR intervalStop();
 
 void modeSetting();
 void IRAM_ATTR onTimer();
@@ -55,8 +58,6 @@ void setup()
     sr.begin(115200);
     initI2C(wr);
     InitBz();
-    // xTaskCreatePinnedToCore(taskMotor_W, "taskMotor_W", 4096, NULL, 1, NULL, 0);
-    // xTaskCreatePinnedToCore(taskMotor_F, "taskMotor_F", 4096, NULL, 1, NULL, 1);
     bzPowerOn();
     wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, false);
     setHttpAction();
@@ -69,8 +70,24 @@ void setup()
     LC.ledFlash(PORT_LED_R, 10, 5);
     digitalWrite(PORT_LED_R, 1);
 
-    motorAction(false, 100, true);
-    motorAction(true, 100, true);
+    // motorAction(false, 50, true);
+    // motorAction(true, 50, true);
+
+    // motorAction(false, 50, false);
+    // motorAction(true, 50, false);
+    
+    xTaskCreatePinnedToCore(taskMotor_W, "taskMotor_W", 4096, NULL, 1, NULL, 1);
+    xTaskCreatePinnedToCore(taskMotor_F, "taskMotor_F", 4096, NULL, 1, NULL, 0);
+
+    // xTaskCreatePinnedToCore(
+    //        タスク名,
+    //        "タスク名",
+    //        スタックメモリサイズ,
+    //        NULL,
+    //        タスク優先順位,
+    //        タスクハンドルポインタ,
+    //        Core ID
+    // );
 }
 
 //*************************************
@@ -78,31 +95,31 @@ void loop()
 {
     server.handleClient();
 
-    if(deviceSts_W.oppenning && !deviceSts_W.opened)
-    {
-        sr.println("Run = w");
-        motorAction(MOTOR_OPEN, 50, false);
-        deviceSts_W.oppenning = false;
-    }
+    // if(deviceSts_W.oppenning && !deviceSts_W.opened)
+    // {
+    //     sr.println("Run = w");
+    //     motorAction(MOTOR_OPEN, 50, false);
+    //     // deviceSts_W.oppenning = false;
+    // }
 
-    if(deviceSts_F.oppenning && !deviceSts_F.opened)
-    {
-        sr.println("Run = f");
-        motorAction(MOTOR_OPEN, 50, true);
-        deviceSts_F.oppenning = false;
-    }
+    // if(deviceSts_F.oppenning && !deviceSts_F.opened)
+    // {
+    //     sr.println("Run = f");
+    //     motorAction(MOTOR_OPEN, 50, true);
+    //     // deviceSts_F.oppenning = false;
+    // }
 
-    if(deviceSts_W.closing && deviceSts_W.opened)
-    {
-        motorAction(MOTOR_CLOSE, 50, false);
-        deviceSts_W.closing = false;
-    }
+    // if(deviceSts_W.closing && deviceSts_W.opened)
+    // {
+    //     motorAction(MOTOR_CLOSE, 50, false);
+    //     deviceSts_W.closing = false;
+    // }
 
-    if(deviceSts_F.closing && deviceSts_F.opened)
-    {
-        motorAction(MOTOR_CLOSE, 50, true);
-        deviceSts_F.closing = false;
-    }
+    // if(deviceSts_F.closing && deviceSts_F.opened)
+    // {
+    //     motorAction(MOTOR_CLOSE, 50, true);
+    //     deviceSts_F.closing = false;
+    // }
     // if(setVal.settingReserv && !deviceSts.opened) {
     //     setAfter(setVal.interval, 0);
     //     setVal.settingReserv = false;
@@ -112,20 +129,68 @@ void loop()
 //*************************************
 void taskMotor_W(void* arg)
 {
+    int len;
     while(1)
     {
-        sr.println("task motor W");
-        delay(500);
+        // sr.println("task motor W");
+        // delay(500);
+        if(deviceSts_W.oppenning && !deviceSts_W.opened)
+        {
+            sr.print("Run = w, length = ");
+            sr.println(deviceSts_W.length);
+            deviceSts_W.oppenning = false;
+            deviceSts_W.opened = true;
+            motorAction(MOTOR_OPEN, 50, false);
+            if(deviceSts_W.flgNow) len = deviceSts_W.nowLength;
+            else len = deviceSts_W.length;
+            deviceSts_W.flgNow = false;
+            setTimerInterrupt(tClose_W, deviceSts_W.timerNumClose, closeMotorW, len * 1000000, false);
+        }
+        if(deviceSts_W.closing && deviceSts_W.opened)
+        {
+            deviceSts_W.closing = false;
+            deviceSts_W.opened = false;
+            motorAction(MOTOR_CLOSE, 50, false);
+        }
+        if(deviceSts_W.adjustment && !deviceSts_W.opened)
+        {
+            motorAction(deviceSts_W.adjustmentLeft, 10, false);
+            deviceSts_W.adjustment = false;
+        }
+        delay(1);
     }
 }
 
 //*************************************
 void taskMotor_F(void* arg)
 {
+    int len;
     while(1)
     {
-        sr.println("task motor F");
-        delay(500);
+        // sr.println("task motor F");
+        // delay(500);
+        if(deviceSts_F.oppenning && !deviceSts_F.opened)
+        {
+            deviceSts_F.oppenning = false;
+            deviceSts_F.opened = true;
+            motorAction(MOTOR_OPEN, 50, true);
+            if(deviceSts_F.flgNow) len = deviceSts_F.nowLength;
+            else len = deviceSts_F.length;
+            deviceSts_F.flgNow = false;
+            setTimerInterrupt(tClose_F, deviceSts_F.timerNumClose, closeMotorF, len * 1000000, false);
+        }
+        if(deviceSts_F.closing && deviceSts_F.opened)
+        {
+            motorAction(MOTOR_CLOSE, 50, true);
+            deviceSts_F.closing = false;
+            deviceSts_F.opened = false;
+        }
+        if(deviceSts_F.adjustment && !deviceSts_F.opened)
+        {
+            motorAction(deviceSts_F.adjustmentLeft, 10, false);
+            deviceSts_F.adjustment = false;
+        }
+        delay(1);
     }
 }
 
@@ -163,18 +228,25 @@ void setDevice(int contentNum)
     bool *p_blOpened;
     bool *p_blOppenning;
     bool *p_blClosing;
+    bool *p_flgNow;
+    bool *p_adjustment;
+    bool *p_adustmentLeft;
     int *p_interval;
     int *p_length;
     int *p_nowLength;
+    int *p_timerNumOpen;
     hw_timer_t *p_t;
     deviceStatus *p_device;
     auto *func = &openMotorF;
+
+    int portLED;
 
     String returnMessage = "";
     String paramSts = server.arg("sts");
     String paramLength = server.arg("length");
     String paramInterval = server.arg("interval");
     String paramArea = server.arg("area");
+    String paramDirection = server.arg("direction");
 
     switch(contentNum)
     {
@@ -186,6 +258,7 @@ void setDevice(int contentNum)
                 p_blOpened = &deviceSts_W.opened;
                 p_blOppenning = &deviceSts_W.oppenning;
                 p_blClosing = &deviceSts_W.closing;
+                p_flgNow = &deviceSts_W.flgNow;
                 p_nowLength = &deviceSts_W.nowLength;
                 p_t = tNowOpen_W;
                 func = &openMotorW;
@@ -197,6 +270,7 @@ void setDevice(int contentNum)
                 p_blOpened = &deviceSts_F.opened;
                 p_blOppenning = &deviceSts_F.oppenning;
                 p_blClosing = &deviceSts_F.closing;
+                p_flgNow = &deviceSts_F.flgNow;
                 p_nowLength = &deviceSts_F.nowLength;
                 p_t = tNowOpen_F;
                 func = &openMotorF;
@@ -215,7 +289,8 @@ void setDevice(int contentNum)
                 bzReceivedRing();
                 if(paramLength != "") *p_nowLength = atoi(paramLength.c_str());
                 else *p_nowLength = DEFAULT_LENGTH;
-                setTimerInterrupt(p_t, *func, 0, false);
+                *p_flgNow = true;
+                *p_blOppenning = true;
                 returnMessage = "successed";
             }
             else{
@@ -232,8 +307,11 @@ void setDevice(int contentNum)
                 // p_blClosing = &deviceSts_W.closing;
                 p_interval = &deviceSts_W.interval;
                 p_length = &deviceSts_W.length;
+                p_timerNumOpen = &deviceSts_W.timerNumOpen;
                 p_t = tOpen_W;
                 func = &openMotorW;
+
+                portLED = PORT_LED_G;
             }
             else if(paramArea == "f")
             {
@@ -243,8 +321,11 @@ void setDevice(int contentNum)
                 // p_blClosing = &deviceSts_F.closing;
                 p_interval = &deviceSts_F.interval;
                 p_length = &deviceSts_F.length;
+                p_timerNumOpen = &deviceSts_F.timerNumOpen;
                 p_t = tOpen_F;
                 func = &openMotorF;
+
+                portLED = PORT_LED_R;
             }
             else
             {
@@ -255,12 +336,19 @@ void setDevice(int contentNum)
             if(paramLength != "") *p_length = atoi(paramLength.c_str());
             if(paramInterval == "0")
             {
+                sr.println("interval stop");
                 *p_interval =  0;
-                stopTimerInterrupt(p_t);
+                // stopTimerInterrupt(p_t);
+                // timerEnd(p_t);
+                setTimerInterrupt(p_t, *p_timerNumOpen, intervalStop, 0, false);
+                digitalWrite(portLED, LED_OFF);
+                bzReceivedRing();
+                returnMessage = "successed";
             }
             else if(paramInterval != "") {
-                *p_interval =  atoi(paramInterval.c_str());
-                setTimerInterrupt(p_t, func, *p_interval, true);
+                *p_interval = atoi(paramInterval.c_str());
+                setTimerInterrupt(p_t, *p_timerNumOpen, func, *p_interval * 1000000, true);
+                digitalWrite(portLED, LED_ON);
                 bzReceivedRing();
                 returnMessage = "successed";
             }
@@ -268,12 +356,15 @@ void setDevice(int contentNum)
 
         case enmAdjust://--------------------------------------------------
             bool blF = false;
+            bool blLeft = false;
             if(paramArea == "w")
             { 
                 // p_device = &deviceSts_W;
                 p_blOpened = &deviceSts_W.opened;
                 p_blOppenning = &deviceSts_W.oppenning;
                 p_blClosing = &deviceSts_W.closing;
+                p_adjustment = &deviceSts_W.adjustment;
+                p_adustmentLeft = &deviceSts_W.adjustmentLeft;
                 blF = false;
             }
             else if(paramArea == "f")
@@ -282,6 +373,8 @@ void setDevice(int contentNum)
                 p_blOpened = &deviceSts_F.opened;
                 p_blOppenning = &deviceSts_F.oppenning;
                 p_blClosing = &deviceSts_F.closing;
+                p_adjustment = &deviceSts_F.adjustment;
+                p_adustmentLeft = &deviceSts_W.adjustmentLeft;
                 blF = true;
             }
             else
@@ -296,11 +389,9 @@ void setDevice(int contentNum)
                 *p_blClosing == false)
             {
                 bzReceivedRing();
-                *p_blOpened = true;
-                *p_blOppenning = true;
-                motorAction(true, 10, blF);
-                *p_blOpened = false;
-                *p_blOppenning = false;
+                if(paramDirection == "l") *p_adustmentLeft = true;
+                else *p_adustmentLeft = false;
+                *p_adjustment = true;
                 returnMessage = "successed";
             }
             else
@@ -309,11 +400,6 @@ void setDevice(int contentNum)
                 returnMessage = "error";
             }
             break;
-        // default:
-        //     bzErrorSound();
-        //     // returnMessage = errorMessage[enmStsError_set];
-        //     returnMessage = "error";
-        //     break;
     }
     server.send(200, "text/plain", returnMessage);
 }
@@ -365,14 +451,12 @@ void outputValue()
 //*************************************
 void IRAM_ATTR openMotorW()
 {
-    sr.println("intterrupt = w");
     deviceSts_W.oppenning = true;
 } 
 
 //*************************************
 void IRAM_ATTR openMotorF()
 {
-    sr.println("intterrupt = f");
     deviceSts_F.oppenning = true;
 } 
 
@@ -385,6 +469,11 @@ void IRAM_ATTR closeMotorW()
 void IRAM_ATTR closeMotorF()
 {
     deviceSts_F.closing = true;
+} 
+
+//*************************************
+void IRAM_ATTR intervalStop()
+{
 } 
 
 //*************************************
@@ -500,7 +589,7 @@ void modeSetting()
     digitalWrite(PORT_LED_G, LED_OFF);
     digitalWrite(PORT_LED_R, LED_OFF);
     mode = enmNormal;
-    setTimerInterrupt(tSettingOff, &onTimer, 1000000, false);
+    setTimerInterrupt(tSettingOff, 5, &onTimer, 1000000, false);
 }
 
 //*************************************

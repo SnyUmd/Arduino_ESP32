@@ -38,8 +38,8 @@ void motorAction(bool bl_left, int loop_num, bool bl_food)
     {
         for(int i1 = 0; i1 < 4; i1++)
         {
-            if(bl_left) num = i1;
-            else num = 4 - i1 -1;
+            if(bl_left) num = 4 - i1 -1;
+            else num = i1;
             digitalWrite(in1, aryMotorSts[num][0]);
             delay(1);
             digitalWrite(in2, aryMotorSts[num][1]);

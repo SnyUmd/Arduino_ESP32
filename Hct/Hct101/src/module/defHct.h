@@ -11,7 +11,7 @@
 #define MOTOR_OPEN true
 #define MOTOR_CLOSE false
 
-#define DEFAULT_LENGTH 1
+#define DEFAULT_LENGTH 2
 
 #define LED_ON 0
 #define LED_OFF 1

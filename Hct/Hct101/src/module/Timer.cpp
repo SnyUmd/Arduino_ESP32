@@ -12,16 +12,16 @@
 // }
 // initTimerInterrupt(true, &onTimer);
 
-void setTimerInterrupt(hw_timer_t* timer, void(* fn)(void), int count_time, bool regular)
+void setTimerInterrupt(hw_timer_t* timer, int timer_num, void(* fn)(void), int count_time, bool regular)
 {
-    timer = timerBegin(0, 80, true);
+    timer = timerBegin(timer_num, 80, true);
     timerAttachInterrupt(timer, fn, true);
     timerAlarmWrite(timer, count_time, regular);
     timerAlarmEnable(timer);
 }
 
 //*********************************************************************************
-void stopTimerInterrupt(hw_timer_t* timer)
+void stopTimerInterrupt(hw_timer_t*& timer)
 {
     timerAlarmDisable(timer);
 }
