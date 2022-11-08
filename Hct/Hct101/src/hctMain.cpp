@@ -69,12 +69,6 @@ void setup()
     // setAfter(setVal.interval, setVal.length);
     LC.ledFlash(PORT_LED_R, 10, 5);
     digitalWrite(PORT_LED_R, 1);
-
-    // motorAction(false, 50, true);
-    // motorAction(true, 50, true);
-
-    // motorAction(false, 50, false);
-    // motorAction(true, 50, false);
     
     xTaskCreatePinnedToCore(taskMotor_W, "taskMotor_W", 4096, NULL, 1, NULL, 1);
     xTaskCreatePinnedToCore(taskMotor_F, "taskMotor_F", 4096, NULL, 1, NULL, 0);
@@ -94,36 +88,6 @@ void setup()
 void loop()
 {
     server.handleClient();
-
-    // if(deviceSts_W.oppenning && !deviceSts_W.opened)
-    // {
-    //     sr.println("Run = w");
-    //     motorAction(MOTOR_OPEN, 50, false);
-    //     // deviceSts_W.oppenning = false;
-    // }
-
-    // if(deviceSts_F.oppenning && !deviceSts_F.opened)
-    // {
-    //     sr.println("Run = f");
-    //     motorAction(MOTOR_OPEN, 50, true);
-    //     // deviceSts_F.oppenning = false;
-    // }
-
-    // if(deviceSts_W.closing && deviceSts_W.opened)
-    // {
-    //     motorAction(MOTOR_CLOSE, 50, false);
-    //     deviceSts_W.closing = false;
-    // }
-
-    // if(deviceSts_F.closing && deviceSts_F.opened)
-    // {
-    //     motorAction(MOTOR_CLOSE, 50, true);
-    //     deviceSts_F.closing = false;
-    // }
-    // if(setVal.settingReserv && !deviceSts.opened) {
-    //     setAfter(setVal.interval, 0);
-    //     setVal.settingReserv = false;
-    // }
 }
 
 //*************************************
@@ -329,6 +293,7 @@ void setDevice(int contentNum)
             else if(paramInterval != "") {
                 device.interval = atoi(paramInterval.c_str());
                 setTimerInterrupt(device.tOpen, device.timerNumOpen, func, device.interval * 1000000, true);
+                device.setTime = GetTime();
                 digitalWrite(portLED, LED_ON);
                 *p_device = device;
                 bzReceivedRing();
@@ -424,12 +389,14 @@ void outputValue()
 //*************************************
 void IRAM_ATTR openMotorW()
 {
+    deviceSts_W.setTime = GetTime();
     deviceSts_W.oppenning = true;
 } 
 
 //*************************************
 void IRAM_ATTR openMotorF()
 {
+    deviceSts_F.setTime = GetTime();
     deviceSts_F.oppenning = true;
 } 
 
@@ -445,9 +412,7 @@ void IRAM_ATTR closeMotorF()
 } 
 
 //*************************************
-void IRAM_ATTR intervalStop()
-{
-} 
+void IRAM_ATTR intervalStop(){ } 
 
 //*************************************
 string getTemp()
