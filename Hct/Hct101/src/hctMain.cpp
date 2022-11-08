@@ -151,7 +151,7 @@ void taskMotor_F(void* arg)
         }
         if(deviceSts_F.adjustment && !deviceSts_F.opened)
         {
-            motorAction(deviceSts_F.adjustmentLeft, 10, false);
+            motorAction(deviceSts_F.adjustmentLeft, 10, true);
             deviceSts_F.adjustment = false;
         }
         delay(1);
@@ -189,17 +189,6 @@ void setHttpAction()
 //*************************************
 void setDevice(int contentNum)
 {
-    // bool *p_blOpened;
-    // bool *p_blOppenning;
-    // bool *p_blClosing;
-    // bool *p_flgNow;
-    // bool *p_adjustment;
-    // bool *p_adustmentLeft;
-    // int *p_interval;
-    // int *p_length;
-    // int *p_nowLength;
-    // int *p_timerNumOpen;
-    // hw_timer_t *p_t;
     deviceStatus device;
     deviceStatus *p_device;
     auto *func = &openMotorF;
@@ -208,6 +197,7 @@ void setDevice(int contentNum)
 
     String returnMessage = "";
     String paramSts = server.arg("sts");
+    String paramMelody = server.arg("melody");
     String paramLength = server.arg("length");
     String paramInterval = server.arg("interval");
     String paramArea = server.arg("area");
@@ -262,6 +252,7 @@ void setDevice(int contentNum)
                 func = &openMotorW;
 
                 portLED = PORT_LED_G;
+                bzReceivedRing();
             }
             else if(paramArea == "f")
             {
@@ -270,12 +261,41 @@ void setDevice(int contentNum)
                 func = &openMotorF;
 
                 portLED = PORT_LED_R;
+                bzReceivedRing();
             }
             else
             {
                 bzErrorSound();
                 returnMessage = "error";
                 break;
+            }
+            if(paramMelody != "")
+            {
+                device.melody = paramMelody;
+                sr.println(paramMelody);
+                // float f[1][4];
+                setHctMelody(sr, paramMelody.c_str());
+
+                // sr.println(sizeof(hctMelody)/sizeof(*hctMelody));
+                // sr.println(sizeof(*hctMelody)/sizeof(**hctMelody));
+                // sr.println(hctMelody[0][0]);
+                // sr.println(hctMelody[0][1]);
+                // sr.println(hctMelody[0][2]);
+                // sr.println(hctMelody[0][3]);
+                // sr.println("------------");
+                device.musicalScale[sizeof(hctMelody)/sizeof(*hctMelody)][sizeof(*hctMelody)/sizeof(**hctMelody)];
+                for(int i = 0; i < sizeof(hctMelody)/sizeof(*hctMelody); i++)
+                {
+                    for(int ii = 0; ii < sizeof(*hctMelody)/sizeof(**hctMelody); ii++)
+                    {
+                        device.musicalScale[i][ii] = hctMelody[i][ii];
+                    }
+                }
+                sr.println(sizeof(hctMelody)/sizeof(*hctMelody));
+                sr.println(sizeof(device.musicalScale)/sizeof(*device.musicalScale));
+                bzHctMelody(sr);
+                *p_device = device;
+                returnMessage = "successed";
             }
             if(paramLength != "") device.length = atoi(paramLength.c_str());
             if(paramInterval == "0")
@@ -287,7 +307,7 @@ void setDevice(int contentNum)
                 setTimerInterrupt(device.tOpen, device.timerNumOpen, intervalStop, 0, false);
                 digitalWrite(portLED, LED_OFF);
                 *p_device = device;
-                bzReceivedRing();
+                // bzReceivedRing();
                 returnMessage = "successed";
             }
             else if(paramInterval != "") {
@@ -296,7 +316,7 @@ void setDevice(int contentNum)
                 device.setTime = GetTime();
                 digitalWrite(portLED, LED_ON);
                 *p_device = device;
-                bzReceivedRing();
+                // bzReceivedRing();
                 returnMessage = "successed";
             }
             break;
@@ -311,8 +331,8 @@ void setDevice(int contentNum)
             }
             else if(paramArea == "f")
             {
-                device = deviceSts_W;
-                p_device = &deviceSts_W;
+                device = deviceSts_F;
+                p_device = &deviceSts_F;
             }
             else
             {

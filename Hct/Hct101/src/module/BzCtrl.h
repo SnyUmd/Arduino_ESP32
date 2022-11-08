@@ -10,6 +10,9 @@
 #define PWM_DUTY 128
 
 #include <Arduino.h>
+using namespace std;
+
+extern float hctMelody[1][4];
 // #include "defHct.h"
 
 //void BzNote(int type, int iTime, int scale);
@@ -39,3 +42,6 @@ void bzErrorSound();
 void bzPowerOn();
 void prgBug();
 void bzModeChange(int modeNum);
+
+void setHctMelody(HardwareSerial& sr, string val);
+void bzHctMelody(HardwareSerial& sr);

@@ -98,6 +98,8 @@ struct deviceStatus{
   int setTime;
   int timerNumOpen;
   int timerNumClose;
+  float musicalScale[1][4];
+  String melody;
   hw_timer_t* tOpen;
   hw_timer_t* tClose;
 };
@@ -108,14 +110,14 @@ deviceStatus deviceSts_W =
     DEFAULT_LENGTH, 0, 
     TIMER_NUM_OPEN_W, 
     TIMER_NUM_CLOSE_W,
-    NULL, NULL};
+    {0, 0, 0, 0}, "", NULL, NULL};
 deviceStatus deviceSts_F = 
   { false, false, false, false, false, false, 0, 
     DEFAULT_LENGTH, 
     DEFAULT_LENGTH, 0, 
     TIMER_NUM_OPEN_F, 
     TIMER_NUM_CLOSE_F,
-    NULL, NULL};
+    {0, 0, 0, 0}, "", NULL, NULL};
 
 enum enmDevStsAddress
 {
