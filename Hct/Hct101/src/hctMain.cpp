@@ -144,7 +144,7 @@ void taskMotor_W(void* arg)
             if(deviceSts_W.flgNow) len = deviceSts_W.nowLength;
             else len = deviceSts_W.length;
             deviceSts_W.flgNow = false;
-            setTimerInterrupt(tClose_W, deviceSts_W.timerNumClose, closeMotorW, len * 1000000, false);
+            setTimerInterrupt(deviceSts_W.tClose, deviceSts_W.timerNumClose, closeMotorW, len * 1000000, false);
         }
         if(deviceSts_W.closing && deviceSts_W.opened)
         {
@@ -177,7 +177,7 @@ void taskMotor_F(void* arg)
             if(deviceSts_F.flgNow) len = deviceSts_F.nowLength;
             else len = deviceSts_F.length;
             deviceSts_F.flgNow = false;
-            setTimerInterrupt(tClose_F, deviceSts_F.timerNumClose, closeMotorF, len * 1000000, false);
+            setTimerInterrupt(deviceSts_F.tClose, deviceSts_F.timerNumClose, closeMotorF, len * 1000000, false);
         }
         if(deviceSts_F.closing && deviceSts_F.opened)
         {
@@ -225,17 +225,18 @@ void setHttpAction()
 //*************************************
 void setDevice(int contentNum)
 {
-    bool *p_blOpened;
-    bool *p_blOppenning;
-    bool *p_blClosing;
-    bool *p_flgNow;
-    bool *p_adjustment;
-    bool *p_adustmentLeft;
-    int *p_interval;
-    int *p_length;
-    int *p_nowLength;
-    int *p_timerNumOpen;
-    hw_timer_t *p_t;
+    // bool *p_blOpened;
+    // bool *p_blOppenning;
+    // bool *p_blClosing;
+    // bool *p_flgNow;
+    // bool *p_adjustment;
+    // bool *p_adustmentLeft;
+    // int *p_interval;
+    // int *p_length;
+    // int *p_nowLength;
+    // int *p_timerNumOpen;
+    // hw_timer_t *p_t;
+    deviceStatus device;
     deviceStatus *p_device;
     auto *func = &openMotorF;
 
@@ -253,26 +254,16 @@ void setDevice(int contentNum)
         case enmNow://-------------------------------------------------------
             if(paramArea == "w")
             { 
-                // p_device = &deviceSts_W;
+                device = deviceSts_W;
+                p_device = &deviceSts_W;
                 sr.println("area = w");
-                p_blOpened = &deviceSts_W.opened;
-                p_blOppenning = &deviceSts_W.oppenning;
-                p_blClosing = &deviceSts_W.closing;
-                p_flgNow = &deviceSts_W.flgNow;
-                p_nowLength = &deviceSts_W.nowLength;
-                p_t = tNowOpen_W;
                 func = &openMotorW;
             }
             else if(paramArea == "f")
             {
                 sr.println("area = f");
-                // p_device = &deviceSts_F;
-                p_blOpened = &deviceSts_F.opened;
-                p_blOppenning = &deviceSts_F.oppenning;
-                p_blClosing = &deviceSts_F.closing;
-                p_flgNow = &deviceSts_F.flgNow;
-                p_nowLength = &deviceSts_F.nowLength;
-                p_t = tNowOpen_F;
+                device = deviceSts_F;
+                p_device = &deviceSts_F;
                 func = &openMotorF;
             }
             else
@@ -282,15 +273,16 @@ void setDevice(int contentNum)
                 break;
             }
             
-            if( *p_blOpened == false && 
-                *p_blOppenning == false && 
-                *p_blClosing == false)
+            if( device.opened == false && 
+                device.oppenning == false && 
+                device.closing == false)
             {
                 bzReceivedRing();
-                if(paramLength != "") *p_nowLength = atoi(paramLength.c_str());
-                else *p_nowLength = DEFAULT_LENGTH;
-                *p_flgNow = true;
-                *p_blOppenning = true;
+                if(paramLength != "") device.nowLength = atoi(paramLength.c_str());
+                else device.nowLength = DEFAULT_LENGTH;
+                device.flgNow = true;
+                device.oppenning = true;
+                *p_device = device;
                 returnMessage = "successed";
             }
             else{
@@ -301,28 +293,16 @@ void setDevice(int contentNum)
         case enmSet://-------------------------------------------------------
             if(paramArea == "w")
             { 
-                // p_device = &deviceSts_W;
-                // p_blOpened = &deviceSts_W.opened;
-                // p_blOppenning = &deviceSts_W.oppenning;
-                // p_blClosing = &deviceSts_W.closing;
-                p_interval = &deviceSts_W.interval;
-                p_length = &deviceSts_W.length;
-                p_timerNumOpen = &deviceSts_W.timerNumOpen;
-                p_t = tOpen_W;
+                device = deviceSts_W;
+                p_device = &deviceSts_W;
                 func = &openMotorW;
 
                 portLED = PORT_LED_G;
             }
             else if(paramArea == "f")
             {
-                // p_device = &deviceSts_F;
-                // p_blOpened = &deviceSts_F.opened;
-                // p_blOppenning = &deviceSts_F.oppenning;
-                // p_blClosing = &deviceSts_F.closing;
-                p_interval = &deviceSts_F.interval;
-                p_length = &deviceSts_F.length;
-                p_timerNumOpen = &deviceSts_F.timerNumOpen;
-                p_t = tOpen_F;
+                device = deviceSts_F;
+                p_device = &deviceSts_F;
                 func = &openMotorF;
 
                 portLED = PORT_LED_R;
@@ -333,22 +313,24 @@ void setDevice(int contentNum)
                 returnMessage = "error";
                 break;
             }
-            if(paramLength != "") *p_length = atoi(paramLength.c_str());
+            if(paramLength != "") device.length = atoi(paramLength.c_str());
             if(paramInterval == "0")
             {
                 sr.println("interval stop");
-                *p_interval =  0;
+                device.interval =  0;
                 // stopTimerInterrupt(p_t);
                 // timerEnd(p_t);
-                setTimerInterrupt(p_t, *p_timerNumOpen, intervalStop, 0, false);
+                setTimerInterrupt(device.tOpen, device.timerNumOpen, intervalStop, 0, false);
                 digitalWrite(portLED, LED_OFF);
+                *p_device = device;
                 bzReceivedRing();
                 returnMessage = "successed";
             }
             else if(paramInterval != "") {
-                *p_interval = atoi(paramInterval.c_str());
-                setTimerInterrupt(p_t, *p_timerNumOpen, func, *p_interval * 1000000, true);
+                device.interval = atoi(paramInterval.c_str());
+                setTimerInterrupt(device.tOpen, device.timerNumOpen, func, device.interval * 1000000, true);
                 digitalWrite(portLED, LED_ON);
+                *p_device = device;
                 bzReceivedRing();
                 returnMessage = "successed";
             }
@@ -359,23 +341,13 @@ void setDevice(int contentNum)
             bool blLeft = false;
             if(paramArea == "w")
             { 
-                // p_device = &deviceSts_W;
-                p_blOpened = &deviceSts_W.opened;
-                p_blOppenning = &deviceSts_W.oppenning;
-                p_blClosing = &deviceSts_W.closing;
-                p_adjustment = &deviceSts_W.adjustment;
-                p_adustmentLeft = &deviceSts_W.adjustmentLeft;
-                blF = false;
+                device = deviceSts_W;
+                p_device = &deviceSts_W;
             }
             else if(paramArea == "f")
             {
-                // p_device = &deviceSts_F;
-                p_blOpened = &deviceSts_F.opened;
-                p_blOppenning = &deviceSts_F.oppenning;
-                p_blClosing = &deviceSts_F.closing;
-                p_adjustment = &deviceSts_F.adjustment;
-                p_adustmentLeft = &deviceSts_W.adjustmentLeft;
-                blF = true;
+                device = deviceSts_W;
+                p_device = &deviceSts_W;
             }
             else
             {
@@ -384,14 +356,15 @@ void setDevice(int contentNum)
                 break;
             }
 
-            if( *p_blOpened == false && 
-                *p_blOppenning == false && 
-                *p_blClosing == false)
+            if( device.opened == false && 
+                device.oppenning == false && 
+                device.closing == false)
             {
                 bzReceivedRing();
-                if(paramDirection == "l") *p_adustmentLeft = true;
-                else *p_adustmentLeft = false;
-                *p_adjustment = true;
+                if(paramDirection == "l") device.adjustmentLeft = true;
+                else device.adjustmentLeft = false;
+                device.adjustment = true;
+                *p_device = device;
                 returnMessage = "successed";
             }
             else

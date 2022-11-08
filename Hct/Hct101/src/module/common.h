@@ -31,13 +31,13 @@ struct tm timeInfRTC;
 
 char s[20];//文字格納用
 
-hw_timer_t* tOpen_W = NULL;
-hw_timer_t* tNowOpen_W = NULL;
-hw_timer_t* tClose_W = NULL;
+// hw_timer_t* tOpen_W = NULL;
+// hw_timer_t* tNowOpen_W = NULL;
+// hw_timer_t* tClose_W = NULL;
 
-hw_timer_t* tOpen_F = NULL;
-hw_timer_t* tNowOpen_F = NULL;
-hw_timer_t* tClose_F = NULL;
+// hw_timer_t* tOpen_F = NULL;
+// hw_timer_t* tNowOpen_F = NULL;
+// hw_timer_t* tClose_F = NULL;
 
 hw_timer_t* tSettingOff = NULL;
 
@@ -98,10 +98,24 @@ struct deviceStatus{
   int setTime;
   int timerNumOpen;
   int timerNumClose;
+  hw_timer_t* tOpen;
+  hw_timer_t* tClose;
 };
 
-deviceStatus deviceSts_W = {false, false, false, false, false, false, 0, DEFAULT_LENGTH, DEFAULT_LENGTH, 0, TIMER_NUM_OPEN_W, TIMER_NUM_CLOSE_W};
-deviceStatus deviceSts_F = {false, false, false, false, false, false, 0, DEFAULT_LENGTH, DEFAULT_LENGTH, 0, TIMER_NUM_OPEN_F, TIMER_NUM_CLOSE_F};
+deviceStatus deviceSts_W = 
+  { false, false, false, false, false, false, 0, 
+    DEFAULT_LENGTH, 
+    DEFAULT_LENGTH, 0, 
+    TIMER_NUM_OPEN_W, 
+    TIMER_NUM_CLOSE_W,
+    NULL, NULL};
+deviceStatus deviceSts_F = 
+  { false, false, false, false, false, false, 0, 
+    DEFAULT_LENGTH, 
+    DEFAULT_LENGTH, 0, 
+    TIMER_NUM_OPEN_F, 
+    TIMER_NUM_CLOSE_F,
+    NULL, NULL};
 
 enum enmDevStsAddress
 {
