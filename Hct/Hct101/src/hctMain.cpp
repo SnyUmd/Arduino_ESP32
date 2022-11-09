@@ -48,67 +48,6 @@ void IRAM_ATTR intervalStop();
 void modeSetting();
 void IRAM_ATTR onTimer();
 
-class clsAction
-{
-    public:
-        void regularAction(deviceStatus& device, int& led_cnt, bool bl_food){
-            int len;
-            bool ringed = false;
-
-            if(device.oppenning && !device.opened)
-            {
-                if (device.ring && !device.ringing)
-                {
-                    device.ringing = true;
-                    setHctMelody(sr, device.melody.c_str());
-                    device.ringing = false;
-                    ringed = true;
-                }
-
-                digitalWrite(device.portLED, LED_ON);
-                device.oppenning = false;
-                device.opened = true;
-                motorAction(MOTOR_OPEN, 50, bl_food);
-                if(device.flgNow) len = device.nowLength;
-                else len = device.length;
-                device.flgNow = false;
-
-                if (!ringed && device.ring && !device.ringing)
-                {
-                    device.ringing = true;
-                    setHctMelody(sr, device.melody.c_str());
-                    device.ringing = false;
-                    ringed = true;
-                }
-                setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorW, len * 1000000, false);
-            }
-            if(device.closing && device.opened)
-            {
-                motorAction(MOTOR_CLOSE, 50, bl_food);
-                digitalWrite(device.portLED, LED_OFF);
-                device.closing = false;
-                device.opened = false;
-            }
-            if(device.adjustment && !device.opened)
-            {
-                motorAction(device.adjustmentLeft, 10, bl_food);
-                device.adjustment = false;
-            }
-            led_cnt++;
-            // sr.println(led_cnt);
-            if(led_cnt > 1000)
-            {
-                led_cnt = 0;
-                if(device.interval > 0 && !device.opened){
-                    // sr.println(digitalRead(device.portLED));
-                    digitalWrite(device.portLED, !digitalRead(device.portLED));
-                }
-            }
-            delay(1);
-        }
-
-};
-
 //***************************************************************************************************************
 //***************************************************************************************************************
 //***************************************************************************************************************
