@@ -4,6 +4,7 @@
 #include <WebServer.h>
 #include <Wire.h>
 #include <iostream>
+#include <vector>
 #include "module/initialize.h"
 #include "module/defHct.h"
 #include "module/common.h"
@@ -47,6 +48,66 @@ void IRAM_ATTR intervalStop();
 void modeSetting();
 void IRAM_ATTR onTimer();
 
+class clsAction
+{
+    public:
+        void regularAction(deviceStatus& device, int& led_cnt, bool bl_food){
+            int len;
+            bool ringed = false;
+
+            if(device.oppenning && !device.opened)
+            {
+                if (device.ring && !device.ringing)
+                {
+                    device.ringing = true;
+                    setHctMelody(sr, device.melody.c_str());
+                    device.ringing = false;
+                    ringed = true;
+                }
+
+                digitalWrite(device.portLED, LED_ON);
+                device.oppenning = false;
+                device.opened = true;
+                motorAction(MOTOR_OPEN, 50, bl_food);
+                if(device.flgNow) len = device.nowLength;
+                else len = device.length;
+                device.flgNow = false;
+
+                if (!ringed && device.ring && !device.ringing)
+                {
+                    device.ringing = true;
+                    setHctMelody(sr, device.melody.c_str());
+                    device.ringing = false;
+                    ringed = true;
+                }
+                setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorW, len * 1000000, false);
+            }
+            if(device.closing && device.opened)
+            {
+                motorAction(MOTOR_CLOSE, 50, bl_food);
+                digitalWrite(device.portLED, LED_OFF);
+                device.closing = false;
+                device.opened = false;
+            }
+            if(device.adjustment && !device.opened)
+            {
+                motorAction(device.adjustmentLeft, 10, bl_food);
+                device.adjustment = false;
+            }
+            led_cnt++;
+            // sr.println(led_cnt);
+            if(led_cnt > 1000)
+            {
+                led_cnt = 0;
+                if(device.interval > 0 && !device.opened){
+                    // sr.println(digitalRead(device.portLED));
+                    digitalWrite(device.portLED, !digitalRead(device.portLED));
+                }
+            }
+            delay(1);
+        }
+
+};
 
 //***************************************************************************************************************
 //***************************************************************************************************************
@@ -90,72 +151,197 @@ void loop()
     server.handleClient();
 }
 
+void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
+{
+    
+    int len;
+    bool ringed = false;
+
+    if(device.oppenning && !device.opened)
+    {
+        if (device.ring && !device.ringing)
+        {
+            device.ringing = true;
+            setHctMelody(sr, device.melody.c_str());
+            device.ringing = false;
+            ringed = true;
+        }
+
+        digitalWrite(device.portLED, LED_ON);
+        device.oppenning = false;
+        device.opened = true;
+        motorAction(MOTOR_OPEN, 50, bl_food);
+        if(device.flgNow) len = device.nowLength;
+        else len = device.length;
+        device.flgNow = false;
+
+        if (!ringed && device.ring && !device.ringing)
+        {
+            device.ringing = true;
+            setHctMelody(sr, device.melody.c_str());
+            device.ringing = false;
+            ringed = true;
+        }
+        if(!bl_food)
+            setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorW, len * 1000000, false);
+        else
+            setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorF, len * 1000000, false);
+    }
+    if(device.closing && device.opened)
+    {
+        motorAction(MOTOR_CLOSE, 50, bl_food);
+        digitalWrite(device.portLED, LED_OFF);
+        device.closing = false;
+        device.opened = false;
+    }
+    if(device.adjustment && !device.opened)
+    {
+        motorAction(device.adjustmentLeft, 10, bl_food);
+        device.adjustment = false;
+    }
+    led_cnt++;
+    // sr.println(led_cnt);
+    if(led_cnt > 1000)
+    {
+        led_cnt = 0;
+        if(device.interval > 0 && !device.opened){
+            sr.println(digitalRead(device.portLED));
+            digitalWrite(device.portLED, !digitalRead(device.portLED));
+        }
+    }
+    delay(1);
+
+}
+
 //*************************************
 void taskMotor_W(void* arg)
 {
-    int len;
-    while(1)
-    {
-        // sr.println("task motor W");
-        // delay(500);
-        if(deviceSts_W.oppenning && !deviceSts_W.opened)
-        {
-            sr.print("Run = w, length = ");
-            sr.println(deviceSts_W.length);
-            deviceSts_W.oppenning = false;
-            deviceSts_W.opened = true;
-            motorAction(MOTOR_OPEN, 50, false);
-            if(deviceSts_W.flgNow) len = deviceSts_W.nowLength;
-            else len = deviceSts_W.length;
-            deviceSts_W.flgNow = false;
-            setTimerInterrupt(deviceSts_W.tClose, deviceSts_W.timerNumClose, closeMotorW, len * 1000000, false);
-        }
-        if(deviceSts_W.closing && deviceSts_W.opened)
-        {
-            deviceSts_W.closing = false;
-            deviceSts_W.opened = false;
-            motorAction(MOTOR_CLOSE, 50, false);
-        }
-        if(deviceSts_W.adjustment && !deviceSts_W.opened)
-        {
-            motorAction(deviceSts_W.adjustmentLeft, 10, false);
-            deviceSts_W.adjustment = false;
-        }
-        delay(1);
+    // clsAction clsAction_W;
+    int cntLED = 0;
+    while(1){
+        cntLED++;
+        regularAction(deviceSts_W, cntLED, false);
+        // clsAction_W.regularAction(deviceSts_W, cntLED, false);
+        // regularAction(deviceSts_W, cntLED);
+        // bool ringed = false;
+        // if(deviceSts_W.oppenning && !deviceSts_W.opened)
+        // {
+        //     if (deviceSts_W.ring && !deviceSts_W.ringing)
+        //     {
+        //         deviceSts_W.ringing = true;
+        //         setHctMelody(sr, deviceSts_W.melody.c_str());
+        //         deviceSts_W.ringing = false;
+        //         ringed = true;
+        //     }
+
+        //     deviceSts_W.oppenning = false;
+        //     deviceSts_W.opened = true;
+        //     motorAction(MOTOR_OPEN, 50, false);
+        //     if(deviceSts_W.flgNow) len = deviceSts_W.nowLength;
+        //     else len = deviceSts_W.length;
+        //     deviceSts_W.flgNow = false;
+
+        //     if (!ringed && deviceSts_W.ring && !deviceSts_W.ringing)
+        //     {
+        //         deviceSts_W.ringing = true;
+        //         setHctMelody(sr, deviceSts_W.melody.c_str());
+        //         deviceSts_W.ringing = false;
+        //         ringed = true;
+        //     }
+        //     setTimerInterrupt(deviceSts_W.tClose, deviceSts_W.timerNumClose, closeMotorW, len * 1000000, false);
+        // }
+        // if(deviceSts_W.closing && deviceSts_W.opened)
+        // {
+        //     deviceSts_W.closing = false;
+        //     deviceSts_W.opened = false;
+        //     motorAction(MOTOR_CLOSE, 50, false);
+        // }
+        // if(deviceSts_W.adjustment && !deviceSts_W.opened)
+        // {
+        //     motorAction(deviceSts_W.adjustmentLeft, 10, false);
+        //     deviceSts_W.adjustment = false;
+        // }
+        // cntLED++;
+        // sr.println(cntLED);
+        // if(cntLED > 100)
+        // {
+        //     cntLED = 0;
+        //     if(deviceSts_W.interval > 0){
+        //         sr.println(digitalRead(PORT_LED_G));
+        //         digitalWrite(PORT_LED_R, !digitalRead(PORT_LED_G));
+        //     }
+        // }
+        // delay(1);
     }
 }
 
 //*************************************
 void taskMotor_F(void* arg)
 {
+    // clsAction clsAction_F;
     int len;
+    int cntLED = 0;
     while(1)
     {
-        // sr.println("task motor F");
-        // delay(500);
-        if(deviceSts_F.oppenning && !deviceSts_F.opened)
-        {
-            deviceSts_F.oppenning = false;
-            deviceSts_F.opened = true;
-            motorAction(MOTOR_OPEN, 50, true);
-            if(deviceSts_F.flgNow) len = deviceSts_F.nowLength;
-            else len = deviceSts_F.length;
-            deviceSts_F.flgNow = false;
-            setTimerInterrupt(deviceSts_F.tClose, deviceSts_F.timerNumClose, closeMotorF, len * 1000000, false);
-        }
-        if(deviceSts_F.closing && deviceSts_F.opened)
-        {
-            motorAction(MOTOR_CLOSE, 50, true);
-            deviceSts_F.closing = false;
-            deviceSts_F.opened = false;
-        }
-        if(deviceSts_F.adjustment && !deviceSts_F.opened)
-        {
-            motorAction(deviceSts_F.adjustmentLeft, 10, true);
-            deviceSts_F.adjustment = false;
-        }
-        delay(1);
+        cntLED++;
+        regularAction(deviceSts_F, cntLED, true);
+        // clsAction_F.regularAction(deviceSts_F, cntLED, true);
     }
+    // while(1)
+    // {
+    //     // sr.println("task motor F");
+    //     // delay(500);
+    //     bool ringed = false;
+    //     if(deviceSts_F.oppenning && !deviceSts_F.opened)
+    //     {
+            
+    //         if (deviceSts_F.ring && !deviceSts_F.ringing)
+    //         {
+    //             deviceSts_F.ringing = true;
+    //             setHctMelody(sr, deviceSts_F.melody.c_str());
+    //             deviceSts_F.ringing = false;
+    //             ringed = true;
+    //         }
+
+    //         deviceSts_F.oppenning = false;
+    //         deviceSts_F.opened = true;
+    //         motorAction(MOTOR_OPEN, 50, true);
+    //         if(deviceSts_F.flgNow) len = deviceSts_F.nowLength;
+    //         else len = deviceSts_F.length;
+    //         deviceSts_F.flgNow = false;
+
+    //         if (!ringed && deviceSts_F.ring && !deviceSts_F.ringing)
+    //         {
+    //             deviceSts_F.ringing = true;
+    //             setHctMelody(sr, deviceSts_F.melody.c_str());
+    //             deviceSts_F.ringing = false;
+    //             ringed = true;
+    //         }
+    //         setTimerInterrupt(deviceSts_F.tClose, deviceSts_F.timerNumClose, closeMotorF, len * 1000000, false);
+    //     }
+    //     if(deviceSts_F.closing && deviceSts_F.opened)
+    //     {
+    //         motorAction(MOTOR_CLOSE, 50, true);
+    //         deviceSts_F.closing = false;
+    //         deviceSts_F.opened = false;
+    //     }
+    //     if(deviceSts_F.adjustment && !deviceSts_F.opened)
+    //     {
+    //         motorAction(deviceSts_F.adjustmentLeft, 10, true);
+    //         deviceSts_F.adjustment = false;
+    //     }
+    //     cntLED++;
+    //     // sr.println(cntLED);
+    //     if(cntLED > 100)
+    //     {
+    //         cntLED = 0;
+    //         if(deviceSts_F.interval > 0){
+    //             sr.println(digitalRead(PORT_LED_R));
+    //             digitalWrite(PORT_LED_R, !digitalRead(PORT_LED_R));
+    //         }
+    //     }
+    //     delay(1);
+    // }
 }
 
 
@@ -202,6 +388,7 @@ void setDevice(int contentNum)
     String paramInterval = server.arg("interval");
     String paramArea = server.arg("area");
     String paramDirection = server.arg("direction");
+    String paramRing = server.arg("ring");
 
     switch(contentNum)
     {
@@ -252,7 +439,7 @@ void setDevice(int contentNum)
                 func = &openMotorW;
 
                 portLED = PORT_LED_G;
-                bzReceivedRing();
+                // bzReceivedRing();
             }
             else if(paramArea == "f")
             {
@@ -261,7 +448,7 @@ void setDevice(int contentNum)
                 func = &openMotorF;
 
                 portLED = PORT_LED_R;
-                bzReceivedRing();
+                // bzReceivedRing();
             }
             else
             {
@@ -273,32 +460,20 @@ void setDevice(int contentNum)
             {
                 device.melody = paramMelody;
                 sr.println(paramMelody);
-                // float f[1][4];
-                setHctMelody(sr, paramMelody.c_str());
 
-                // sr.println(sizeof(hctMelody)/sizeof(*hctMelody));
-                // sr.println(sizeof(*hctMelody)/sizeof(**hctMelody));
-                // sr.println(hctMelody[0][0]);
-                // sr.println(hctMelody[0][1]);
-                // sr.println(hctMelody[0][2]);
-                // sr.println(hctMelody[0][3]);
-                // sr.println("------------");
-                device.musicalScale[sizeof(hctMelody)/sizeof(*hctMelody)][sizeof(*hctMelody)/sizeof(**hctMelody)];
-                for(int i = 0; i < sizeof(hctMelody)/sizeof(*hctMelody); i++)
-                {
-                    for(int ii = 0; ii < sizeof(*hctMelody)/sizeof(**hctMelody); ii++)
-                    {
-                        device.musicalScale[i][ii] = hctMelody[i][ii];
-                    }
-                }
-                sr.println(sizeof(hctMelody)/sizeof(*hctMelody));
-                sr.println(sizeof(device.musicalScale)/sizeof(*device.musicalScale));
-                bzHctMelody(sr);
+                // setHctMelody(sr, device.melody.c_str());
+
                 *p_device = device;
+                bzReceivedRing();
                 returnMessage = "successed";
             }
-            if(paramLength != "") device.length = atoi(paramLength.c_str());
-            if(paramInterval == "0")
+            else if(paramLength != "") {
+                device.length = atoi(paramLength.c_str());
+                *p_device = device;
+                bzReceivedRing();
+                returnMessage = "successed";
+            }
+            else if(paramInterval == "0")
             {
                 sr.println("interval stop");
                 device.interval =  0;
@@ -307,7 +482,7 @@ void setDevice(int contentNum)
                 setTimerInterrupt(device.tOpen, device.timerNumOpen, intervalStop, 0, false);
                 digitalWrite(portLED, LED_OFF);
                 *p_device = device;
-                // bzReceivedRing();
+                bzReceivedRing();
                 returnMessage = "successed";
             }
             else if(paramInterval != "") {
@@ -316,8 +491,24 @@ void setDevice(int contentNum)
                 device.setTime = GetTime();
                 digitalWrite(portLED, LED_ON);
                 *p_device = device;
-                // bzReceivedRing();
+                bzReceivedRing();
                 returnMessage = "successed";
+            }
+            else if(paramRing == "true" || paramRing == "false")
+            {
+                if(paramRing == "true")
+                    device.ring = true;
+                else
+                    device.ring = false;
+                *p_device = device;
+                bzReceivedRing();
+                returnMessage = "successed";
+            }
+            else
+            {
+                bzErrorSound();
+                returnMessage = "error";
+                break;
             }
             break;
 
@@ -448,16 +639,6 @@ string getHumd()
     float fHumd = readHumdHTD21D(wr);
     return to_string(fHumd).substr(0, 5);
 }
-
-// //*************************************
-// void closeValve_Now()
-// {
-//     blClosing = false;
-//     motorAction(true, 100, false);
-//     blOpened = false;
-//     if(!deviceSts.nowRun)setVal.settingReserv = true;
-//     else deviceSts.nowRun = false;
-// }
 
 //*************************************
 int getNextTime(bool blFood)

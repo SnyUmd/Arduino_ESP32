@@ -12,7 +12,7 @@
 #include <Arduino.h>
 using namespace std;
 
-extern float hctMelody[1][4];
+// extern float hctMelody[100][4];
 // #include "defHct.h"
 
 //void BzNote(int type, int iTime, int scale);
@@ -44,4 +44,4 @@ void prgBug();
 void bzModeChange(int modeNum);
 
 void setHctMelody(HardwareSerial& sr, string val);
-void bzHctMelody(HardwareSerial& sr);
+// void bzHctMelody();

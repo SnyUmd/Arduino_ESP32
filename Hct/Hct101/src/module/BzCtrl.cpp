@@ -12,7 +12,6 @@ int iDuty = PWM_RESOLUTION / 2;
 float beat0 = 1000;
 float beat1 = 2000;
 
-float hctMelody[1][4];
 
 //*******************************************************
 float flSound[][12] =
@@ -541,26 +540,8 @@ void Bz_DragonQuest_Preface()
     BzStop(200);
 }
 
-void bzHctMelody(HardwareSerial& sr)
-{
-    sr.println(sizeof(hctMelody)/sizeof(*hctMelody));
-    int iRow = sizeof(hctMelody)/sizeof(*hctMelody);
-
-    for(int i0 = 0; i0 < iRow; i0++)
-    {
-       BzNote(hctMelody[i0][0],hctMelody[i0][1],hctMelody[i0][2],hctMelody[i0][3]);
-       sr.println(hctMelody[i0][0]); 
-       sr.println(hctMelody[i0][1]); 
-       sr.println(hctMelody[i0][2]); 
-       sr.println(hctMelody[i0][3]); 
-    }
-    // iRow = sizeof(aryScore2) / sizeof(aryScore2[0]);
-    // for(int i2 = 0; i2 < iRow; i2++)
-    //     BzNote(aryScore2[i2][0],aryScore2[i2][1],aryScore2[i2][2],aryScore2[i2][3]);
-
-    BzStop(200);
-}
-
+//ハッカソンイベント　音出し用
+//string val = 2do4-2re4-2mi4-2fa4-2so4-2ra4-2si4-3do4;
 void setHctMelody(HardwareSerial& sr, string val)
 {
     string s = val;
@@ -568,7 +549,8 @@ void setHctMelody(HardwareSerial& sr, string val)
     int numSplit;
     numSplit = count(s.begin(), s.end(), '-');
     float aryResult[numSplit + 1][4];
-    hctMelody[numSplit + 1][4];
+    // float hctMelody[100][4] = {};
+
     // map<string, int> hctScale = {{"do", 0}, {"re", 1}};
     // map<int, string> hctScale = {{0, "do"}, {1, "re"}};
 
@@ -583,28 +565,35 @@ void setHctMelody(HardwareSerial& sr, string val)
         string buf;
         string musicalScale;
         splitPoint = s.find("-");//区切り文字の位置を取得
+        // splitPoint = s.find(".");//区切り文字の位置を取得
         
         buf = s.substr(0, splitPoint);//文字抽出
         s.erase(0, splitPoint + 1);//文字削除
         sr.println(buf.c_str());
-        if(buf.find("rest") < 0)
+        int restPosition = buf.find("rest");
+        sr.print("rest find：");
+        sr.println(restPosition);
+        if(restPosition >= 0 && restPosition < 10)
         {
             blRest = true;
-            hctMelody[i][0] = 0;
+            aryResult[i][0] = 0;
             floor = 0;
             buf.erase(0, 4);
-            hctMelody[i][2] = 0;
+            aryResult[i][2] = 0;
         }
         else
         {
-            hctMelody[i][0] = 1;
+            aryResult[i][0] = 1;
             floor = atoi(buf.substr(0, 1).c_str());
             buf.erase(0, 1);
             musicalScale = buf.substr(0, 2);
             buf.erase(0, 2);
             const char *chrNext = buf.substr(0, 1).c_str();
-            if(*chrNext < '0' && *chrNext > '9')
+            sr.print("chrNext：");
+            sr.println(*chrNext);
+            if(*chrNext < '0' || *chrNext > '9')
             {
+                sr.println("#認識");
                 musicalScale += buf.substr(0, 1);
                 buf.erase(0, 1);
             }
@@ -612,30 +601,33 @@ void setHctMelody(HardwareSerial& sr, string val)
             {
                 if(hctScale[ii] == musicalScale)
                 {
-                    hctMelody[i][2] = flSound[floor][ii];
+                    aryResult[i][2] = flSound[floor][ii];
                     break;
                 }
             }
         }
         symbol = atoi(buf.c_str());
-        hctMelody[i][1] = getScale0(symbol);
-        hctMelody[i][3] = 100;
+        aryResult[i][1] = getScale0(symbol);
+        aryResult[i][3] = 100;
 
-        // sr.print("記号：");
-        // sr.println(hctMelody[i][0]);
-        // sr.print("階：");
-        // sr.println(floor);
-        // sr.print("音：");
-        // sr.println(musicalScale.c_str());
-        // sr.print("0：");
-        // sr.println(hctMelody[i][0]);
-        // sr.print("1：");
-        // sr.println(hctMelody[i][1]);
-        // sr.print("2：");
-        // sr.println(hctMelody[i][2]);
-        // sr.print("3：");
-        // sr.println(hctMelody[i][3]);
+        sr.println(aryResult[i][0]);
+        sr.println(aryResult[i][1]);
+        sr.println(aryResult[i][2]);
+        sr.println(aryResult[i][3]);
+        sr.println("-----");
     }
+
+    // int iRow = sizeof(aryResult)/sizeof(*aryResult);
+    for(int i0 = 0; i0 <= numSplit; i0++)
+    {
+        if( aryResult[i0][0] == 0 && 
+            aryResult[i0][1] == 0 && 
+            aryResult[i0][2] == 0 && 
+            aryResult[i0][3] == 0) {break;}
+       BzNote(aryResult[i0][0],aryResult[i0][1],aryResult[i0][2],aryResult[i0][3]);
+    }
+
+    BzStop(200);
 }
 
 //*************************************************************************************
@@ -740,3 +732,6 @@ void bzModeChange(int modeNum)
     // BzNote(1, getrScale(32), flSound[4][mDO], 100);
     // BzNote(0, getScale1(32), 0, 100);
 }
+
+
+

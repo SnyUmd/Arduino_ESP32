@@ -8,6 +8,7 @@
 #include <WiFi.h>
 #include <string>
 #include <WebServer.h>
+#include <vector>
 
 int mode = 0;
 enum enmMode
@@ -92,32 +93,36 @@ struct deviceStatus{
   bool flgNow;
   bool adjustment;
   bool adjustmentLeft;
+  bool ring;
+  bool ringing;
+  int portLED;
   int interval;
   int length;
   int nowLength;
   int setTime;
   int timerNumOpen;
   int timerNumClose;
-  float musicalScale[1][4];
   String melody;
   hw_timer_t* tOpen;
   hw_timer_t* tClose;
 };
 
 deviceStatus deviceSts_W = 
-  { false, false, false, false, false, false, 0, 
+  { false, false, false, false, false, false, false, false, 
+    PORT_LED_G ,0, 
     DEFAULT_LENGTH, 
     DEFAULT_LENGTH, 0, 
     TIMER_NUM_OPEN_W, 
     TIMER_NUM_CLOSE_W,
-    {0, 0, 0, 0}, "", NULL, NULL};
+    "0do8-0re8-0mi8-0fa8-0so8-0ra8-0si8-1do8", NULL, NULL};
 deviceStatus deviceSts_F = 
-  { false, false, false, false, false, false, 0, 
+  { false, false, false, false, false, false, false, false, 
+    PORT_LED_R ,0, 
     DEFAULT_LENGTH, 
     DEFAULT_LENGTH, 0, 
     TIMER_NUM_OPEN_F, 
     TIMER_NUM_CLOSE_F,
-    {0, 0, 0, 0}, "", NULL, NULL};
+    "2do8-2re8-2mi8-2fa8-2so8-2ra8-2si8-3do8", NULL, NULL};
 
 enum enmDevStsAddress
 {
