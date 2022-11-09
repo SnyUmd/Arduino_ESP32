@@ -114,7 +114,7 @@ deviceStatus deviceSts_W =
     DEFAULT_LENGTH, 0, 
     TIMER_NUM_OPEN_W, 
     TIMER_NUM_CLOSE_W,
-    "0do8-0re8-0mi8-0fa8-0so8-0ra8-0si8-1do8", NULL, NULL};
+    "4do8-4re8-4mi8-4fa8-4so8-4ra8-4si8-5do8", NULL, NULL};
 deviceStatus deviceSts_F = 
   { false, false, false, false, false, false, false, false, 
     PORT_LED_R ,0, 
@@ -124,15 +124,6 @@ deviceStatus deviceSts_F =
     TIMER_NUM_CLOSE_F,
     "2do8-2re8-2mi8-2fa8-2so8-2ra8-2si8-3do8", NULL, NULL};
 
-enum enmDevStsAddress
-{
-  enm_opened = 0,
-  enm_oppenning,
-  enm_closing,
-  enm_interval = 6,
-  enm_length = 10
-
-};
 //↑↑↑==============================================
 
 int operationReservation = 0;
@@ -171,6 +162,10 @@ const String paramWord_get[] =
   "time", 
   "temperture", 
   "humidity",
+  "interval",
+  "ring",
+  "melody",
+  "next",
   "all"
 };
 enum enmContentNum_Get
@@ -178,6 +173,10 @@ enum enmContentNum_Get
   enm_time,
   enm_temperture,
   enm_humidity,
+  enm_interval,
+  enm_ring,
+  enm_melody,
+  enm_next,
   enm_all
 };
 //↑↑↑==============================================
