@@ -133,7 +133,7 @@ void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
         digitalWrite(device.portLED, LED_ON);
         device.oppenning = false;
         device.opened = true;
-        motorAction(MOTOR_OPEN, 100, bl_food);
+        motorAction(MOTOR_OPEN, MOTOR_RANGE, bl_food);
         if(device.flgNow) len = device.nowLength;
         else len = device.length;
         device.flgNow = false;
@@ -152,14 +152,14 @@ void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
     }
     if(device.closing && device.opened)
     {
-        motorAction(MOTOR_CLOSE, 100, bl_food);
+        motorAction(MOTOR_CLOSE, MOTOR_RANGE, bl_food);
         digitalWrite(device.portLED, LED_OFF);
         device.closing = false;
         device.opened = false;
     }
     if(device.adjustment && !device.opened)
     {
-        motorAction(device.adjustmentLeft, 10, bl_food);
+        motorAction(device.adjustmentLeft, MOTOR_ADJUST_RANGE, bl_food);
         device.adjustment = false;
     }
     led_cnt++;

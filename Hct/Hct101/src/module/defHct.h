@@ -11,6 +11,9 @@
 #define MOTOR_OPEN true
 #define MOTOR_CLOSE false
 
+#define MOTOR_RANGE 300
+#define MOTOR_ADJUST_RANGE 10
+
 #define DEFAULT_LENGTH 2
 
 #define LED_ON 0

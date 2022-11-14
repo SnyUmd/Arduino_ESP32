@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Stepper.h>
 #include "defHct.h"
 #include "motorCtrl.h"
 
@@ -55,4 +56,3 @@ void motorAction(bool bl_left, int loop_num, bool bl_food)
     digitalWrite(in3, 0);
     digitalWrite(in4, 0);
 }
-
