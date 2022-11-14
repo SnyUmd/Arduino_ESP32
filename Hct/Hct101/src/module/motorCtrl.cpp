@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <Stepper.h>
 #include "defHct.h"
 #include "motorCtrl.h"
 
