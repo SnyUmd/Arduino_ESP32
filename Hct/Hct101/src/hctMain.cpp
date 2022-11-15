@@ -119,15 +119,24 @@ void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
     
     int len;
     bool ringed = false;
+    bool canRing = true;
+    deviceStatus *p_device;
+    if(bl_food) p_device = &deviceSts_F;
+    else p_device = &deviceSts_W;
 
     if(device.oppenning && !device.opened)
     {
-        if (device.ring && !device.ringing)
+        if(bl_food && deviceSts_W.ringing) canRing = false;
+        else if(deviceSts_F.ringing) canRing = false;
+        else canRing = true;
+        if (canRing && device.ring && !device.ringing)
         {
             device.ringing = true;
+            p_device = &device;
             setHctMelody(sr, device.melody.c_str());
             device.ringing = false;
             ringed = true;
+            p_device = &device;
         }
 
         digitalWrite(device.portLED, LED_ON);
@@ -138,13 +147,23 @@ void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
         else len = device.length;
         device.flgNow = false;
 
-        if (!ringed && device.ring && !device.ringing)
+        if(!ringed)
         {
-            device.ringing = true;
-            setHctMelody(sr, device.melody.c_str());
-            device.ringing = false;
-            ringed = true;
+            canRing = true;
+            if(bl_food && deviceSts_W.ringing) canRing = false;
+            else if(deviceSts_F.ringing) canRing = false;
+            else canRing = true;
+            if (canRing && device.ring && !device.ringing)
+            {
+                device.ringing = true;
+                p_device = &device;
+                setHctMelody(sr, device.melody.c_str());
+                device.ringing = false;
+                ringed = true;
+                p_device = &device;
+            }
         }
+        
         if(!bl_food)
             setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorW, len * 1000000, false);
         else
