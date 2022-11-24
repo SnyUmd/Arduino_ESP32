@@ -8,8 +8,8 @@
 #define PORT_MOTOR3_F 12
 #define PORT_MOTOR4_F 14
 
-#define MOTOR_OPEN true
-#define MOTOR_CLOSE false
+#define MOTOR_OPEN false
+#define MOTOR_CLOSE true
 
 #define MOTOR_RANGE 125
 #define MOTOR_ADJUST_RANGE 10

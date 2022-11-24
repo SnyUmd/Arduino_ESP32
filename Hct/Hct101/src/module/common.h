@@ -95,6 +95,7 @@ struct deviceStatus{
   bool adjustmentLeft;
   bool ring;
   bool ringing;
+  bool serverInit;
   int portLED;
   int interval;
   int length;
@@ -108,22 +109,25 @@ struct deviceStatus{
 };
 
 deviceStatus deviceSts_W = 
-  { false, false, false, false, false, false, false, false, 
+  { false, false, false, false, false, false, false, false, true,
     PORT_LED_G ,0, 
     DEFAULT_LENGTH, 
     DEFAULT_LENGTH, 0, 
     TIMER_NUM_OPEN_W, 
     TIMER_NUM_CLOSE_W,
     "4do8-4re8-4mi8-4fa8-4so8-4ra8-4si8-5do8", NULL, NULL};
+    // "4do8-4re8-4mi8", NULL, NULL};
 deviceStatus deviceSts_F = 
-  { false, false, false, false, false, false, false, false, 
+  { false, false, false, false, false, false, false, false, true,
     PORT_LED_R ,0, 
     DEFAULT_LENGTH, 
     DEFAULT_LENGTH, 0, 
     TIMER_NUM_OPEN_F, 
     TIMER_NUM_CLOSE_F,
     "2do8-2re8-2mi8-2fa8-2so8-2ra8-2si8-3do8", NULL, NULL};
+    // "2do8-2re8-2mi8", NULL, NULL};
 
+bool setRinging = false;
 //↑↑↑==============================================
 
 int operationReservation = 0;

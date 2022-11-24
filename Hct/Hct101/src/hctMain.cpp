@@ -72,7 +72,7 @@ void setup()
     LC.ledFlash(PORT_LED_R, 10, 5);
     digitalWrite(PORT_LED_R, 1);
     
-    xTaskCreatePinnedToCore(taskMotor_W, "taskMotor_W", 4096, NULL, 1, NULL, 1);
+    xTaskCreatePinnedToCore(taskMotor_W, "taskMotor_W", 4096, NULL, 1, NULL, 0);
     xTaskCreatePinnedToCore(taskMotor_F, "taskMotor_F", 4096, NULL, 1, NULL, 0);
 
     // xTaskCreatePinnedToCore(
@@ -89,6 +89,7 @@ void setup()
 //*************************************
 void loop()
 {
+    // if(deviceSts_W.serverInit && deviceSts_F.serverInit) server.handleClient();
     server.handleClient();
 }
 
@@ -116,27 +117,28 @@ void taskMotor_F(void* arg)
 
 void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
 {
-    
     int len;
     bool ringed = false;
     bool canRing = true;
-    deviceStatus *p_device;
-    if(bl_food) p_device = &deviceSts_F;
-    else p_device = &deviceSts_W;
+    // deviceStatus *p_device;
+    // if(bl_food) p_device = &deviceSts_F;
+    // else p_device = &deviceSts_W;
 
     if(device.oppenning && !device.opened)
     {
+        // device.serverInit = false;
         if(bl_food && deviceSts_W.ringing) canRing = false;
         else if(deviceSts_F.ringing) canRing = false;
+        else if(setRinging) canRing = false;
         else canRing = true;
         if (canRing && device.ring && !device.ringing)
         {
             device.ringing = true;
-            p_device = &device;
+            // p_device = &device;
             setHctMelody(sr, device.melody.c_str());
             device.ringing = false;
             ringed = true;
-            p_device = &device;
+            // p_device = &device;
         }
 
         digitalWrite(device.portLED, LED_ON);
@@ -152,15 +154,16 @@ void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
             canRing = true;
             if(bl_food && deviceSts_W.ringing) canRing = false;
             else if(deviceSts_F.ringing) canRing = false;
+            else if(setRinging) canRing = false;
             else canRing = true;
             if (canRing && device.ring && !device.ringing)
             {
                 device.ringing = true;
-                p_device = &device;
+                // p_device = &device;
                 setHctMelody(sr, device.melody.c_str());
                 device.ringing = false;
                 ringed = true;
-                p_device = &device;
+                // p_device = &device;
             }
         }
         
@@ -168,21 +171,25 @@ void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
             setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorW, len * 1000000, false);
         else
             setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorF, len * 1000000, false);
+        // device.serverInit = true;
     }
-    if(device.closing && device.opened)
+    // if(device.closing && device.opened)
+    else if(device.closing && device.opened)
     {
-        motorAction(MOTOR_CLOSE, MOTOR_RANGE, bl_food);
-        digitalWrite(device.portLED, LED_OFF);
+        // device.serverInit = false;
         device.closing = false;
         device.opened = false;
+        motorAction(MOTOR_CLOSE, MOTOR_RANGE, bl_food);
+        digitalWrite(device.portLED, LED_OFF);
+        // device.serverInit = true;
     }
-    if(device.adjustment && !device.opened)
+    else if(device.adjustment && !device.opened)
     {
         motorAction(device.adjustmentLeft, MOTOR_ADJUST_RANGE, bl_food);
         device.adjustment = false;
     }
     led_cnt++;
-    if(led_cnt > 1000)
+    if(led_cnt > 500)
     {
         led_cnt = 0;
         if(device.interval > 0 && !device.opened){
@@ -311,7 +318,13 @@ void setDevice(int contentNum)
                 if(paramMelody != ""){
                     device.melody = paramMelody;
                     sr.println(paramMelody);
-                    setHctMelody(sr, device.melody.c_str());
+
+                    if(getNextTime(device) < 10){
+                        while(deviceSts_F.ringing || deviceSts_W.ringing);
+                        setRinging = true;
+                        setHctMelody(sr, device.melody.c_str());
+                        setRinging = false;
+                    }
                 }
                 if(paramRing == "true" || paramRing == "false")
                 {
