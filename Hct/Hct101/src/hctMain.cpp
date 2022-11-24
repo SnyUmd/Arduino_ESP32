@@ -344,7 +344,7 @@ void setDevice(int contentNum)
                         setHctMelody(sr, device.melody.c_str());
                         setRinging = false;
                     }
-                    returnMessage = GetResponsMessage(Position, "set", "melody", paramMelody);
+                    returnMessage = GetResponsMessage(Position, "set", "melody", device.melody);
                 }
                 if(paramRing == "true" || paramRing == "false")
                 {
@@ -362,7 +362,7 @@ void setDevice(int contentNum)
                 *p_device = device;
                 bzReceivedRing();
                 // returnMessage = "successed";
-                returnMessage = GetResponsMessage(Position, "set", "length", paramLength);
+                returnMessage = GetResponsMessage(Position, "set", "length", to_string(device.length).c_str());
             }
             else if(paramInterval == "0")
             {
@@ -375,7 +375,7 @@ void setDevice(int contentNum)
                 *p_device = device;
                 bzReceivedRing();
                 // returnMessage = "successed";
-                returnMessage = GetResponsMessage(Position, "set", "interval", paramInterval);
+                returnMessage = GetResponsMessage(Position, "set", "interval", to_string(device.interval).c_str());
             }
             else if(paramInterval != "") {
                 device.interval = atoi(paramInterval.c_str());
@@ -386,7 +386,7 @@ void setDevice(int contentNum)
                 *p_device = device;
                 bzReceivedRing();
                 // returnMessage = "successed";
-                returnMessage = GetResponsMessage(Position, "set", "interval", paramInterval);
+                returnMessage = GetResponsMessage(Position, "set", "interval", to_string(device.interval).c_str());
             }
             // else if(paramRing == "true" || paramRing == "false")
             // {
