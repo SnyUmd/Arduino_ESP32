@@ -58,6 +58,21 @@ enum enmContentNum_Set
   enm_buzzer
 };
 
+struct Responses{
+  String Target;
+  String Action;
+  String Item;
+  String Value;
+};
+
+Responses ResponsWord = 
+{
+  "\"target\"", 
+  "\"action\"",
+  "\"item\"", 
+  "\"value\""
+};
+
 //↓↓↓↓==============================================
 // struct setValue{
 //   int interval;
@@ -103,6 +118,7 @@ struct deviceStatus{
   int setTime;
   int timerNumOpen;
   int timerNumClose;
+  int adjustMotion;
   String melody;
   hw_timer_t* tOpen;
   hw_timer_t* tClose;
@@ -114,7 +130,7 @@ deviceStatus deviceSts_W =
     DEFAULT_LENGTH, 
     DEFAULT_LENGTH, 0, 
     TIMER_NUM_OPEN_W, 
-    TIMER_NUM_CLOSE_W,
+    TIMER_NUM_CLOSE_W, 10,
     "4do8-4re8-4mi8-4fa8-4so8-4ra8-4si8-5do8", NULL, NULL};
     // "4do8-4re8-4mi8", NULL, NULL};
 deviceStatus deviceSts_F = 
@@ -123,7 +139,7 @@ deviceStatus deviceSts_F =
     DEFAULT_LENGTH, 
     DEFAULT_LENGTH, 0, 
     TIMER_NUM_OPEN_F, 
-    TIMER_NUM_CLOSE_F,
+    TIMER_NUM_CLOSE_F, 10,
     "2do8-2re8-2mi8-2fa8-2so8-2ra8-2si8-3do8", NULL, NULL};
     // "2do8-2re8-2mi8", NULL, NULL};
 
@@ -146,7 +162,7 @@ String httpContents[] =
   "/get",
   "/now",
   "/set",
-  "/adjust",
+  "/adjust"
 };
 
 enum enmHttpContents

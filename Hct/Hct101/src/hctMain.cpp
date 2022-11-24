@@ -48,6 +48,7 @@ void IRAM_ATTR intervalStop();
 void modeSetting();
 void IRAM_ATTR onTimer();
 void regularAction(deviceStatus& device, int& led_cnt, bool bl_food);
+String GetResponsMessage(String target, String action, String item = "", String value = "");
 
 int getNextTime(deviceStatus device);
 //***************************************************************************************************************
@@ -174,7 +175,7 @@ void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
         // device.serverInit = true;
     }
     // if(device.closing && device.opened)
-    else if(device.closing && device.opened)
+    if(device.closing && device.opened)
     {
         // device.serverInit = false;
         device.closing = false;
@@ -183,9 +184,9 @@ void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
         digitalWrite(device.portLED, LED_OFF);
         // device.serverInit = true;
     }
-    else if(device.adjustment && !device.opened)
+    if(device.adjustment && !device.opened)
     {
-        motorAction(device.adjustmentLeft, MOTOR_ADJUST_RANGE, bl_food);
+        motorAction(device.adjustmentLeft, device.adjustMotion, bl_food);
         device.adjustment = false;
     }
     led_cnt++;
@@ -210,7 +211,7 @@ void setHttpAction()
 {
     //バルブオープン
     server.on(httpContents[enmNow], HTTP_ANY, [](){setDevice(enmNow);});
-    //アフター設定
+    //セット
     server.on(httpContents[enmSet], HTTP_ANY, [](){setDevice(enmSet);});
 
     //値取得
@@ -245,7 +246,9 @@ void setDevice(int contentNum)
     String paramTarget = server.arg("target");
     String paramDirection = server.arg("direction");
     String paramRing = server.arg("ring");
+    String paramMotion = server.arg("motion");
 
+    String Position = "water";
     switch(contentNum)
     {
         case enmNow://-------------------------------------------------------
@@ -259,6 +262,7 @@ void setDevice(int contentNum)
             else if(paramTarget == "f")
             {
                 sr.println("area = f");
+                string Position = "food";
                 device = deviceSts_F;
                 p_device = &deviceSts_F;
                 func = &openMotorF;
@@ -280,7 +284,21 @@ void setDevice(int contentNum)
                 device.flgNow = true;
                 device.oppenning = true;
                 *p_device = device;
-                returnMessage = "successed";
+                returnMessage = GetResponsMessage(Position, "now");
+                // returnMessage = "successed";
+                // returnMessage = 
+                //     "{%s:\"%s\",%s:\"%s\",%s:\"%s\",%s:\"%s\"}", 
+                //     ResponsWord.Position, Position,
+                //     ResponsWord.Motion, "\"now\"",
+                //     ResponsWord.Item, "\"\"",
+                //     ResponsWord.Value, "\"\"";
+
+                // returnMessage += "{";
+                // returnMessage += ResponsWord.Position + ":\"" + Position + "\",";
+                // returnMessage += ResponsWord.Motion + ":\"now\",";
+                // returnMessage += ResponsWord.Item + ":\"\",";
+                // returnMessage += ResponsWord.Value + ":\"\"";
+                // returnMessage += "}";
             }
             else{
                 bzErrorSound();
@@ -302,6 +320,7 @@ void setDevice(int contentNum)
                 device = deviceSts_F;
                 p_device = &deviceSts_F;
                 func = &openMotorF;
+                string Position = "food";
 
                 portLED = PORT_LED_R;
                 // bzReceivedRing();
@@ -325,23 +344,25 @@ void setDevice(int contentNum)
                         setHctMelody(sr, device.melody.c_str());
                         setRinging = false;
                     }
+                    returnMessage = GetResponsMessage(Position, "set", "melody", paramMelody);
                 }
                 if(paramRing == "true" || paramRing == "false")
                 {
-                    if(paramRing == "true")
-                        device.ring = true;
-                    else
-                        device.ring = false;
+                    if(paramRing == "true") device.ring = true;
+                    else device.ring = false;
+                    returnMessage = GetResponsMessage(Position, "set", "ring", paramRing);
                 }
                 bzReceivedRing();
                 *p_device = device;
-                returnMessage = "successed";
+                // returnMessage = "successed";
+
             }
             else if(paramLength != "") {
                 device.length = atoi(paramLength.c_str());
                 *p_device = device;
                 bzReceivedRing();
-                returnMessage = "successed";
+                // returnMessage = "successed";
+                returnMessage = GetResponsMessage(Position, "set", "length", paramLength);
             }
             else if(paramInterval == "0")
             {
@@ -353,7 +374,8 @@ void setDevice(int contentNum)
                 digitalWrite(device.portLED, LED_OFF);
                 *p_device = device;
                 bzReceivedRing();
-                returnMessage = "successed";
+                // returnMessage = "successed";
+                returnMessage = GetResponsMessage(Position, "set", "interval", paramInterval);
             }
             else if(paramInterval != "") {
                 device.interval = atoi(paramInterval.c_str());
@@ -363,7 +385,8 @@ void setDevice(int contentNum)
                 digitalWrite(device.portLED, LED_ON);
                 *p_device = device;
                 bzReceivedRing();
-                returnMessage = "successed";
+                // returnMessage = "successed";
+                returnMessage = GetResponsMessage(Position, "set", "interval", paramInterval);
             }
             // else if(paramRing == "true" || paramRing == "false")
             // {
@@ -408,8 +431,12 @@ void setDevice(int contentNum)
                 device.closing == false)
             {
                 bzReceivedRing();
+
                 if(paramDirection == "l") device.adjustmentLeft = true;
                 else device.adjustmentLeft = false;
+
+                if(paramMotion != "") sscanf(paramMotion.c_str(), "%d", &device.adjustMotion);
+
                 device.adjustment = true;
                 *p_device = device;
                 returnMessage = "successed";
@@ -433,6 +460,9 @@ void outputValue()
 
     deviceStatus device;
     deviceStatus *p_device;
+
+    String Position = "water";
+
     // if(paramSts == paramWord_get[enm_time])
     // {
     //     bzReceivedRing();
@@ -467,6 +497,7 @@ void outputValue()
         {
             device = deviceSts_F;
             p_device = &deviceSts_F;
+            Position = "food";
         }
         else
         {
@@ -478,41 +509,57 @@ void outputValue()
         if(paramItem == paramWord_get[enm_interval])
         {
             bzReceivedRing();
-            returnMessage = device.interval;
+            // returnMessage = device.interval;
+            returnMessage = GetResponsMessage(Position, "output", paramItem, to_string(device.interval).c_str());
+
         }
         else if(paramItem == paramWord_get[enm_ring])
         {
             bzReceivedRing();
-            if(device.ring) returnMessage = "true";
-            else returnMessage = "false";
+            if(device.ring) returnMessage = GetResponsMessage(Position, "output", paramItem, "true");
+            else returnMessage = GetResponsMessage(Position, "output", paramItem, "false");
         }
         else if(paramItem == paramWord_get[enm_melody])
         {
             bzReceivedRing();
-            returnMessage = device.melody;
+            // returnMessage = device.melody;
+            returnMessage = GetResponsMessage(Position, "output", paramItem, device.melody);
             setHctMelody(sr, device.melody.c_str());
+            
         }
         else if(paramItem == paramWord_get[enm_next])
         {
             // sr.println(getNextTime(device));
             bzReceivedRing();
-            returnMessage = getNextTime(device);
+            // returnMessage = getNextTime(device);
+            returnMessage = GetResponsMessage(Position, "output", paramItem, to_string(getNextTime(device)).c_str());
         }
         else if(paramItem == "settime")
         {
             bzReceivedRing();
             returnMessage = device.setTime;
+            returnMessage = GetResponsMessage(Position, "output", paramItem, to_string(device.setTime).c_str());
         }
         else if(paramItem == paramWord_get[enm_all])
         {
             bzReceivedRing();
-            struct tm nowTime = getTimeInf();
-            arrangeTime(s, nowTime);
-            returnMessage = s;
-            returnMessage += "\r";
-            returnMessage += getTemp().c_str();
-            returnMessage += "\r";
-            returnMessage += getHumd().c_str();
+            // struct tm nowTime = getTimeInf();
+            // arrangeTime(s, nowTime);
+            // returnMessage = s;
+            // returnMessage += "\r";
+            // returnMessage += getTemp().c_str();
+            // returnMessage += "\r";
+            // returnMessage += getHumd().c_str();
+
+            String ringVal = "";
+            if(device.ring) ringVal = "true";
+            else ringVal = "false";
+            returnMessage += "[";
+            returnMessage += GetResponsMessage(Position, "output", "interval", to_string(device.interval).c_str()) + ",";
+            returnMessage += GetResponsMessage(Position, "output", "ring", ringVal) + ",";
+            returnMessage += GetResponsMessage(Position, "output", "melody", device.melody) + ",";
+            returnMessage += GetResponsMessage(Position, "output", "next", to_string(getNextTime(device)).c_str());
+            returnMessage += "]";
         }
         else{
             bzErrorSound();
@@ -520,6 +567,18 @@ void outputValue()
         }
     }
     server.send(200, "text/plain", returnMessage);
+}
+
+String GetResponsMessage(String target, String action, String item, String value)
+{
+    String resultMessage = "";
+    resultMessage += "{";
+    resultMessage += ResponsWord.Target + ":\"" + target + "\",";
+    resultMessage += ResponsWord.Action + ":\"" + action + "\",";
+    resultMessage += ResponsWord.Item + ":\"" + item + "\",";
+    resultMessage += ResponsWord.Value + ":\"" + value + "\"";
+    resultMessage += "}";
+    return resultMessage;
 }
 
 //*************************************
