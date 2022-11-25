@@ -262,7 +262,7 @@ void setDevice(int contentNum)
             else if(paramTarget == "f")
             {
                 sr.println("area = f");
-                string Position = "food";
+                Position = "food";
                 device = deviceSts_F;
                 p_device = &deviceSts_F;
                 func = &openMotorF;
@@ -320,7 +320,7 @@ void setDevice(int contentNum)
                 device = deviceSts_F;
                 p_device = &deviceSts_F;
                 func = &openMotorF;
-                string Position = "food";
+                Position = "food";
 
                 portLED = PORT_LED_R;
                 // bzReceivedRing();
