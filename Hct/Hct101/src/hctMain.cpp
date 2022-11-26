@@ -57,21 +57,37 @@ int getNextTime(deviceStatus device);
 void setup()
 {
     initPort();
+
+    LC.ledFlash(PORT_LED_R, 5, 3);
+    LC.ledFlash(PORT_LED_G, 5, 3);
+    digitalWrite(PORT_LED_R, 1);
+    digitalWrite(PORT_LED_G, 1);
+
     attachInterrupt(PORT_SW, swInterrupt, FALLING);
     sr.begin(115200);
     initI2C(wr);
     InitBz();
     bzPowerOn();
+
     wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, false);
     setHttpAction();
     sr.println("-----loop Start-----");
-    BzGoUp(10, 10);
     
     // setVal.interval = 20;
     // operationReservation = enmRegularOppenning;
     // setAfter(setVal.interval, setVal.length);
-    LC.ledFlash(PORT_LED_R, 10, 5);
+    LC.ledFlash(PORT_LED_G, 5, 2);
+    digitalWrite(PORT_LED_G, 1);
+    LC.ledFlash(PORT_LED_R, 5, 2);
     digitalWrite(PORT_LED_R, 1);
+
+    motorAction(MOTOR_OPEN, 20, false);
+    motorAction(MOTOR_OPEN, 20, true);
+
+    motorAction(MOTOR_CLOSE, 20, false);
+    motorAction(MOTOR_CLOSE, 20, true);
+
+    BzGoUp(5, 10);
     
     xTaskCreatePinnedToCore(taskMotor_W, "taskMotor_W", 4096, NULL, 1, NULL, 0);
     xTaskCreatePinnedToCore(taskMotor_F, "taskMotor_F", 4096, NULL, 1, NULL, 0);
