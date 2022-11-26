@@ -14,7 +14,7 @@
 #define MOTOR_RANGE 125
 #define MOTOR_ADJUST_RANGE 10
 
-#define DEFAULT_LENGTH 2
+#define DEFAULT_LENGTH 3
 
 #define LED_ON 0
 #define LED_OFF 1
