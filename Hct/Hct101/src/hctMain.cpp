@@ -148,6 +148,7 @@ void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
         else if(deviceSts_F.ringing) canRing = false;
         else if(setRinging) canRing = false;
         else canRing = true;
+
         if (canRing && device.ring && !device.ringing)
         {
             device.ringing = true;
@@ -161,9 +162,16 @@ void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
         digitalWrite(device.portLED, LED_ON);
         device.oppenning = false;
         device.opened = true;
+
+        // モータを動かす前にクロージングタイマーをセット
+        // if(device.flgNow) len = device.nowLength;
+        // else len = device.length;
+        if(!bl_food)
+            setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorW, /*len*/DEFAULT_LENGTH * 1000000, false);
+        else
+            setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorF, /*len*/DEFAULT_LENGTH * 1000000, false);
+        
         motorAction(MOTOR_OPEN, MOTOR_RANGE, bl_food);
-        if(device.flgNow) len = device.nowLength;
-        else len = device.length;
         device.flgNow = false;
 
         if(!ringed)
@@ -184,10 +192,10 @@ void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
             }
         }
         
-        if(!bl_food)
-            setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorW, len * 1000000, false);
-        else
-            setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorF, len * 1000000, false);
+        // if(!bl_food)
+        //     setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorW, len * 1000000, false);
+        // else
+        //     setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorF, len * 1000000, false);
         // device.serverInit = true;
     }
     // if(device.closing && device.opened)
@@ -257,7 +265,7 @@ void setDevice(int contentNum)
     String returnMessage = "";
     // String paramSts = server.arg("sts");
     String paramMelody = server.arg("melody");
-    String paramLength = server.arg("length");
+    // String paramLength = server.arg("length");
     String paramInterval = server.arg("interval");
     String paramTarget = server.arg("target");
     String paramDirection = server.arg("direction");
@@ -295,8 +303,8 @@ void setDevice(int contentNum)
                 device.closing == false)
             {
                 bzReceivedRing();
-                if(paramLength != "") device.nowLength = atoi(paramLength.c_str());
-                else device.nowLength = DEFAULT_LENGTH;
+                // if(paramLength != "") device.nowLength = atoi(paramLength.c_str());
+                // else device.nowLength = DEFAULT_LENGTH;
                 device.flgNow = true;
                 device.oppenning = true;
                 *p_device = device;
@@ -373,13 +381,13 @@ void setDevice(int contentNum)
                 // returnMessage = "successed";
 
             }
-            else if(paramLength != "") {
-                device.length = atoi(paramLength.c_str());
-                *p_device = device;
-                bzReceivedRing();
-                // returnMessage = "successed";
-                returnMessage = GetResponsMessage(Position, "set", "length", to_string(device.length).c_str());
-            }
+            // else if(paramLength != "") {
+            //     device.length = atoi(paramLength.c_str());
+            //     *p_device = device;
+            //     bzReceivedRing();
+            //     // returnMessage = "successed";
+            //     returnMessage = GetResponsMessage(Position, "set", "length", to_string(device.length).c_str());
+            // }
             else if(paramInterval == "0")
             {
                 sr.println("interval stop");
@@ -498,10 +506,8 @@ void outputValue()
         bzReceivedRing();
         returnMessage = getHumd().c_str();
     }
-    else if(paramItem == "dq")
-    {
-        Bz_DragonQuest_Preface();
-    }
+    // else if(paramItem == "dq")
+    //     Bz_DragonQuest_Preface();
     else
     {
         if(paramTarget == "w")
@@ -527,7 +533,6 @@ void outputValue()
             bzReceivedRing();
             // returnMessage = device.interval;
             returnMessage = GetResponsMessage(Position, "output", paramItem, to_string(device.interval).c_str());
-
         }
         else if(paramItem == paramWord_get[enm_ring])
         {
