@@ -9,6 +9,15 @@
 #define PWM_PIN 25
 #define PWM_DUTY 128
 
+#define PWM_FRQ_DO_0 1046.502
+#define PWM_FRQ_RE_0 1174.659
+#define PWM_FRQ_MI_0 1318.51
+#define PWM_FRQ_FA_0 1396.913
+#define PWM_FRQ_SO_0 1567.982
+#define PWM_FRQ_RA_0 1760
+#define PWM_FRQ_SI_0 1975.533
+#define PWM_FRQ_DO_1 2093.005
+
 #include <Arduino.h>
 using namespace std;
 
