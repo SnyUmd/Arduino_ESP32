@@ -9,9 +9,9 @@ void wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char*
     {
         int waitTime = 0;
         wifi.setHostname(host_name);//ホスト名を設定
-        // delay(500);
+        delay(1000);
         wifi.begin(ssid, pass);
-        // delay(500);
+        delay(1000);
         while(wifi.status() != WL_CONNECTED) {
             sr.print('.');
             delay(500);
