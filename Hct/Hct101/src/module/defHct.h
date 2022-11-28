@@ -29,10 +29,10 @@
 // #define SSID "GalFl-sn"
 // #define PASS "noenoe0714"
 
-#define SSID "pet-oasis"
-#define PASS "petOasis2022"
+// #define SSID "pet-oasis"
+// #define PASS "petOasis2022"
 
-// #define SSID "tangatable-ap"
-// #define PASS "TangaTable2015"
+#define SSID "Buffalo-G-F088"
+#define PASS "n17e92@53S19n"
 
 #define HOST_NAME "petoasis"
