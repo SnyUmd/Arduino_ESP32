@@ -10,7 +10,7 @@ const int aryMotorSts[4][4] =
     {0, 0, 0, 1}
 };
 
-void motorAction(bool bl_left, int loop_num, bool bl_food)
+void motorAction(bool bl_left, int loop_num, bool is_food)
 {
     bool blLoop = true;
     int num;
@@ -19,7 +19,7 @@ void motorAction(bool bl_left, int loop_num, bool bl_food)
     // LC.ledFlash(PORT_LED_G, 10, 5);
 
     int in1, in2, in3, in4;
-    if(bl_food)
+    if(is_food)
     {
         in1 = PORT_MOTOR1_F;
         in2 = PORT_MOTOR2_F;

@@ -82,25 +82,32 @@ void setup()
             delay(100);
         }
     }
+    digitalWrite(PORT_LED_F, LED_OFF);
+    digitalWrite(PORT_LED_W, LED_OFF);
+    delay(500);
+
     setHttpAction();
-    sr.println("-----loop Start-----");
     
     // setVal.interval = 20;
     // operationReservation = enmRegularOppenning;
     // setAfter(setVal.interval, setVal.length);
-    LC.ledFlash(PORT_LED_W, 5, 2);
-    digitalWrite(PORT_LED_W, LED_OFF);
-    LC.ledFlash(PORT_LED_F, 5, 2);
+    
+    LC.ledFlash(PORT_LED_F, 5, 5);
     digitalWrite(PORT_LED_F, LED_OFF);
+    LC.ledFlash(PORT_LED_W, 5, 5);
+    digitalWrite(PORT_LED_W, LED_OFF);
 
-    motorAction(MOTOR_OPEN, 20, false);
+
+
     motorAction(MOTOR_OPEN, 20, true);
-
-    motorAction(MOTOR_CLOSE, 20, false);
+    motorAction(MOTOR_OPEN, 20, false);
     motorAction(MOTOR_CLOSE, 20, true);
+    motorAction(MOTOR_CLOSE, 20, false);
 
     BzGoUp(5, 10);
     
+    sr.println("-----loop Start-----");
+
     xTaskCreatePinnedToCore(taskMotor_W, "taskMotor_W", 4096, NULL, 1, NULL, 0);
     xTaskCreatePinnedToCore(taskMotor_F, "taskMotor_F", 4096, NULL, 1, NULL, 0);
 
