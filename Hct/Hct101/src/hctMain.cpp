@@ -60,14 +60,17 @@ void setup()
 
     LC.ledFlash(PORT_LED_F, 5, 3);
     LC.ledFlash(PORT_LED_W, 5, 3);
-    digitalWrite(PORT_LED_F, 1);
-    digitalWrite(PORT_LED_W, 1);
+    digitalWrite(PORT_LED_F, LED_OFF);
+    digitalWrite(PORT_LED_W, LED_OFF);
 
     attachInterrupt(PORT_SW, swInterrupt, FALLING);
     sr.begin(115200);
     initI2C(wr);
     InitBz();
     bzPowerOn();
+
+    digitalWrite(PORT_LED_F, LED_ON);
+    digitalWrite(PORT_LED_W, LED_ON);
 
     wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, false);
     setHttpAction();
@@ -77,9 +80,9 @@ void setup()
     // operationReservation = enmRegularOppenning;
     // setAfter(setVal.interval, setVal.length);
     LC.ledFlash(PORT_LED_W, 5, 2);
-    digitalWrite(PORT_LED_W, 1);
+    digitalWrite(PORT_LED_W, LED_OFF);
     LC.ledFlash(PORT_LED_F, 5, 2);
-    digitalWrite(PORT_LED_F, 1);
+    digitalWrite(PORT_LED_F, LED_OFF);
 
     motorAction(MOTOR_OPEN, 20, false);
     motorAction(MOTOR_OPEN, 20, true);
