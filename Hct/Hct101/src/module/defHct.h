@@ -21,8 +21,8 @@
 
 #define PORT_SW 0
 
-#define PORT_LED_G 16
-#define PORT_LED_R 4
+#define PORT_LED_G 16//水用LED
+#define PORT_LED_R 4//餌用LED
 
 #define PORT_BUZZER 25
 
