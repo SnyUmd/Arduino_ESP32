@@ -26,13 +26,7 @@
 
 #define PORT_BUZZER 25
 
-// #define SSID "GalFl-sn"
-// #define PASS "noenoe0714"
-
-// #define SSID "pet-oasis"
-// #define PASS "petOasis2022"
-
-#define SSID "Buffalo-G-F088"
-#define PASS "n17e92@53S19n"
+#define SSID "barnet24"
+#define PASS "t8diw56s7sxie"
 
 #define HOST_NAME "petoasis"
