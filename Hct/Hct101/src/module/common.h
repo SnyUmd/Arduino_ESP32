@@ -126,7 +126,7 @@ struct deviceStatus{
 
 deviceStatus deviceSts_W = 
   { false, false, false, false, false, false, false, false, true,
-    PORT_LED_G ,0, 
+    PORT_LED_W ,0, 
     /*DEFAULT_LENGTH, 
     DEFAULT_LENGTH,*/ 0, 
     TIMER_NUM_OPEN_W, 
@@ -135,7 +135,7 @@ deviceStatus deviceSts_W =
     // "4do8-4re8-4mi8", NULL, NULL};
 deviceStatus deviceSts_F = 
   { false, false, false, false, false, false, false, false, true,
-    PORT_LED_R ,0, 
+    PORT_LED_F ,0, 
     /*DEFAULT_LENGTH, 
     DEFAULT_LENGTH,*/ 0, 
     TIMER_NUM_OPEN_F, 

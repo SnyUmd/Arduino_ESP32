@@ -9,10 +9,10 @@ void initPort()
     pinMode(PORT_SW, INPUT_PULLUP);
 
     //LEDポート
-    pinMode(PORT_LED_G, OUTPUT);
-    pinMode(PORT_LED_R, OUTPUT);
-    digitalWrite(PORT_LED_G, 1);
-    digitalWrite(PORT_LED_R, 1);
+    pinMode(PORT_LED_W, OUTPUT);
+    pinMode(PORT_LED_F, OUTPUT);
+    digitalWrite(PORT_LED_W, 1);
+    digitalWrite(PORT_LED_F, 1);
 
     //ステッピングモータ　ポート
     pinMode(PORT_MOTOR1_W, OUTPUT);

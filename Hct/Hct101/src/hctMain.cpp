@@ -58,10 +58,10 @@ void setup()
 {
     initPort();
 
-    LC.ledFlash(PORT_LED_R, 5, 3);
-    LC.ledFlash(PORT_LED_G, 5, 3);
-    digitalWrite(PORT_LED_R, 1);
-    digitalWrite(PORT_LED_G, 1);
+    LC.ledFlash(PORT_LED_F, 5, 3);
+    LC.ledFlash(PORT_LED_W, 5, 3);
+    digitalWrite(PORT_LED_F, 1);
+    digitalWrite(PORT_LED_W, 1);
 
     attachInterrupt(PORT_SW, swInterrupt, FALLING);
     sr.begin(115200);
@@ -76,10 +76,10 @@ void setup()
     // setVal.interval = 20;
     // operationReservation = enmRegularOppenning;
     // setAfter(setVal.interval, setVal.length);
-    LC.ledFlash(PORT_LED_G, 5, 2);
-    digitalWrite(PORT_LED_G, 1);
-    LC.ledFlash(PORT_LED_R, 5, 2);
-    digitalWrite(PORT_LED_R, 1);
+    LC.ledFlash(PORT_LED_W, 5, 2);
+    digitalWrite(PORT_LED_W, 1);
+    LC.ledFlash(PORT_LED_F, 5, 2);
+    digitalWrite(PORT_LED_F, 1);
 
     motorAction(MOTOR_OPEN, 20, false);
     motorAction(MOTOR_OPEN, 20, true);
@@ -336,7 +336,7 @@ void setDevice(int contentNum)
                 p_device = &deviceSts_W;
                 func = &openMotorW;
 
-                portLED = PORT_LED_G;
+                portLED = PORT_LED_W;
                 // bzReceivedRing();
             }
             else if(paramTarget == "f")
@@ -346,7 +346,7 @@ void setDevice(int contentNum)
                 func = &openMotorF;
                 Position = "food";
 
-                portLED = PORT_LED_R;
+                portLED = PORT_LED_F;
                 // bzReceivedRing();
             }
             else
@@ -722,8 +722,8 @@ void modeSetting()
 {
     int swCnt_L = 0;
     int swCnt_H = 0;
-    digitalWrite(PORT_LED_G, LED_ON);
-    digitalWrite(PORT_LED_R, LED_ON);
+    digitalWrite(PORT_LED_W, LED_ON);
+    digitalWrite(PORT_LED_F, LED_ON);
 
     while(1)
     {
@@ -736,8 +736,8 @@ void modeSetting()
         delay(5);
     }
 
-    digitalWrite(PORT_LED_G, LED_OFF);
-    digitalWrite(PORT_LED_R, LED_OFF);
+    digitalWrite(PORT_LED_W, LED_OFF);
+    digitalWrite(PORT_LED_F, LED_OFF);
     mode = enmNormal;
     setTimerInterrupt(tSettingOff, 5, &onTimer, 1000000, false);
 }

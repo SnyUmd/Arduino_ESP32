@@ -21,8 +21,8 @@
 
 #define PORT_SW 0
 
-#define PORT_LED_G 16
-#define PORT_LED_R 4
+#define PORT_LED_W 16
+#define PORT_LED_F 4
 
 #define PORT_BUZZER 25
 
