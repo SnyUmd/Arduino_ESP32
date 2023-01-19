@@ -710,6 +710,16 @@ void prgBug()
     BzStop(1);
 }
 
+void bzWiFiError()
+{
+    BzNote(1, getrScale(8), flSound[0][mDO], 100);
+    BzNote(0, getScale1(8), 0, 100);
+    BzNote(1, getrScale(8), flSound[0][mDO], 100);
+    BzNote(0, getScale1(8), 0, 100);
+    BzNote(1, getrScale(8), flSound[0][mDO], 100);
+    BzNote(0, getScale1(8), 0, 100);
+}
+
 void bzModeChange(int modeNum)
 {
     if(modeNum == 0)

@@ -3,8 +3,9 @@
 
 
 // ****************************************************************
-void wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char* host_name, bool bl_ota)
+bool wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char* host_name, bool bl_ota)
 {
+    int errCnt = 0;
     while(1)
     {
         int waitTime = 0;
@@ -19,7 +20,11 @@ void wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char*
             if(waitTime > 5) break;
         }
         if(waitTime <= 5) break;
-        else sr.println("retry");
+        else {
+            errCnt++;
+            if(errCnt > 3) return false;
+            sr.println("retry");
+        }
     }
 
     configTime(JST, 0, "ntp.nict.jp", "time.google.com", "ntp.jst.mfeed.ad.jp");//NTPの設定
@@ -28,6 +33,7 @@ void wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char*
     sr.println(wifi.localIP());
     sr.print("Host name : ");
     sr.println(host_name);
+    return true;
 }
 
 // ****************************************************************

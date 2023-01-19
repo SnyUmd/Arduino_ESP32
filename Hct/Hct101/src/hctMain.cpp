@@ -72,7 +72,16 @@ void setup()
     digitalWrite(PORT_LED_F, LED_ON);
     digitalWrite(PORT_LED_W, LED_ON);
 
-    wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, false);
+    if(!wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, false))
+    {
+        bzErrorSound();
+        while(1)
+        {
+            digitalWrite(PORT_LED_F, !digitalRead(PORT_LED_F));
+            digitalWrite(PORT_LED_W, !digitalRead(PORT_LED_W));
+            delay(100);
+        }
+    }
     setHttpAction();
     sr.println("-----loop Start-----");
     

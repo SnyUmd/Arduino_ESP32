@@ -50,6 +50,7 @@ void bzReceivedRing();
 void bzErrorSound();
 void bzPowerOn();
 void prgBug();
+void bzWiFiError();
 void bzModeChange(int modeNum);
 
 void setHctMelody(HardwareSerial& sr, string val);
