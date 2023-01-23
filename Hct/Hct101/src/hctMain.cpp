@@ -506,16 +506,16 @@ void outputValue()
 
     String Position = "water";
 
-    // if(paramSts == paramWord_get[enm_time])
-    // {
-    //     bzReceivedRing();
-    //     struct tm nowTime = getTimeInf();
-    //     char s[20] = {};
-    //     arrangeTime(s, nowTime);
-    //     returnMessage = s;
-    //     // server.send(200, "text/plain", s);
-    // }
-    if(paramItem == paramWord_get[enm_temperture])
+    if(paramItem == paramWord_get[enm_time])
+    {
+        bzReceivedRing();
+        struct tm nowTime = getTimeInf();
+        char s[20] = {};
+        arrangeTime(s, nowTime);
+        returnMessage = s;
+        // server.send(200, "text/plain", s);
+    }
+    else if(paramItem == paramWord_get[enm_temperture])
     {
         bzReceivedRing();
         returnMessage = getTemp().c_str();

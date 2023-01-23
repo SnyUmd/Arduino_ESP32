@@ -8,6 +8,13 @@
 #define PORT_MOTOR3_F 12
 #define PORT_MOTOR4_F 14
 
+#define PORT_LED_W 16
+#define PORT_LED_F 4
+
+#define PORT_SW 0
+
+#define PORT_BUZZER 25
+
 #define MOTOR_OPEN false
 #define MOTOR_CLOSE true
 
@@ -18,13 +25,6 @@
 
 #define LED_ON 0
 #define LED_OFF 1
-
-#define PORT_SW 0
-
-#define PORT_LED_W 16
-#define PORT_LED_F 4
-
-#define PORT_BUZZER 25
 
 #define SSID "barnet24"
 #define PASS "t8diw56s7sxie"
