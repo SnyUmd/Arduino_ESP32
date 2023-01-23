@@ -49,6 +49,7 @@ void modeSetting();
 void IRAM_ATTR onTimer();
 void regularAction(deviceStatus& device, int& led_cnt, bool bl_food);
 String GetResponsMessage(String target, String action, String item = "", String value = "");
+String GetResponsMessage_all(String target, String action, String item = "", String value = "");
 
 int getNextTime(deviceStatus device);
 //***************************************************************************************************************
@@ -328,20 +329,6 @@ void setDevice(int contentNum)
                 device.oppenning = true;
                 *p_device = device;
                 returnMessage = GetResponsMessage(Position, "now");
-                // returnMessage = "successed";
-                // returnMessage = 
-                //     "{%s:\"%s\",%s:\"%s\",%s:\"%s\",%s:\"%s\"}", 
-                //     ResponsWord.Position, Position,
-                //     ResponsWord.Motion, "\"now\"",
-                //     ResponsWord.Item, "\"\"",
-                //     ResponsWord.Value, "\"\"";
-
-                // returnMessage += "{";
-                // returnMessage += ResponsWord.Position + ":\"" + Position + "\",";
-                // returnMessage += ResponsWord.Motion + ":\"now\",";
-                // returnMessage += ResponsWord.Item + ":\"\",";
-                // returnMessage += ResponsWord.Value + ":\"\"";
-                // returnMessage += "}";
             }
             else{
                 bzErrorSound();
@@ -594,11 +581,11 @@ void outputValue()
             String ringVal = "";
             if(device.ring) ringVal = "true";
             else ringVal = "false";
-            returnMessage += "[";
-            returnMessage += GetResponsMessage(Position, "output", "interval", to_string(device.interval).c_str()) + ",";
-            returnMessage += GetResponsMessage(Position, "output", "ring", ringVal) + ",";
-            returnMessage += GetResponsMessage(Position, "output", "melody", device.melody) + ",";
-            returnMessage += GetResponsMessage(Position, "output", "next", to_string(getNextTime(device)).c_str());
+            returnMessage += "[\r";
+            returnMessage += "" + GetResponsMessage_all(Position, "output", "interval", to_string(device.interval).c_str()) + ",\r";
+            returnMessage += "" + GetResponsMessage_all(Position, "output", "ring", ringVal) + ",\r";
+            returnMessage += "" + GetResponsMessage_all(Position, "output", "melody", device.melody) + ",\r";
+            returnMessage += "" + GetResponsMessage_all(Position, "output", "next", to_string(getNextTime(device)).c_str()) + "\r";
             returnMessage += "]";
         }
         else{
@@ -612,12 +599,24 @@ void outputValue()
 String GetResponsMessage(String target, String action, String item, String value)
 {
     String resultMessage = "";
-    resultMessage += "{";
-    resultMessage += ResponsWord.Target + ":\"" + target + "\",";
-    resultMessage += ResponsWord.Action + ":\"" + action + "\",";
-    resultMessage += ResponsWord.Item + ":\"" + item + "\",";
-    resultMessage += ResponsWord.Value + ":\"" + value + "\"";
+    resultMessage += "{\r";
+    resultMessage += "\t" + ResponsWord.Target + ":\"" + target + "\",\r";
+    resultMessage += "\t" + ResponsWord.Action + ":\"" + action + "\",\r";
+    resultMessage += "\t" + ResponsWord.Item + ":\"" + item + "\",\r";
+    resultMessage += "\t" + ResponsWord.Value + ":\"" + value + "\"\r";
     resultMessage += "}";
+    return resultMessage;
+}
+
+String GetResponsMessage_all(String target, String action, String item, String value)
+{
+    String resultMessage = "";
+    resultMessage += "\t{\r";
+    resultMessage += "\t\t" + ResponsWord.Target + ":\"" + target + "\",\r";
+    resultMessage += "\t\t" + ResponsWord.Action + ":\"" + action + "\",\r";
+    resultMessage += "\t\t" + ResponsWord.Item + ":\"" + item + "\",\r";
+    resultMessage += "\t\t" + ResponsWord.Value + ":\"" + value + "\"\r";
+    resultMessage += "\t}";
     return resultMessage;
 }
 
