@@ -74,6 +74,7 @@ void setup()
     digitalWrite(PORT_LED_F, LED_OFF);
     digitalWrite(PORT_LED_W, LED_OFF);
 
+    // 割り込み
     attachInterrupt(PORT_SW, swInterrupt, FALLING);
     sr.begin(115200);
     initI2C(wr);
