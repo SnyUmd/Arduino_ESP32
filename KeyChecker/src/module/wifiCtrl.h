@@ -6,7 +6,7 @@
 
 bool wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char* host_name, bool bl_ota);
 //使い方
-// if(!wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, false))
+// if(!wifiInit(WiFi, serial, SSID, PASS, HOST_NAME, false))
 // {
 //     bzErrorSound();
 //     while(1)
@@ -16,5 +16,6 @@ bool wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char*
 //         delay(100);
 //     }
 // }
+
 struct tm getTimeInf();
 void arrangeTime(char* s, tm time_inf);
