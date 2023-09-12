@@ -1,5 +1,7 @@
-#define LED_INTERNAL 2
-#define SW_INTERNAL 0
+#define P_LED_INTERNAL 2
+#define P_SW_INTERNAL 0
+#define P_BUZZER 25
+#define P_APDS9930_INT 18
 
 #define LED_ON 1
 #define LED_OFF 0

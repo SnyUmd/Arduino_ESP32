@@ -8,12 +8,18 @@
 #include "module/Initialize.h"
 #include "module/Interrupt.h"
 #include "module/wifiCtrl.h"
+#include "module/BzCtrl.h"
+#include "module/i2cCtrl.h"
+#include "module/apds9930.h"
 
 // put function declarations here:
 //----------------------------
 void swInterrupt_fn();
 void setHttpAction();
 void httpAction(int, String);
+
+void ringSet(void(*fn)(void));
+void taskBuzzer(void* arg);
 //----------------------------
 
 
@@ -28,43 +34,85 @@ void setup() {
   sr.begin(115200);
 
   initPort();
-  // attachInterrupt(SW_INTERNAL, swInterrupt, FALLING);
-  // initInterrupt(SW_INTERNAL, swInterrupt_fn, FALLING);
+  InitBz();
+  initI2C(wr);
+  // bzPowerOn();
+  ringSet(bzPowerOn);
+  attachInterrupt(P_SW_INTERNAL, swInterrupt_fn, FALLING);
+  // initInterrupt(P_SW_INTERNAL, swInterrupt_fn, FALLING);
 
+  //ブザー鳴動タスクをセット
+  xTaskCreatePinnedToCore(taskBuzzer, "taskBuzzer", 4096, NULL, 1, NULL, 0);
+
+  //Wi-Fi接続
   if(!wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, false))
   {
+    //接続失敗でLED点滅
+      ringSet(bzErrorSound);
       while(1)
       {
-          digitalWrite(LED_INTERNAL, !digitalRead(LED_INTERNAL));
+          digitalWrite(P_LED_INTERNAL, !digitalRead(P_LED_INTERNAL));
           delay(200);
       }
   }
-  else digitalWrite(LED_INTERNAL, LED_ON);
+  else digitalWrite(P_LED_INTERNAL, LED_ON);
   setHttpAction();
   sr.print("setup successed");
+  // BzGoUp(5, 10);
+  ringSet(stanbyOk);//準備完了音を鳴らす
 }
 
+//**********************************************************
 void loop() {
-  // put your main code here, to run repeatedly:
-  server.handleClient();
-  
+  // server.handleClient();
+
+  sr.println(readTestApds9930(wr, sr));
+  delay(500);
 }
+
+
+//**********************************************************
+//鳴らすブザー音をセット
+void ringSet(void(*fn)(void))
+{
+  ringBz = fn;
+  flgBz = true;
+}
+
+//**********************************************************
+//ブザー鳴動タスク
+void taskBuzzer(void* arg)
+{
+  ringing *f;
+  while(1)
+  {
+    f = &ringBz;
+    if(flgBz)
+    {
+      flgBz = false;
+      ringBz();
+    }
+    delay(1);//待たなければリセットしてしまう。
+  }
+}
+
 
 //**********************************************************
 /// @brief SW割り込み処理
 void swInterrupt_fn()
 {
-  if(digitalRead(SW_INTERNAL) == !SW_OFF)
+  if(digitalRead(P_SW_INTERNAL) == !SW_OFF)
   {
     // チャタリング防止の為、割り込み停止
-    attachInterrupt(SW_INTERNAL, NULL, FALLING);
+    attachInterrupt(P_SW_INTERNAL, NULL, FALLING);
 
     //割り込み処理--------------------------
-    digitalWrite(LED_INTERNAL, !digitalRead(LED_INTERNAL));
+    // digitalWrite(P_LED_INTERNAL, !digitalRead(P_LED_INTERNAL));
+    ringSet(bzReceivedRing);
     // ------------------------------------
 
     //割り込みセット
-    attachInterrupt(SW_INTERNAL, swInterrupt_fn, FALLING);
+    attachInterrupt(P_SW_INTERNAL, swInterrupt_fn, FALLING);
   }
 }
 
