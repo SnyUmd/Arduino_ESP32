@@ -544,3 +544,14 @@ void bzPowerOn()
     BzNote(1, getrScale(32), flSound[4][mDO], 100);
     BzNote(0, getScale1(4), 0, 100);
 }
+
+//*******************************************************
+void bzDummy()
+{
+    BzNote(1, getrScale(16), flSound[0][mDO], 100);
+    BzNote(0, getScale1(16), 0, 100);
+    // BzNote(1, getrScale(16), flSound[0][mDO], 100);
+    // BzNote(0, getScale1(16), 0, 100);
+    // BzNote(1, getrScale(16), flSound[0][mDO], 100);
+    // BzNote(0, getScale1(16), 0, 100);
+}

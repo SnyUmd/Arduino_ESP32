@@ -39,5 +39,6 @@ void stanbyOk();
 void bzReceivedRing();
 void bzErrorSound();
 void bzPowerOn();
+void bzDummy();
 
 void setHctMelody(HardwareSerial& sr, string val);

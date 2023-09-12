@@ -18,7 +18,7 @@ void swInterrupt_fn();
 void setHttpAction();
 void httpAction(int, String);
 
-void ringSet(void(*fn)(void));
+void ringSet(int);
 void taskBuzzer(void* arg);
 //----------------------------
 
@@ -37,7 +37,7 @@ void setup() {
   InitBz();
   initI2C(wr);
   // bzPowerOn();
-  ringSet(bzPowerOn);
+  ringSet(enm_power_on);
   attachInterrupt(P_SW_INTERNAL, swInterrupt_fn, FALLING);
   // initInterrupt(P_SW_INTERNAL, swInterrupt_fn, FALLING);
 
@@ -48,7 +48,7 @@ void setup() {
   if(!wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, false))
   {
     //接続失敗でLED点滅
-      ringSet(bzErrorSound);
+      ringSet(enm_error);
       while(1)
       {
           digitalWrite(P_LED_INTERNAL, !digitalRead(P_LED_INTERNAL));
@@ -59,39 +59,58 @@ void setup() {
   setHttpAction();
   sr.print("setup successed");
   // BzGoUp(5, 10);
-  ringSet(stanbyOk);//準備完了音を鳴らす
+  ringSet(enm_stanby_ok);//準備完了音を鳴らす
 }
 
 //**********************************************************
 void loop() {
   // server.handleClient();
 
-  sr.println(readTestApds9930(wr, sr));
+  // sr.println(readTestApds9930(wr, sr));
   delay(500);
 }
 
 
 //**********************************************************
 //鳴らすブザー音をセット
-void ringSet(void(*fn)(void))
+void ringSet(int bz_num)
 {
-  ringBz = fn;
-  flgBz = true;
+  bzSts[bz_num].blBz = true;
+  // flgBz = true;
+}
+
+bool checkBz()
+{
+    for(int i = 0; i < sizeof(bzSts)/sizeof(structBz); i++) 
+    {
+      if(bzSts[i].blBz) return true;
+    }
+    return false;
 }
 
 //**********************************************************
 //ブザー鳴動タスク
 void taskBuzzer(void* arg)
 {
-  ringing *f;
   while(1)
   {
-    f = &ringBz;
-    if(flgBz)
+    // if(flgBz)
+    while(checkBz())
     {
-      flgBz = false;
-      ringBz();
+      sr.println("----------");
+      sr.println(sizeof(bzSts)/sizeof(structBz));
+      sr.println("----------");
+      for(int i = 0; i < sizeof(bzSts)/sizeof(structBz); i++)
+      // for(int i = 0; i < 4; i++)
+      {
+        if(bzSts[i].blBz) 
+        {
+          bzSts[i].ring();
+          bzSts[i].blBz = false;
+        }
+      }
     }
+    // flgBz = false;
     delay(1);//待たなければリセットしてしまう。
   }
 }
@@ -108,7 +127,7 @@ void swInterrupt_fn()
 
     //割り込み処理--------------------------
     // digitalWrite(P_LED_INTERNAL, !digitalRead(P_LED_INTERNAL));
-    ringSet(bzReceivedRing);
+    ringSet(enm_free0);
     // ------------------------------------
 
     //割り込みセット
