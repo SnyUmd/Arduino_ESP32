@@ -11,6 +11,7 @@
 
 #define HOST_NAME "keychecker"
 // #define SSID "IODATA-f73e40-2G"
+// #define SSID "Wi-ko1225_G"
 #define SSID "Buffalo-G-F088"
 #define PASS "n17e92@53S19n"
 // #define PASS "aaaa"

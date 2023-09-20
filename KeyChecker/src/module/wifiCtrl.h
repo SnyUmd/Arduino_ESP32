@@ -4,6 +4,7 @@
 #include <ArduinoOTA.h>
 // #include <Arduino.h>
 
+
 bool wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char* host_name, bool bl_ota);
 //使い方
 // if(!wifiInit(WiFi, serial, SSID, PASS, HOST_NAME, false))

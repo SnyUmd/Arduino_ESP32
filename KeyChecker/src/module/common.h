@@ -2,10 +2,12 @@
 #include <WebServer.h>
 #include <Wire.h>
 #include "BzCtrl.h"
+// #include "ledCtrl.h"
 
 WebServer server(80);
-HardwareSerial sr(0);
+HardwareSerial sr(2);
 TwoWire wr = Wire;
+// ledCtrl LC;
 
 //task buzzer
 bool flgBz = false;//trueでringBzにセットされた関数を実行
@@ -17,6 +19,7 @@ enum enmBz
     enm_error,
     enm_stanby_ok,
     enm_int_ring,
+    enm_interrupt,
     enm_free0,
 };
 struct structBz
@@ -31,6 +34,7 @@ structBz bzSts[] =
     {bzErrorSound, false},
     {stanbyOk, false},
     {bzReceivedRing, false},
+    {bzInterrupt, false},
     {bzDummy, false}
 };
 

@@ -11,6 +11,7 @@
 #include "module/BzCtrl.h"
 #include "module/i2cCtrl.h"
 #include "module/apds9930.h"
+#include "module/ledCtrl.h"
 
 // put function declarations here:
 //----------------------------
@@ -21,9 +22,7 @@ void httpAction(int, String);
 void ringSet(int);
 void taskBuzzer(void* arg);
 //----------------------------
-
-
-
+ledCtrl LC;
 
 
 //**********************************************************
@@ -55,9 +54,10 @@ void setup() {
           delay(200);
       }
   }
-  else digitalWrite(P_LED_INTERNAL, LED_ON);
+  LC.ledFlash(P_LED_INTERNAL, 5, 5);
+  digitalWrite(P_LED_INTERNAL, LED_OFF);
   setHttpAction();
-  sr.print("setup successed");
+  sr.println("setup successed");
   // BzGoUp(5, 10);
   ringSet(enm_stanby_ok);//準備完了音を鳴らす
 }
@@ -97,11 +97,7 @@ void taskBuzzer(void* arg)
     // if(flgBz)
     while(checkBz())
     {
-      sr.println("----------");
-      sr.println(sizeof(bzSts)/sizeof(structBz));
-      sr.println("----------");
       for(int i = 0; i < sizeof(bzSts)/sizeof(structBz); i++)
-      // for(int i = 0; i < 4; i++)
       {
         if(bzSts[i].blBz) 
         {
@@ -127,7 +123,8 @@ void swInterrupt_fn()
 
     //割り込み処理--------------------------
     // digitalWrite(P_LED_INTERNAL, !digitalRead(P_LED_INTERNAL));
-    ringSet(enm_free0);
+    sr.println("get intterrupt");
+    ringSet(enm_interrupt);
     // ------------------------------------
 
     //割り込みセット
