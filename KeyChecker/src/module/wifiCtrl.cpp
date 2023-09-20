@@ -1,12 +1,14 @@
 #define JST 3600* 9
 #include "wifiCtrl.h"
 #include "defKeyChecker.h"
-// #include "ledCtrl.h"
+#include "ledCtrl.h"
 // #include "common.h"
+// #include "module/common.h"
 
 // ****************************************************************
 bool wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char* host_name, bool bl_ota)
 {
+    ledCtrl LedCtrl;
     int errCnt = 0;
     int reTryNum = 10;
     while(1)
@@ -27,7 +29,7 @@ bool wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char*
             errCnt++;
             // if(errCnt > 3) return false;
             if(errCnt > reTryNum) return false;
-            // LC.ledFlash(P_LED_INTERNAL, 5, 5);
+            LedCtrl.ledFlash(P_LED_INTERNAL, 2, 2);
             sr.println("retry");
         }
     }

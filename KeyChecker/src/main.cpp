@@ -11,7 +11,7 @@
 #include "module/BzCtrl.h"
 #include "module/i2cCtrl.h"
 #include "module/apds9930.h"
-#include "module/ledCtrl.h"
+// #include "module/ledCtrl.h"
 
 // put function declarations here:
 //----------------------------
@@ -22,7 +22,7 @@ void httpAction(int, String);
 void ringSet(int);
 void taskBuzzer(void* arg);
 //----------------------------
-ledCtrl LC;
+// ledCtrl LC;
 
 
 //**********************************************************

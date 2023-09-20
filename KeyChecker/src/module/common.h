@@ -2,12 +2,12 @@
 #include <WebServer.h>
 #include <Wire.h>
 #include "BzCtrl.h"
-// #include "ledCtrl.h"
+#include "ledCtrl.h"
 
 WebServer server(80);
 HardwareSerial sr(2);
 TwoWire wr = Wire;
-// ledCtrl LC;
+ledCtrl LC;
 
 //task buzzer
 bool flgBz = false;//trueでringBzにセットされた関数を実行
