@@ -16,7 +16,8 @@ enum enmBz
     enm_power_on,
     enm_error,
     enm_stanby_ok,
-    enm_int_ring,
+    enm_init_ring,
+    enm_interrupt,
     enm_free0,
 };
 struct structBz
@@ -31,6 +32,7 @@ structBz bzSts[] =
     {bzErrorSound, false},
     {stanbyOk, false},
     {bzReceivedRing, false},
+    {bzInterrupt, false},
     {bzDummy, false}
 };
 

@@ -548,7 +548,11 @@ void bzPowerOn()
 //*******************************************************
 void bzInterrupt()
 {
+<<<<<<< HEAD
     BzNote(1, getrScale(16), flSound[0][mDO], 100);
+=======
+    BzNote(1, getrScale(16), flSound[3][mDO], 100);
+>>>>>>> ce55cbbfdde9779e090165399767a08fb0748675
     BzNote(0, getScale1(16), 0, 100);
 }
 

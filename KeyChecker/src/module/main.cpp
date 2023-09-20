@@ -79,7 +79,6 @@ void ringSet(int bz_num)
   // flgBz = true;
 }
 
-//**********************************************************
 bool checkBz()
 {
     for(int i = 0; i < sizeof(bzSts)/sizeof(structBz); i++) 
@@ -98,6 +97,9 @@ void taskBuzzer(void* arg)
     // if(flgBz)
     while(checkBz())
     {
+      sr.println("----------");
+      sr.println(sizeof(bzSts)/sizeof(structBz));
+      sr.println("----------");
       for(int i = 0; i < sizeof(bzSts)/sizeof(structBz); i++)
       // for(int i = 0; i < 4; i++)
       {
@@ -125,8 +127,7 @@ void swInterrupt_fn()
 
     //割り込み処理--------------------------
     // digitalWrite(P_LED_INTERNAL, !digitalRead(P_LED_INTERNAL));
-    sr.println("get interrupt signal");
-    ringSet(enm_interrupt);
+    ringSet(enm_free0);
     // ------------------------------------
 
     //割り込みセット
