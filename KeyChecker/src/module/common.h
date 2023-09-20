@@ -5,7 +5,7 @@
 #include "ledCtrl.h"
 
 WebServer server(80);
-HardwareSerial sr(2);
+HardwareSerial sr(2);//RX17, TX16
 TwoWire wr = Wire;
 ledCtrl LC;
 
