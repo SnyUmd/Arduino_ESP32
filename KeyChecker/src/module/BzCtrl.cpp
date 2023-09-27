@@ -554,6 +554,13 @@ void bzInterrupt()
 }
 
 //*******************************************************
+void bzOf()
+{
+    BzNote(1, getrScale(16), flSound[1][mDO], 100);
+    BzNote(0, getScale1(16), 0, 100);    
+}
+
+//*******************************************************
 void bzDummy()
 {
     BzNote(1, getrScale(16), flSound[0][mDO], 100);

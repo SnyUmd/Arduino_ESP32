@@ -9,7 +9,7 @@
 #define SW_ON 0
 #define SW_OFF 1
 
-#define HOST_NAME "keychecker"
+#define HOST_NAME "keychecker_000"
 // #define SSID "IODATA-f73e40-2G"
 // #define SSID "Wi-ko1225_G"
 #define SSID "Buffalo-G-F088"

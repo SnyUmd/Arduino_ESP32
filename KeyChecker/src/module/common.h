@@ -13,6 +13,8 @@ ledCtrl LC;
 bool flgBz = false;//trueでringBzにセットされた関数を実行
 // typedef void(*ringing)();//ブザー鳴動関数格納用　関数ポインタの宣言
 
+bool flgLighting = false;
+
 enum enmBz
 {
     enm_power_on,
@@ -20,6 +22,7 @@ enum enmBz
     enm_stanby_ok,
     enm_int_ring,
     enm_interrupt,
+    enm_of,
     enm_free0,
 };
 struct structBz
@@ -35,9 +38,14 @@ structBz bzSts[] =
     {stanbyOk, false},
     {bzReceivedRing, false},
     {bzInterrupt, false},
+    {bzOf, false},
     {bzDummy, false}
 };
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 enum enmHttpContents
 {
     // enmGet,

@@ -41,5 +41,6 @@ void bzErrorSound();
 void bzPowerOn();
 void bzDummy();
 void bzInterrupt();
+void bzOf();
 
 void setHctMelody(HardwareSerial& sr, string val);
