@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 
+
 #include "module/common.h"
 #include "module/defKeyChecker.h"
 #include "module/Initialize.h"
@@ -27,7 +28,8 @@ void taskLighting(void* arg);
 bool checkBz();
 void ringSet(int);
 
-void LightOff();
+bool LightOff();
+void start_light_sleep();
 
 //----------------------------
 // ledCtrl LC;
@@ -78,11 +80,11 @@ void setup() {
 
 //**********************************************************
 void loop() {
-    // server.handleClient();
+    server.handleClient();
 
     // sr.println(readTestApds9930(wr, sr));
     // delay(500);
-    int a = 1;
+    // int a = 1;
 }
 
 //**********************************************************
@@ -121,8 +123,8 @@ void taskBuzzer(void* arg)
         {
             if(bzSts[i].blBz) 
             {
-            bzSts[i].ring();
-            bzSts[i].blBz = false;
+                bzSts[i].ring();
+                bzSts[i].blBz = false;
             }
         }
         }
@@ -152,31 +154,35 @@ bool checkBz()
 //**********************************************************
 bool setFlgLighting()
 {
+    sr.println("-----function setFlgLighting----");
     if(!flgLighting)
     {
         flgLighting = true;
         ringSet(enm_interrupt);
         sr.println("flag lighting set");
-        sr.println("");
-        sr.println("点灯中");
         return true;
     }
     else
     {
-        sr.println("点灯中");
+        // sr.println("点灯中");
         return false;
     } 
 }
 
 //**********************************************************
 // void IRAM_ATTR LightOff()
-void LightOff()
+bool LightOff()
 {
-    digitalWrite(P_LED_INTERNAL, LED_OFF);
-    sr.println("Light OFF");
-    ringSet(enm_of);
-    flgLighting = false;
-    sr.println("reset flag lighting");
+    if(flgLighting)
+    {
+        digitalWrite(P_LED_INTERNAL, LED_OFF);
+        sr.println("Light OFF");
+        ringSet(enm_of);
+        flgLighting = false;
+        sr.println("reset flag lighting");
+        return true;
+    }
+    else return false;
 }
 
 
@@ -191,14 +197,7 @@ void swInterrupt_fn()
 
         //割り込み処理--------------------------
         sr.println("get intterrupt");
-        // if(!flgLighting)
-        // {
-        //     flgLighting = true;
-        //     ringSet(enm_interrupt);
-        //     sr.println("flag lighting set");
-        //     sr.println("");
-        // }
-        // else sr.println("点灯中");
+
         if(!setFlgLighting()) sr.println("点灯中");
         // ------------------------------------
 
@@ -211,8 +210,8 @@ void swInterrupt_fn()
 void setHttpAction()
 {
     //バルブオープン
-    // server.on("/test", HTTP_ANY, [](){httpAction(0,"sts");});//http://keychecker.airport/test?sts=??
-    server.on("/set", HTTP_ANY, [](){httpAction(1,"sts");});//http://keychecker.airport/set?sts=??
+    server.on("/test", HTTP_ANY, [](){httpAction(0,"sts");});//http://keychecker.airport/test?sts=??
+    server.on("/set", HTTP_ANY, [](){httpAction(1,"sts");});//http://keychecker_000.airport/set?sts=??
     //セット
     // server.on(httpContents[enmSet], HTTP_ANY, [](){httpAction(enmSet);});
 
@@ -233,12 +232,12 @@ void httpAction(int pattern, String param)
     switch (pattern)
     {
         case 0:
-        // if(param_val == "ok")
-        //     returnMessage = "OK";
-        // else if(param_val == "ng")
-        //     returnMessage = "NG";
-        // else
-        //     returnMessage = "-----";
+            if(param_val == "ok")
+                returnMessage = "OK";
+            else if(param_val == "ng")
+                returnMessage = "NG";
+            else
+                returnMessage = "-----";
             break;
         case 1:
             if(param_val == "on")
@@ -250,6 +249,16 @@ void httpAction(int pattern, String param)
                 } 
                 else returnMessage = "Light turned on successfully";
             }
+            else if(param_val == "off")
+            {
+                if(LightOff())
+                    returnMessage = "Light turned off successflly";
+                else
+                {
+                    sr.println("既に消灯中");
+                    returnMessage = "error  [While the lights are off]";
+                }
+            }
             break;
         
         default:
@@ -258,6 +267,5 @@ void httpAction(int pattern, String param)
     server.send(200, "text/plain", returnMessage);
 
 }
-
 
 //**********************************************************

@@ -14,6 +14,7 @@ bool flgBz = false;//trueでringBzにセットされた関数を実行
 // typedef void(*ringing)();//ブザー鳴動関数格納用　関数ポインタの宣言
 
 bool flgLighting = false;
+int deviceID = 000;
 
 enum enmBz
 {
@@ -42,10 +43,6 @@ structBz bzSts[] =
     {bzDummy, false}
 };
 
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 enum enmHttpContents
 {
     // enmGet,
