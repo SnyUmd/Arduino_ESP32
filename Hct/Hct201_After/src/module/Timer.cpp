@@ -12,11 +12,11 @@
 // }
 // setup()
 // {
-//      setTimerInterrupt(timer, 0, onTimer, /*len*/5 * 1000000, false);
+//      setTimerInterrupt(timer, 0, onTimer);
 // }
 // main()
 // {
-//      startTimerInterrupt(timer);
+//      startTimerInterrupt(timer, 1000000, false);
 // }
 
 // void setTimerInterrupt(hw_timer_t*& timer, int timer_num, void(* fn)(void), int count_time, bool regular)

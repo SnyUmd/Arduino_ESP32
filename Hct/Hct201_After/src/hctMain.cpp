@@ -101,24 +101,10 @@ void setup()
     //        タスクハンドルポインタ,
     //        Core ID
     // );
-
-
-    // deviceSts_W.tClose = timerBegin(deviceSts_W.timerNumClose, 80, true);
-    // timerAttachInterrupt(deviceSts_W.tClose, closeMotorW, true);
-    // timerAlarmWrite(deviceSts_W.tClose, DEFAULT_LENGTH * 1000000, false);
-
-    // deviceSts_F.tClose = timerBegin(deviceSts_F.timerNumClose, 80, true);
-    // timerAttachInterrupt(deviceSts_F.tClose, closeMotorF, true);
-    // timerAlarmWrite(deviceSts_F.tClose, DEFAULT_LENGTH * 1000000, false);
-
-    // setTimerInterrupt(deviceSts_W.tClose, deviceSts_W.timerNumClose, closeMotorW, /*len*/DEFAULT_LENGTH * 1000000, false);
-    // setTimerInterrupt(deviceSts_F.tClose, deviceSts_F.timerNumClose, closeMotorF, /*len*/DEFAULT_LENGTH * 1000000, false);
     setTimerInterrupt(deviceSts_W.tClose, deviceSts_W.timerNumClose, closeMotorW);
     setTimerInterrupt(deviceSts_F.tClose, deviceSts_F.timerNumClose, closeMotorF);
     setTimerInterrupt(deviceSts_W.tOpen, deviceSts_W.timerNumOpen, openMotorW);
     setTimerInterrupt(deviceSts_F.tOpen, deviceSts_F.timerNumOpen, openMotorF);
-    // setTimerInterrupt(tSettingOff, 5, &onTimer);
-
 }
 
 //*************************************
@@ -188,17 +174,6 @@ void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
         //クローズタイマーセット
         startTimerInterrupt(device.tClose, 3000000, false);
         
-        // if(!bl_food)
-        // {
-        //     // setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorW, /*len*/DEFAULT_LENGTH * 1000000, false);
-        //     startTimerInterrupt(device.tClose);
-        // }
-        // else
-        // {
-        //     // setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorF, /*len*/DEFAULT_LENGTH * 1000000, false);
-        //     startTimerInterrupt(device.tClose);
-        // }
-        
         motorAction(MOTOR_OPEN, MOTOR_RANGE, bl_food);
         device.flgNow = false;
 
@@ -220,11 +195,6 @@ void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
             }
         }
         
-        // if(!bl_food)
-        //     setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorW, len * 1000000, false);
-        // else
-        //     setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorF, len * 1000000, false);
-        // device.serverInit = true;
     }
     // if(device.closing && device.opened)
     if(device.closing && device.opened)
@@ -422,7 +392,6 @@ void setDevice(int contentNum)
                 device.interval =  0;
                 // stopTimerInterrupt(p_t);
                 // timerEnd(p_t);
-                // setTimerInterrupt(device.tOpen, device.timerNumOpen, intervalStop, 0, false);
                 timerAlarmDisable(device.tOpen);
 
                 digitalWrite(device.portLED, LED_OFF);
@@ -434,7 +403,6 @@ void setDevice(int contentNum)
             else if(paramInterval != "") {
                 device.interval = atoi(paramInterval.c_str());
                 if(device.interval < 10)device.interval = 10;
-                // setTimerInterrupt(device.tOpen, device.timerNumOpen, func, device.interval * 1000000, true);
                 startTimerInterrupt(device.tOpen, device.interval * 1000000, true);
                 device.setTime = GetTime();
                 digitalWrite(device.portLED, LED_ON);
