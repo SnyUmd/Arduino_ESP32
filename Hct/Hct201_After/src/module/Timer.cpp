@@ -10,13 +10,27 @@
 //実行方法　
 // void IRAMATTR onTimer{
 // }
-// initTimerInterrupt(true, &onTimer);
+// setup()
+// {
+//      setTimerInterrupt(timer, 0, onTimer, /*len*/5 * 1000000, false);
+// }
+// main()
+// {
+//      startTimerInterrupt(timer);
+// }
 
-void setTimerInterrupt(hw_timer_t* timer, int timer_num, void(* fn)(void), int count_time, bool regular)
+// void setTimerInterrupt(hw_timer_t*& timer, int timer_num, void(* fn)(void), int count_time, bool regular)
+void setTimerInterrupt(hw_timer_t*& timer, int timer_num, void(* fn)(void))
 {
     timer = timerBegin(timer_num, 80, true);
     timerAttachInterrupt(timer, fn, true);
+    // timerAlarmWrite(timer, count_time, regular);
+}
+
+void startTimerInterrupt(hw_timer_t*& timer, int count_time, bool regular)
+{
     timerAlarmWrite(timer, count_time, regular);
+    timerRestart(timer);
     timerAlarmEnable(timer);
 }
 

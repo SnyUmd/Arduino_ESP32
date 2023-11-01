@@ -45,7 +45,7 @@ void IRAM_ATTR closeMotorW();
 void IRAM_ATTR closeMotorF();
 void IRAM_ATTR intervalStop();
 
-void modeSetting();
+// void modeSetting();
 void IRAM_ATTR onTimer();
 void regularAction(deviceStatus& device, int& led_cnt, bool bl_food);
 String GetResponsMessage(String target, String action, String item = "", String value = "");
@@ -101,6 +101,24 @@ void setup()
     //        タスクハンドルポインタ,
     //        Core ID
     // );
+
+
+    // deviceSts_W.tClose = timerBegin(deviceSts_W.timerNumClose, 80, true);
+    // timerAttachInterrupt(deviceSts_W.tClose, closeMotorW, true);
+    // timerAlarmWrite(deviceSts_W.tClose, DEFAULT_LENGTH * 1000000, false);
+
+    // deviceSts_F.tClose = timerBegin(deviceSts_F.timerNumClose, 80, true);
+    // timerAttachInterrupt(deviceSts_F.tClose, closeMotorF, true);
+    // timerAlarmWrite(deviceSts_F.tClose, DEFAULT_LENGTH * 1000000, false);
+
+    // setTimerInterrupt(deviceSts_W.tClose, deviceSts_W.timerNumClose, closeMotorW, /*len*/DEFAULT_LENGTH * 1000000, false);
+    // setTimerInterrupt(deviceSts_F.tClose, deviceSts_F.timerNumClose, closeMotorF, /*len*/DEFAULT_LENGTH * 1000000, false);
+    setTimerInterrupt(deviceSts_W.tClose, deviceSts_W.timerNumClose, closeMotorW);
+    setTimerInterrupt(deviceSts_F.tClose, deviceSts_F.timerNumClose, closeMotorF);
+    setTimerInterrupt(deviceSts_W.tOpen, deviceSts_W.timerNumOpen, openMotorW);
+    setTimerInterrupt(deviceSts_F.tOpen, deviceSts_F.timerNumOpen, openMotorF);
+    // setTimerInterrupt(tSettingOff, 5, &onTimer);
+
 }
 
 //*************************************
@@ -166,10 +184,20 @@ void regularAction(deviceStatus& device, int& led_cnt, bool bl_food)
         // モータを動かす前にクロージングタイマーをセット
         // if(device.flgNow) len = device.nowLength;
         // else len = device.length;
-        if(!bl_food)
-            setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorW, /*len*/DEFAULT_LENGTH * 1000000, false);
-        else
-            setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorF, /*len*/DEFAULT_LENGTH * 1000000, false);
+
+        //クローズタイマーセット
+        startTimerInterrupt(device.tClose, 3000000, false);
+        
+        // if(!bl_food)
+        // {
+        //     // setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorW, /*len*/DEFAULT_LENGTH * 1000000, false);
+        //     startTimerInterrupt(device.tClose);
+        // }
+        // else
+        // {
+        //     // setTimerInterrupt(device.tClose, device.timerNumClose, closeMotorF, /*len*/DEFAULT_LENGTH * 1000000, false);
+        //     startTimerInterrupt(device.tClose);
+        // }
         
         motorAction(MOTOR_OPEN, MOTOR_RANGE, bl_food);
         device.flgNow = false;
@@ -394,7 +422,9 @@ void setDevice(int contentNum)
                 device.interval =  0;
                 // stopTimerInterrupt(p_t);
                 // timerEnd(p_t);
-                setTimerInterrupt(device.tOpen, device.timerNumOpen, intervalStop, 0, false);
+                // setTimerInterrupt(device.tOpen, device.timerNumOpen, intervalStop, 0, false);
+                timerAlarmDisable(device.tOpen);
+
                 digitalWrite(device.portLED, LED_OFF);
                 *p_device = device;
                 bzReceivedRing();
@@ -404,7 +434,8 @@ void setDevice(int contentNum)
             else if(paramInterval != "") {
                 device.interval = atoi(paramInterval.c_str());
                 if(device.interval < 10)device.interval = 10;
-                setTimerInterrupt(device.tOpen, device.timerNumOpen, func, device.interval * 1000000, true);
+                // setTimerInterrupt(device.tOpen, device.timerNumOpen, func, device.interval * 1000000, true);
+                startTimerInterrupt(device.tOpen, device.interval * 1000000, true);
                 device.setTime = GetTime();
                 digitalWrite(device.portLED, LED_ON);
                 *p_device = device;
@@ -718,29 +749,29 @@ void IRAM_ATTR setSwInterrupt()
 }
 
 //*************************************
-void modeSetting()
-{
-    int swCnt_L = 0;
-    int swCnt_H = 0;
-    digitalWrite(PORT_LED_W, LED_ON);
-    digitalWrite(PORT_LED_F, LED_ON);
+// void modeSetting()
+// {
+//     int swCnt_L = 0;
+//     int swCnt_H = 0;
+//     digitalWrite(PORT_LED_W, LED_ON);
+//     digitalWrite(PORT_LED_F, LED_ON);
 
-    while(1)
-    {
-        if(digitalRead(PORT_SW) == LOW)
-        {
-            swCnt_L++;
-            if(swCnt_L > 40){ break; }
-        }
-        else{ swCnt_L = 0; }
-        delay(5);
-    }
+//     while(1)
+//     {
+//         if(digitalRead(PORT_SW) == LOW)
+//         {
+//             swCnt_L++;
+//             if(swCnt_L > 40){ break; }
+//         }
+//         else{ swCnt_L = 0; }
+//         delay(5);
+//     }
 
-    digitalWrite(PORT_LED_W, LED_OFF);
-    digitalWrite(PORT_LED_F, LED_OFF);
-    mode = enmNormal;
-    setTimerInterrupt(tSettingOff, 5, &onTimer, 1000000, false);
-}
+//     digitalWrite(PORT_LED_W, LED_OFF);
+//     digitalWrite(PORT_LED_F, LED_OFF);
+//     mode = enmNormal;
+//     setTimerInterrupt(tSettingOff, 5, &onTimer, 1000000, false);
+// }
 
 //*************************************
 //現在時刻取得
