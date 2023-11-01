@@ -77,23 +77,27 @@ void setup()
     InitBz();
     bzPowerOn();
 
-    // if(digitalRead(PORT_SW) == LOW)
-    // {
-    //     sr.println("***** Setting mode *****");
-    //     BzGoDown(5, 10);
-    //     digitalWrite(PORT_LED_W, LED_ON);
-    //     digitalWrite(PORT_LED_F, LED_ON);
 
-    //     while(1)
-    //     {
-
-    //     }
-    // }
 //-------------------------------------------------------
     sr.println("----- EEPROM setting -----");
     EEP_Init(ep);
     sr.println("----- WiFi status EEPROM Write -----");
 
+    if(digitalRead(PORT_SW) == LOW)
+    {
+        sr.println("***** Setting mode *****");
+        BzGoDown(5, 10);
+        digitalWrite(PORT_LED_W, LED_ON);
+        digitalWrite(PORT_LED_F, LED_ON);
+        EEP_Write(ep, wifiSts.eep_address_ssid ,SSID);
+        EEP_Write(ep, wifiSts.eep_address_pass ,PASS);
+        EEP_Write(ep, wifiSts.eep_address_host_name ,s_hName);
+        sr.println("Reset wifi status");
+        while(1)
+        {
+
+        }
+    }
 //EEPROMにWi-Fi情報を書き込み----------------------------------
     // EEP_Write(ep, wifiSts.eep_address_ssid ,SSID);
     // EEP_Write(ep, wifiSts.eep_address_pass ,PASS);
@@ -280,6 +284,9 @@ void setHttpAction()
     //位置の調整
     server.on(httpContents[enmAdjust], HTTP_ANY, [](){setDevice(enmAdjust);});
 
+    //wifi情報登録
+    server.on(httpContents[enmWifi], HTTP_ANY, [](){setDevice(enmWifi);});
+
     // 登録されてないパスにアクセスがあった場合
     server.onNotFound([](){
         bzErrorSound();
@@ -307,6 +314,12 @@ void setDevice(int contentNum)
     String paramDirection = server.arg("direction");
     String paramRing = server.arg("ring");
     String paramMotion = server.arg("motion");
+
+    String paramItem = server.arg("item");
+    String paramValue = server.arg("value");
+    // String paramSsid = server.arg("ssid");
+    // String paramPass = server.arg("pass");
+    // String paramHostname = server.arg("hostname");
 
     String Position = "water";
     switch(contentNum)
@@ -468,8 +481,8 @@ void setDevice(int contentNum)
             break;
 
         case enmAdjust://--------------------------------------------------
-            bool blF = false;
-            bool blLeft = false;
+            // bool blF = false;
+            // bool blLeft = false;
             if(paramTarget == "w")
             { 
                 device = deviceSts_W;
@@ -506,6 +519,36 @@ void setDevice(int contentNum)
             {
                 bzErrorSound();
                 returnMessage = "error";
+            }
+            break;
+        // case enmWifi:
+        //     break;
+        case enmWifi://--------------------------------------------------
+            if(paramItem == "ssid")
+            {
+                sr.println(paramValue && paramValue != "");
+                returnMessage = paramValue;
+                EEP_Write(ep, wifiSts.eep_address_ssid, paramValue);
+                bzReceivedRing();
+            }
+            else if(paramItem == "pass")
+            {
+                sr.println(paramValue && paramValue != "");
+                returnMessage = paramValue;
+                EEP_Write(ep, wifiSts.eep_address_pass, paramValue);
+                bzReceivedRing();
+            }
+            else if(paramItem == "hostname" && paramValue != "")
+            {
+                sr.println(paramValue);
+                returnMessage = paramValue;
+                EEP_Write(ep, wifiSts.eep_address_host_name, paramValue);
+                bzReceivedRing();
+            }
+            else
+            {
+                bzErrorSound();
+                returnMessage = "wifi error";
             }
             break;
     }

@@ -47,7 +47,7 @@ hw_timer_t* tSettingOff = NULL;
 EEPROMClass ep = EEPROM;
 String eep_read = "";
 char eep_read_buf[50];
-String s_hName = "s-tech_test";
+String s_hName = "s-tech";
 //----------------------------
 
 String host_name = "petoasis";
@@ -192,7 +192,8 @@ String httpContents[] =
   "/get",
   "/now",
   "/set",
-  "/adjust"
+  "/adjust",
+  "/wifi"
 };
 
 enum enmHttpContents
@@ -200,7 +201,8 @@ enum enmHttpContents
     enmGet,
     enmNow,
     enmSet,
-    enmAdjust
+    enmAdjust,
+    enmWifi,
 };
 //↑↑↑==============================================
 
