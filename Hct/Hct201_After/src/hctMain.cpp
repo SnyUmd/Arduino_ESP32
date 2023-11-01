@@ -286,6 +286,8 @@ void setHttpAction()
 
     //wifi情報登録
     server.on(httpContents[enmWifi], HTTP_ANY, [](){setDevice(enmWifi);});
+    //wifi情報登録Post
+    server.on(httpContents[enmWF], HTTP_POST, [](){setDevice(enmWF);});
 
     // 登録されてないパスにアクセスがあった場合
     server.onNotFound([](){
@@ -550,6 +552,11 @@ void setDevice(int contentNum)
                 bzErrorSound();
                 returnMessage = "wifi error";
             }
+            break;
+        case enmWF:
+            if(server.hasArg("plain") == false);
+            String body = server.arg("plain");
+            // deserializeJson(jsonDocument, body);
             break;
     }
     server.send(200, "text/plain", returnMessage);
