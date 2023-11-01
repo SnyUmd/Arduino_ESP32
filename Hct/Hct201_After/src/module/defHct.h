@@ -49,4 +49,4 @@
 #define SSID "Buffalo-G-F088"
 #define PASS "n17e92@53S19n"
 
-#define HOST_NAME "s-tech"
+#define HOST_NAME "petoasis"

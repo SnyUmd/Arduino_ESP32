@@ -5,6 +5,7 @@
 #include <Wire.h>
 #include <iostream>
 #include <vector>
+#include <EEPROM.h>
 #include "module/initialize.h"
 #include "module/defHct.h"
 #include "module/common.h"
@@ -16,6 +17,7 @@
 #include "module/htu21d.h"
 #include "module/i2cCtrl.h"
 #include "module/motorCtrl.h"
+#include "module/ESP32_eep.h"
 
 using namespace std;
 
@@ -49,27 +51,55 @@ void IRAM_ATTR intervalStop();
 void IRAM_ATTR onTimer();
 void regularAction(deviceStatus& device, int& led_cnt, bool bl_food);
 String GetResponsMessage(String target, String action, String item = "", String value = "");
-
 int getNextTime(deviceStatus device);
+
+
 //***************************************************************************************************************
 //***************************************************************************************************************
 //***************************************************************************************************************
 void setup()
 {
-    initPort();
+    sr.begin(115200);
+    sr.println("----- START -----");
 
+    sr.println("----- PORT setting -----");
+    initPort();
     LC.ledFlash(PORT_LED_F, 5, 3);
     LC.ledFlash(PORT_LED_W, 5, 3);
     digitalWrite(PORT_LED_F, LED_OFF);
     digitalWrite(PORT_LED_W, LED_OFF);
 
+    sr.println("----- Interrupt setting -----");
     attachInterrupt(PORT_SW, swInterrupt, FALLING);
-    sr.begin(115200);
     initI2C(wr);
+    sr.println("----- Buzzer setting -----");
     InitBz();
     bzPowerOn();
 
-    wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, false);
+//-------------------------------------------------------
+    sr.println("----- EEPROM setting -----");
+    EEP_Init(ep);
+    sr.println("----- WiFi status EEPROM Write -----");
+    EEP_Write(ep, wifiSts.eep_address_ssid ,SSID);
+    EEP_Write(ep, wifiSts.eep_address_pass ,PASS);
+    EEP_Write(ep, wifiSts.eep_address_host_name ,s_hName);
+
+    sr.print("eep length : ");
+    sr.println(ep.length());
+    wifiSts.host_name = EEP_Read(ep, wifiSts.eep_address_host_name, '*', ep.length());
+//-------------------------------------------------------
+
+    // auto c_test = host_name.c_str();
+    // wifiInit(WiFi, sr, SSID, PASS, HOST_NAME, false);
+    sr.println("----- EEPROM status-----");
+    sr.print("ssid : ");
+    sr.println(EEP_Read(ep, wifiSts.eep_address_ssid, '*', ep.length()));
+    sr.print("pass : ");
+    sr.println(EEP_Read(ep, wifiSts.eep_address_pass, '*', ep.length()));
+    sr.print("host name : ");
+    sr.println(EEP_Read(ep, wifiSts.eep_address_host_name, '*', ep.length()));
+
+    wifiInit(WiFi, sr, wifiSts.ssid, wifiSts.pass, wifiSts.host_name, false);
     setHttpAction();
     sr.println("-----loop Start-----");
     
@@ -101,10 +131,12 @@ void setup()
     //        タスクハンドルポインタ,
     //        Core ID
     // );
+
     setTimerInterrupt(deviceSts_W.tClose, deviceSts_W.timerNumClose, closeMotorW);
     setTimerInterrupt(deviceSts_F.tClose, deviceSts_F.timerNumClose, closeMotorF);
     setTimerInterrupt(deviceSts_W.tOpen, deviceSts_W.timerNumOpen, openMotorW);
     setTimerInterrupt(deviceSts_F.tOpen, deviceSts_F.timerNumOpen, openMotorF);
+
 }
 
 //*************************************

@@ -42,6 +42,36 @@ char s[20];//文字格納用
 
 hw_timer_t* tSettingOff = NULL;
 
+
+//----------------------------
+EEPROMClass ep = EEPROM;
+String eep_read = "";
+char eep_read_buf[50];
+String s_hName = "s-tech_test";
+//----------------------------
+
+String host_name = "petoasis";
+
+struct wifi_sts
+{
+  String ssid;
+  String pass;
+  String host_name;
+  int eep_address_ssid;
+  int eep_address_pass;
+  int eep_address_host_name;
+};
+
+wifi_sts wifiSts = 
+{
+  SSID,
+  PASS,
+  HOST_NAME,
+  0x00,
+  0x10,
+  0x20,
+};
+
 const int aryMotorSts[4][4] = 
 {
     {1, 0, 0, 0},

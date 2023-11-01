@@ -3,14 +3,14 @@
 
 
 // ****************************************************************
-void wifiInit(WiFiClass& wifi, HardwareSerial& sr, char* ssid, char* pass, char* host_name, bool bl_ota)
+void wifiInit(WiFiClass& wifi, HardwareSerial& sr, String ssid, String pass, String host_name, bool bl_ota)
 {
     while(1)
     {
         int waitTime = 0;
-        wifi.setHostname(host_name);//ホスト名を設定
+        wifi.setHostname(host_name.c_str());//ホスト名を設定
         delay(1000);
-        wifi.begin(ssid, pass);
+        wifi.begin(ssid.c_str(), pass.c_str());
         delay(1000);
         while(wifi.status() != WL_CONNECTED) {
             sr.print('.');
