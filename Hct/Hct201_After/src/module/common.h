@@ -9,6 +9,7 @@
 #include <string>
 #include <WebServer.h>
 #include <vector>
+#include <EEPROM.h>
 
 int mode = 0;
 enum enmMode
@@ -45,6 +46,7 @@ hw_timer_t* tSettingOff = NULL;
 
 //----------------------------
 EEPROMClass ep = EEPROM;
+int eepSize = 50;
 String eep_read = "";
 char eep_read_buf[50];
 String s_hName = "s-tech";

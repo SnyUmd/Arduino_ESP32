@@ -1,8 +1,8 @@
-#include <EEPROM.h>
+#include "ESP32_eep.h"
 
-void EEP_Init(EEPROMClass& eep)
+void EEP_Init(EEPROMClass& eep, int eep_size)
 {
-    eep.begin(100);
+    eep.begin(eep_size);
 }
 
 void EEP_Write(EEPROMClass& eep, int write_address, String val)

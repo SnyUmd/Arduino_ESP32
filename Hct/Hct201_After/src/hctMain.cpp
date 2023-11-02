@@ -1,11 +1,11 @@
 #include <Arduino.h>
 // #include <string>
-#include <WiFi.h>
+// #include <WiFi.h>
 #include <WebServer.h>
-#include <Wire.h>
+// #include <Wire.h>
 #include <iostream>
 #include <vector>
-#include <EEPROM.h>
+// #include <EEPROM.h>
 #include "module/initialize.h"
 #include "module/defHct.h"
 #include "module/common.h"
@@ -25,7 +25,6 @@ ledCtrl LC;
 
 void init();
 void setHttpAction();
-void swInterrupt();
 void setNowOpen(int open_time);
 void setAfter(int next_time, int adjustment_time);
 void setDevice(int contentNum);
@@ -62,6 +61,23 @@ void setup()
 {
     sr.begin(115200);
     sr.println("----- START -----");
+    //------------------------------------------------------------------
+    esp_chip_info_t chip_info;
+    esp_chip_info(&chip_info);
+
+    printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
+    (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
+
+    printf("Free heap size: %d bytes\n", esp_get_free_heap_size());
+    printf("Internal free heap size: %d bytes\n", esp_get_free_internal_heap_size());
+    printf("Minimum free heap size: %d bytes\n", esp_get_minimum_free_heap_size());
+    multi_heap_info_t info;
+    heap_caps_get_info(&info, MALLOC_CAP_SPIRAM);
+    uint32_t bytes = info.total_free_bytes + info.total_allocated_bytes;
+
+    printf("PSRAM size: %d bytes\n", bytes);
+    printf("Free PSRAM size: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
+    //------------------------------------------------------------------
 
     sr.println("----- PORT setting -----");
     initPort();
@@ -71,8 +87,6 @@ void setup()
     digitalWrite(PORT_LED_W, LED_OFF);
     initI2C(wr);
 
-    // sr.println("----- Interrupt setting -----");
-    // attachInterrupt(PORT_SW, swInterrupt, FALLING);
     sr.println("----- Buzzer setting -----");
     InitBz();
     bzPowerOn();
@@ -80,7 +94,7 @@ void setup()
 
 //-------------------------------------------------------
     sr.println("----- EEPROM setting -----");
-    EEP_Init(ep);
+    EEP_Init(ep, eepSize);
     sr.println("----- WiFi status EEPROM Write -----");
 
     if(digitalRead(PORT_SW) == LOW)
@@ -99,6 +113,8 @@ void setup()
         }
     }
 
+    wifiSts.ssid = EEP_Read(ep, wifiSts.eep_address_ssid, '*', ep.length());
+    wifiSts.pass = EEP_Read(ep, wifiSts.eep_address_pass, '*', ep.length());
     wifiSts.host_name = EEP_Read(ep, wifiSts.eep_address_host_name, '*', ep.length());
 //-------------------------------------------------------
     readEEP();
@@ -759,54 +775,7 @@ void readEEP()
     sr.println(EEP_Read(ep, wifiSts.eep_address_host_name, '*', ep.length()));
 }
 
-//*************************************
-// void IRAM_ATTR setClosing()
-// {
-//     deviceSts.closingRun = true;
 
-// }
-//*************************************
-// void IRAM_ATTR setClosing_Regular()
-// {
-//     deviceSts.closingRun = true;
-// }
-
-//*************************************
-// void IRAM_ATTR afterOpenValve()
-// {
-//     openTime = setVal.length * 1000000;
-//     deviceSts.regularOppenning = true;
-// }
-
-//*************************************
-//SWポート割り込み処理
-//*************************************
-void swInterrupt()
-{
-    //チャタリング対策------------------------
-    attachInterrupt(PORT_SW, NULL, FALLING);
-    //---------------------------------------
-    // motorAction(true, 100, false);
-    // sr.println(WiFi.localIP());
-    // sr.println("Setting mode");
-    // mdeo = enmSetting;
-    attachInterrupt(PORT_SW, swInterrupt, FALLING);
-}
-
-
-//*************************************
-//*************************************
-//*************************************
-//*************************************
-
-//*************************************
-//タイマー割り込み処理
-//*************************************
-void IRAM_ATTR setSwInterrupt()
-{
-    // sr.println(GetTime());
-    attachInterrupt(PORT_SW, swInterrupt, FALLING);
-}
 
 //*************************************
 // void modeSetting()

@@ -1,10 +1,10 @@
 #define JST 3600* 9
 #include "wifiCtrl.h"
 
-
 // ****************************************************************
 void wifiInit(WiFiClass& wifi, HardwareSerial& sr, String ssid, String pass, String host_name, bool bl_ota)
 {
+
     while(1)
     {
         int waitTime = 0;
@@ -22,10 +22,13 @@ void wifiInit(WiFiClass& wifi, HardwareSerial& sr, String ssid, String pass, Str
         else sr.println("retry");
     }
 
+
     configTime(JST, 0, "ntp.nict.jp", "time.google.com", "ntp.jst.mfeed.ad.jp");//NTPの設定
     sr.println("");
     sr.println("Wi-Fi connected");
     sr.println(wifi.localIP());
+    sr.print("SSID : ");
+    sr.println(ssid);
     sr.print("Host name : ");
     sr.println(host_name);
 }
