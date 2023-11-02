@@ -91,21 +91,14 @@ void setup()
         digitalWrite(PORT_LED_F, LED_ON);
         EEP_Write(ep, wifiSts.eep_address_ssid ,SSID);
         EEP_Write(ep, wifiSts.eep_address_pass ,PASS);
-        EEP_Write(ep, wifiSts.eep_address_host_name ,s_hName);
+        EEP_Write(ep, wifiSts.eep_address_host_name ,HOST_NAME);
         sr.println("Reset wifi status");
         while(1)
         {
 
         }
     }
-//EEPROMにWi-Fi情報を書き込み----------------------------------
-    // EEP_Write(ep, wifiSts.eep_address_ssid ,SSID);
-    // EEP_Write(ep, wifiSts.eep_address_pass ,PASS);
-    // EEP_Write(ep, wifiSts.eep_address_host_name ,s_hName);
-//------------------------------------------------------------
 
-    sr.print("eep length : ");
-    sr.println(ep.length());
     wifiSts.host_name = EEP_Read(ep, wifiSts.eep_address_host_name, '*', ep.length());
 //-------------------------------------------------------
     readEEP();
