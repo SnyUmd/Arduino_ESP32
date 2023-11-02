@@ -159,10 +159,7 @@ void loop()
     // if(deviceSts_W.serverInit && deviceSts_F.serverInit) server.handleClient();
     server.handleClient();
 
-    if(blModeSetting)
-    {
-       modeSetting();
-    }
+    if(blModeSetting) ESP.restart();
 }
 
 
@@ -556,12 +553,19 @@ void setDevice(int contentNum)
                 EEP_Write(ep, wifiSts.eep_address_host_name, paramValue);
                 bzReceivedRing();
             }
+            // else if(paramItem == "setting")
+            // {
+            //     bzReceivedRing();
+            //     returnMessage = "setting mode";
+            //     modeSetting();
+            // }
             else
             {
                 // bzErrorSound();
                 bzReceivedRing();
                 returnMessage = "Move to setting mode";
                 blModeSetting = true;
+                // modeSetting();
             }
             break;
         case enmWF:
@@ -916,6 +920,7 @@ void modeSetting()
         // timeSetting = GetTime();
     }
 
+    blModeSetting = false;
     digitalWrite(PORT_LED_W, LED_OFF);
     digitalWrite(PORT_LED_F, LED_OFF);
 }
@@ -936,6 +941,7 @@ String serialRead(BluetoothSerial& srBT ,char c_end, long timeout)
         }
         if(srBT.available())
         {
+            timeSetting = GetTime();
             result += srBT.readString();
             if(result.indexOf(c_end) >= 0)
             {

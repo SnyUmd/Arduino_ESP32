@@ -200,7 +200,7 @@ String httpContents[] =
   "/set",
   "/adjust",
   "/wifi",
-  "/wf"
+  "/wf",
 };
 
 enum enmHttpContents
