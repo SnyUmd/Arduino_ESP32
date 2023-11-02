@@ -49,10 +49,13 @@ EEPROMClass ep = EEPROM;
 int eepSize = 50;
 String eep_read = "";
 char eep_read_buf[50];
-String s_hName = "s-tech";
+// String host_name = "petoasis";
+// String s_hName = "s-tech";
+//----------------------------
+BluetoothSerial Serial_BT;
+
 //----------------------------
 
-String host_name = "petoasis";
 
 struct wifi_sts
 {

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 // #include <EEPROM.h>
+#include <BluetoothSerial.h>
 #include "module/initialize.h"
 #include "module/defHct.h"
 #include "module/common.h"
@@ -18,6 +19,7 @@
 #include "module/i2cCtrl.h"
 #include "module/motorCtrl.h"
 #include "module/ESP32_eep.h"
+#include "module/Arduino_Ini_Setup.h"
 
 using namespace std;
 
@@ -46,12 +48,12 @@ void IRAM_ATTR closeMotorW();
 void IRAM_ATTR closeMotorF();
 void IRAM_ATTR intervalStop();
 
-// void modeSetting();
 void IRAM_ATTR onTimer();
 void regularAction(deviceStatus& device, int& led_cnt, bool bl_food);
 String GetResponsMessage(String target, String action, String item = "", String value = "");
 int getNextTime(deviceStatus device);
 void readEEP();
+void modeSetting();
 
 
 //***************************************************************************************************************
@@ -99,18 +101,7 @@ void setup()
 
     if(digitalRead(PORT_SW) == LOW)
     {
-        sr.println("***** Setting mode *****");
-        BzGoDown(5, 10);
-        digitalWrite(PORT_LED_W, LED_ON);
-        digitalWrite(PORT_LED_F, LED_ON);
-        EEP_Write(ep, wifiSts.eep_address_ssid ,SSID);
-        EEP_Write(ep, wifiSts.eep_address_pass ,PASS);
-        EEP_Write(ep, wifiSts.eep_address_host_name ,HOST_NAME);
-        sr.println("Reset wifi status");
-        while(1)
-        {
-
-        }
+       modeSetting();
     }
 
     wifiSts.ssid = EEP_Read(ep, wifiSts.eep_address_ssid, '*', ep.length());
@@ -776,31 +767,55 @@ void readEEP()
 }
 
 
+// }
+//*************************************
+// void IRAM_ATTR setClosing_Regular()
+// {
+//     deviceSts.closingRun = true;
+// }
 
 //*************************************
-// void modeSetting()
+// void IRAM_ATTR afterOpenValve()
 // {
-//     int swCnt_L = 0;
-//     int swCnt_H = 0;
-//     digitalWrite(PORT_LED_W, LED_ON);
-//     digitalWrite(PORT_LED_F, LED_ON);
-
-//     while(1)
-//     {
-//         if(digitalRead(PORT_SW) == LOW)
-//         {
-//             swCnt_L++;
-//             if(swCnt_L > 40){ break; }
-//         }
-//         else{ swCnt_L = 0; }
-//         delay(5);
-//     }
-
-//     digitalWrite(PORT_LED_W, LED_OFF);
-//     digitalWrite(PORT_LED_F, LED_OFF);
-//     mode = enmNormal;
-//     setTimerInterrupt(tSettingOff, 5, &onTimer, 1000000, false);
+//     openTime = setVal.length * 1000000;
+//     deviceSts.regularOppenning = true;
 // }
+
+
+
+// *************************************
+void modeSetting()
+{
+    BluetoothSerial Serial_BT;
+    HardwareSerial Serial00 = Serial;
+
+    sr.println("***** Setting mode *****");
+    BzGoDown(5, 10);
+    digitalWrite(PORT_LED_W, LED_ON);
+    digitalWrite(PORT_LED_F, LED_ON);
+    EEP_Write(ep, wifiSts.eep_address_ssid ,SSID);
+    EEP_Write(ep, wifiSts.eep_address_pass ,PASS);
+    EEP_Write(ep, wifiSts.eep_address_host_name ,HOST_NAME);
+    sr.println("Reset wifi status");
+    //Bluetoothのセット--------------------
+    // if (!mESP32_BLSerial_Set(Serial_BT, "BT_um", Serial00))
+    if(!Serial_BT.begin("BT32"))
+    {
+        //digitalWrite(BLUE_LED, 0);
+        sr.print("-----Bluetooth err-----");
+        while (true);
+    }
+    else
+    {
+        sr.print("-----Bluetooth set-----");
+
+        //digitalWrite(BLUE_LED, 1);
+    }
+    while (true)
+    {
+        
+    }
+}
 
 //*************************************
 //現在時刻取得
