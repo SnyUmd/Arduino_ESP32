@@ -43,6 +43,7 @@ char s[20];//文字格納用
 
 hw_timer_t* tSettingOff = NULL;
 
+bool blModeSetting = false;
 
 //----------------------------
 EEPROMClass ep = EEPROM;
@@ -258,4 +259,16 @@ enum enmErrorMessage
 };
 //↑↑↑==============================================
 
-
+//↓↓↓==============================================
+const String BTcommand[] = 
+{
+  "r",
+  "w",
+  "s"
+};
+enum enmBTcommand
+{
+  enm_read,
+  enm_write,
+  enm_start
+};

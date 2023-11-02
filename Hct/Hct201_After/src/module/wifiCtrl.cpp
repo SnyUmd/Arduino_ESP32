@@ -2,9 +2,10 @@
 #include "wifiCtrl.h"
 
 // ****************************************************************
-void wifiInit(WiFiClass& wifi, HardwareSerial& sr, String ssid, String pass, String host_name, bool bl_ota)
+// void wifiInit(WiFiClass& wifi, HardwareSerial& sr, String ssid, String pass, String host_name, bool bl_ota)
+bool wifiInit(WiFiClass& wifi, HardwareSerial& sr, String ssid, String pass, String host_name, bool bl_ota)
 {
-
+    int retryCnt = 0;
     while(1)
     {
         int waitTime = 0;
@@ -18,8 +19,16 @@ void wifiInit(WiFiClass& wifi, HardwareSerial& sr, String ssid, String pass, Str
             waitTime++;
             if(waitTime > 5) break;
         }
-        if(waitTime <= 5) break;
-        else sr.println("retry");
+        if(waitTime <= 5)
+        {
+            retryCnt++;
+             break;
+        }
+        else
+        {
+            if(retryCnt >= 5) return false;
+            else sr.println("retry");
+        } 
     }
 
 
@@ -30,7 +39,8 @@ void wifiInit(WiFiClass& wifi, HardwareSerial& sr, String ssid, String pass, Str
     sr.print("SSID : ");
     sr.println(ssid);
     sr.print("Host name : ");
-    sr.println(host_name);
+    sr.println(wifi.getHostname());
+    return true;
 }
 
 // ****************************************************************

@@ -48,3 +48,7 @@ http://s-tech.airport/get?target=f&item=melody
 http://s-tech.airport/wifi?item=ssid&value=sssss
 http://s-tech.airport/wifi?item=pass&value=sssss
 http://s-tech.airport/wifi?item=hostname&value=sssss
+
+http://s-tech.airport/wifi
+
+
