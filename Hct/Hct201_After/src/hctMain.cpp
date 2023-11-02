@@ -55,7 +55,8 @@ int getNextTime(deviceStatus device);
 void readEEP();
 void modeSetting();
 void wifiStatusReset();
-String serialRead(BluetoothSerial& srBT,char c_end);
+void wifiStatusIntake();
+String serialRead(BluetoothSerial& srBT, char c_end, long timeout);
 
 //***************************************************************************************************************
 //***************************************************************************************************************
@@ -101,12 +102,11 @@ void setup()
     sr.println("----- WiFi status EEPROM Write -----");
 
     if(digitalRead(PORT_SW) == LOW) wifiStatusReset();
+    wifiStatusIntake();
 
     modeSetting();
-
-    wifiSts.ssid = EEP_Read(ep, wifiSts.eep_address_ssid, '*', ep.length());
-    wifiSts.pass = EEP_Read(ep, wifiSts.eep_address_pass, '*', ep.length());
-    wifiSts.host_name = EEP_Read(ep, wifiSts.eep_address_host_name, '*', ep.length());
+    
+    wifiStatusIntake();
 //-------------------------------------------------------
     readEEP();
     if(!wifiInit(WiFi, sr, wifiSts.ssid, wifiSts.pass, wifiSts.host_name, false))
@@ -797,15 +797,26 @@ void wifiStatusReset()
     EEP_Write(ep, wifiSts.eep_address_ssid ,SSID);
     EEP_Write(ep, wifiSts.eep_address_pass ,PASS);
     EEP_Write(ep, wifiSts.eep_address_host_name ,HOST_NAME);
+    wifiStatusIntake();
     sr.println("Reset wifi status");
 }
 
+void wifiStatusIntake()
+{
+    wifiSts.ssid = EEP_Read(ep, wifiSts.eep_address_ssid, '*', ep.length());
+    wifiSts.pass = EEP_Read(ep, wifiSts.eep_address_pass, '*', ep.length());
+    wifiSts.host_name = EEP_Read(ep, wifiSts.eep_address_host_name, '*', ep.length());
+}
+
+long timeSetting = GetTime();
+const long endTime = 30000;
 // *************************************
 void modeSetting()
 {
     BluetoothSerial srBT;
     HardwareSerial Serial00 = Serial;
 
+    timeSetting = GetTime();
     sr.println("********* Setting mode *********");
     BzGoDown(5, 10);
     digitalWrite(PORT_LED_W, LED_ON);
@@ -827,21 +838,31 @@ void modeSetting()
     }
     String readBuf = "";
 
+    int* p_address;
+    String* p_sBuf;
     while (true)
     {
-        int writeNum = 0;
-        int* p_address;
-        String* p_sBuf;
-
+        timeSetting = GetTime();
+        
         srBT.println("==================");
-        srBT.println("wifi start : s");
-        srBT.println("wifi status read : r");
-        srBT.println("wifi status write : w");
+        srBT.println("s : wifi start");
+        srBT.println("r : wifi status read");
+        srBT.println("w : wifi status write");
         srBT.println("------------------");
         srBT.print("-> ");
-        
-        readBuf = serialRead(srBT, '\n');
-        if(readBuf.indexOf(BTcommand[enm_start]) >= 0) break;
+        readBuf = serialRead(srBT, '\n', 20000);
+
+        if(readBuf == "")
+        {
+            if(CheckElapsedTime(timeSetting, 20000)) 
+            {
+                srBT.println("setting time out");
+                sr.println("setting time out");
+                break;
+            }
+            else continue;
+        }
+        else if(readBuf.indexOf(BTcommand[enm_start]) >= 0) break;
         else if(readBuf.indexOf(BTcommand[enm_read]) >= 0)
         {
             srBT.print("ssid : ");
@@ -854,15 +875,17 @@ void modeSetting()
         }
         else if(readBuf.indexOf(BTcommand[enm_write]) >= 0)
         {
-            srBT.println("ssid : 1");
-            srBT.println("pass : 2");
-            srBT.println("hostname : 3");
+            srBT.println("1 : ssid");
+            srBT.println("2 : pass");
+            srBT.println("3 : hostname");
             srBT.println("------------------");
             srBT.print("number -> ");
-            readBuf = serialRead(srBT, '\n');
-            if(readBuf == "1")
+            // timeSetting = GetTime();
+            readBuf = serialRead(srBT, '\n', 10000);
+            // timeSetting = GetTime();
+            if(readBuf == "") continue;
+            else if(readBuf == "1")
             {
-                // writeNum = 0;
                 p_address = &wifiSts.eep_address_ssid;
                 p_sBuf = &wifiSts.ssid;
             }
@@ -875,13 +898,14 @@ void modeSetting()
                 p_address = &wifiSts.eep_address_host_name;
                 p_sBuf = &wifiSts.host_name;
             }
-            
-            // srBT.println(*p_address);
-            // srBT.println(*p_sBuf);
+            else continue;
+
             srBT.println("------------------");
             srBT.print("value -> ");
-            readBuf = serialRead(srBT, '\n');
+            // timeSetting = GetTime();
+            readBuf = serialRead(srBT, '\n', 10000);
             if(readBuf == "") continue;
+            else if(readBuf == "") continue;
             else
             {
                 EEP_Write(ep, *p_address, readBuf);
@@ -889,20 +913,27 @@ void modeSetting()
                 srBT.println("completion");
             }
         }
+        // timeSetting = GetTime();
     }
 
-    
     digitalWrite(PORT_LED_W, LED_OFF);
     digitalWrite(PORT_LED_F, LED_OFF);
 }
 
 
 //*************************************
-String serialRead(BluetoothSerial& srBT ,char c_end)
+String serialRead(BluetoothSerial& srBT ,char c_end, long timeout)
 {
     String result = "";
+    timeSetting = GetTime();
     while (true)
     {
+        if(CheckElapsedTime(timeSetting, timeout)) 
+        {
+            srBT.println("time out");
+            sr.println("time out");
+            return "";
+        }
         if(srBT.available())
         {
             result += srBT.readString();
