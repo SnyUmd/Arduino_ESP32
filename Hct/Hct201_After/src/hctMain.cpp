@@ -789,13 +789,13 @@ void modeSetting()
     BluetoothSerial Serial_BT;
     HardwareSerial Serial00 = Serial;
 
-    sr.println("***** Setting mode *****");
+    sr.println("********* Setting mode *********");
     BzGoDown(5, 10);
     digitalWrite(PORT_LED_W, LED_ON);
     digitalWrite(PORT_LED_F, LED_ON);
-    EEP_Write(ep, wifiSts.eep_address_ssid ,SSID);
-    EEP_Write(ep, wifiSts.eep_address_pass ,PASS);
-    EEP_Write(ep, wifiSts.eep_address_host_name ,HOST_NAME);
+    // EEP_Write(ep, wifiSts.eep_address_ssid ,SSID);
+    // EEP_Write(ep, wifiSts.eep_address_pass ,PASS);
+    // EEP_Write(ep, wifiSts.eep_address_host_name ,HOST_NAME);
     sr.println("Reset wifi status");
     //Bluetoothのセット--------------------
     // if (!mESP32_BLSerial_Set(Serial_BT, "BT_um", Serial00))
@@ -813,7 +813,7 @@ void modeSetting()
     }
     while (true)
     {
-        
+
     }
 }
 
