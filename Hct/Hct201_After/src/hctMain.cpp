@@ -882,6 +882,9 @@ void modeSetting()
             srBT.println("1 : ssid");
             srBT.println("2 : pass");
             srBT.println("3 : hostname");
+            srBT.println("0 : wifi 0");
+            // srBT.println("8 : wifi1");
+            // srBT.println("9 : wifi2");
             srBT.println("------------------");
             srBT.print("number -> ");
             // timeSetting = GetTime();
@@ -902,6 +905,36 @@ void modeSetting()
                 p_address = &wifiSts.eep_address_host_name;
                 p_sBuf = &wifiSts.host_name;
             }
+            else if(readBuf == "0")
+            {
+                EEP_Write(ep, wifiSts.eep_address_ssid,SSID_1);
+                EEP_Write(ep, wifiSts.eep_address_pass,PASS_1);
+                EEP_Write(ep, wifiSts.eep_address_host_name,HOST_NAME_1);
+                wifiStatusIntake();
+                sr.println("set wifi 1");
+                srBT.println("set wifi 1");
+                continue;
+            }
+            else if(readBuf == "umd0")
+            {
+                EEP_Write(ep, wifiSts.eep_address_ssid,SSID);
+                EEP_Write(ep, wifiSts.eep_address_pass,PASS);
+                EEP_Write(ep, wifiSts.eep_address_host_name,HOST_NAME);
+                wifiStatusIntake();
+                sr.println("set wifi umd0");
+                srBT.println("set wifi umd0");
+                continue;
+            }
+            else if(readBuf == "umd1")
+            {
+                EEP_Write(ep, wifiSts.eep_address_ssid,SSID_2);
+                EEP_Write(ep, wifiSts.eep_address_pass,PASS_2);
+                EEP_Write(ep, wifiSts.eep_address_host_name,HOST_NAME_2);
+                wifiStatusIntake();
+                sr.println("set wifi umd1");
+                srBT.println("set wifi umd1");
+                continue;
+            }
             else continue;
 
             srBT.println("------------------");
@@ -909,7 +942,6 @@ void modeSetting()
             // timeSetting = GetTime();
             readBuf = serialRead(srBT, '\n', 10000);
             if(readBuf == "") continue;
-            else if(readBuf == "") continue;
             else
             {
                 EEP_Write(ep, *p_address, readBuf);

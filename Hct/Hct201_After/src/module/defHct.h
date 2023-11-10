@@ -40,16 +40,17 @@
 
 #define PORT_BUZZER 25
 
-// #define SSID "GalFl-sn"
-// #define PASS "noenoe0714"
-
 // #define SSID "pet-oasis"
 // #define PASS "petOasis2022"
+
+#define SSID_1 "STS-AKB-2G"
+#define PASS_1 "4xtxu38ynp6mp"
+#define HOST_NAME_1 "s-tech"
 
 #define SSID "Buffalo-G-F088"
 #define PASS "n17e92@53S19n"
 #define HOST_NAME "s-tech"
 
-// #define SSID "GalFl-sn"
-// #define PASS "noenoe0714"
-// #define HOST_NAME "s-tech"
+#define SSID_2 "GalFl-sn"
+#define PASS_2 "noenoe0714"
+#define HOST_NAME_2 "s-tech"
