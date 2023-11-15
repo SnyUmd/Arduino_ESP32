@@ -19,7 +19,8 @@ enum enmMode
 };
 
 HardwareSerial sr(0);
-WebServer server(80);
+// WebServer server(80);
+WebServer server(8888);
 TwoWire wr = Wire;
 String target = ""; // この変数をPOSTメソッドで書き換える
 // bool blOpening = false;
