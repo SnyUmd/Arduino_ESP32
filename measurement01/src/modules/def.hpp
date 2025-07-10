@@ -1,18 +1,31 @@
 
 #define DEFAULT_LENGTH 5
 
+#define PORT_SW 0
+#define PORT_LED 2
+#define PORT_LED_WHITE 32
+#define PORT_LED_ORANGE 33
+
+#define PORT_BUZZER 25
+
+#define PORT_MORTER_0 18
+#define PORT_MORTER_1 5
+#define PORT_MORTER_2 2
+#define PORT_MORTER_3 15
+
+#define PORT_WATER_OPEN 34
+#define PORT_WATER_CLOSE 35
+
+//debug----------------
+#define PORT_DEBUG_0 12
+#define PORT_DEBUG_1 13
+//^--------------------
+
 #define LED_ON 1
 #define LED_OFF 0
 
-#define PORT_SW 0
-#define PORT_LED 2
-
-// #define PORT_BUZZER 32
-
-//debug----------------
-#define PORT_ACCESS 19
-#define PORT_SW_DEBUG 33
-//^--------------------
+#define LED_ON_EX 0
+#define LED_OFF_EX 1
 
 #define EEP_SIZE 512
 
