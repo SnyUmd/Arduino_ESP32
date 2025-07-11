@@ -155,7 +155,8 @@ void loop() {
 
   while(true){
     waterSts = !waterSts;
-    ClsWaterCtrl.WaterSet(waterSts);
+    ClsWaterCtrl.SetWater(waterSts, PORT_WATER_OPEN, PORT_WATER_CLOSE);
+    ClsWaterCtrl.SetLED(waterSts, PORT_LED_GREEN, PORT_LED_ORANGE, LED_OFF_EX);
     delay(4000);
   }
 
