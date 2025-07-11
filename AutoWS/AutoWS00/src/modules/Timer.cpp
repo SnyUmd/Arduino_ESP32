@@ -19,6 +19,7 @@
 //      startTimerInterrupt(timer, 1000000, false);
 // }
 
+//*********************************************************************************
 // void setTimerInterrupt(hw_timer_t*& timer, int timer_num, void(* fn)(void), int count_time, bool regular)
 void setTimerInterrupt(hw_timer_t*& timer, int timer_num, void(* fn)(void))
 {
@@ -27,6 +28,7 @@ void setTimerInterrupt(hw_timer_t*& timer, int timer_num, void(* fn)(void))
     // timerAlarmWrite(timer, count_time, regular);
 }
 
+//*********************************************************************************
 void startTimerInterrupt(hw_timer_t*& timer, int count_time, bool regular)
 {
     timerAlarmWrite(timer, count_time, regular);
