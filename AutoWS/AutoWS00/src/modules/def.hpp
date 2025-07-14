@@ -20,6 +20,8 @@
 #define PORT_WATER_OPEN 12
 #define PORT_WATER_CLOSE 13
 
+#define PORT_RUN_WATER 22
+
 //debug----------------
 // #define PORT_DEBUG_0 12
 // #define PORT_DEBUG_1 13
