@@ -43,9 +43,9 @@ bool wifiInit(WiFiClass& w_f, HardwareSerial& sr, String ssid, String pass, Stri
             if(retryCnt < 5)
             {
                 sr.println("retry");
-                digitalWrite(PORT_LED, LED_ON);
+                digitalWrite(PORT_LED_INTERNAL, LED_ON);
                 delay(25);
-                digitalWrite(PORT_LED, LED_OFF);
+                digitalWrite(PORT_LED_INTERNAL, LED_OFF);
                 continue;
             }
             else

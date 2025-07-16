@@ -1,4 +1,3 @@
-
 #define DEFAULT_LENGTH 5
 
 // #define PORT_SW 0
@@ -23,8 +22,8 @@
 #define PORT_RUN_WATER 22
 
 //debug----------------
-// #define PORT_DEBUG_0 12
-// #define PORT_DEBUG_1 13
+#define PORT_DEBUG_0 26
+#define PORT_DEBUG_1 27
 //^--------------------
 
 #define PWM_FRQ 50
@@ -40,14 +39,15 @@
 #define EEP_SIZE 512
 
 #define SERVER_PORT_NUM 8080
-#define DEVICE_NUM "stc002"
-#define HOST_NAME "stc002"
+#define HTTP_PORT_NUM "8000"
+// #define DEVICE_NUM "stc002"
+#define HOST_NAME "wc00"
 
-#define SSID_1 "STS-AKB-2G"
-#define PASS_1 "4xtxu38ynp6mp"
+// #define SSID_1 "STS-AKB-2G"
+// #define PASS_1 "4xtxu38ynp6mp"
 
-#define SSID_0 "Buffalo-G-F088"
+#define SSID_0 "um50-fx"
 #define PASS_0 "n17e92@53S19n"
 
-#define SSID_2 "GalFl-sn"
-#define PASS_2 "noenoe0714"
+// #define SSID_2 "GalFl-sn"
+// #define PASS_2 "noenoe0714"
