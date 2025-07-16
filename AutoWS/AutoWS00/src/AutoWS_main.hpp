@@ -1,7 +1,9 @@
 // 参考：https://kohacraft.com/archives/202006201124.html
 #include <string>
+#include <iostream>
 #include <WiFi.h>
 #include <WebServer.h>
+#include <ESPmDNS.h>//250716_1
 #include <EEPROM.h>
 
 // #include "class/clsWaterCtrl.hpp"
@@ -17,21 +19,36 @@ HardwareSerial sr(0);//RX:34 TX:35
 // HardwareSerial sr(2);//RX:16 TX:17
 
 WiFiClass wf;
-WebServer server(SERVER_PORT_NUM);
+// WebServer server(PORT_NUM);
+WebServer server(PORT_NUM);
 
-hw_timer_t * timer = NULL;
+hw_timer_t * timer_close = NULL;//タイマーNo.0
+hw_timer_t * timer_resurve1 = NULL;//タイマーNo.1
+hw_timer_t * timer__resurve2 = NULL;//タイマーNo.2
+hw_timer_t * timer__resurve3 = NULL;//タイマーNo.3
+enum EnmTimerNum{
+  enmStop = 0,
+  enmReserve1,
+  enmReserve2,
+  enmReserve3,
+};
+
 EEPROMClass eep = EEPROM;
 
-// const char *ssid = "um50-fx";
-// const char *password = "n17e92@53S19n";
-// const char *host_name = "WaterController00";
-
-struct wifi_sts
-{
+struct wifi_sts{
   String ssid;
   String pass;
   String host_name;
-  String portNum;
+  int portNum;
+};
+wifi_sts wifiSts ={
+  SSID_0,
+  PASS_0,
+  HOST_NAME,
+  PORT_NUM
+};
+
+struct eepAddress{
   int eep_address_ssid;
   int eep_address_pass;
   int eep_address_host_name;
@@ -39,15 +56,9 @@ struct wifi_sts
   int eep_address_sequence_num;
   int eep_address_measurement_num;
   int eep_address_start_time;
-  int stop;
+  int eep_address_end;
 };
-
-wifi_sts wifiSts =
-{
-  SSID_0,
-  PASS_0,
-  HOST_NAME,
-  HTTP_PORT_NUM,
+eepAddress eepAdd ={
   0x00,
   0x20,
   0x40,
@@ -59,11 +70,30 @@ wifi_sts wifiSts =
   //※EEP領域の確保数注意(eepSize)
 };
 
+bool ary_blDeviceSts[] ={
+  false,//open
+  false,//close
+  false,//watering
+  false,//open signal
+  false//close signal
+};
+enum EnmDeviceSts{
+  enmDevStsOpen = 0,
+  enmDevStsClose,
+  enmDevStsWatering,
+  enmDevStsSignalOpen,
+  enmDevStsSignalClose
+};
+
+
 int eepSize = 255;
 int cntWater = 0;
 
-int sTime = 0;
+long sTime = 0;
+long eTime = 0;
 int endTime = 10;
-int flgCheckTime = false;
 
-bool waterSts = false;
+// bool flgCheckTime = false;
+bool flgSolenoidSignal = false;
+
+// bool waterSts = false;

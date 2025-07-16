@@ -6,8 +6,8 @@
 #define PORT_LED_INTERNAL 2
 #define PORT_SW_INTERNAL 0
 
-#define PORT_LED_GREEN 33
-#define PORT_LED_ORANGE 32
+#define PORT_LED_OPEN 33//green
+#define PORT_LED_CLOSE 32//orange
 
 #define PORT_BUZZER 25
 
@@ -33,21 +33,23 @@
 #define LED_ON 1
 #define LED_OFF 0
 
-#define LED_ON_EX 0
 #define LED_OFF_EX 1
+#define LED_ON_EX 0
+
+#define SOLENOID_OFF 0
+#define SOLENOID_ON 1
 
 #define EEP_SIZE 512
 
-#define SERVER_PORT_NUM 8080
-#define HTTP_PORT_NUM "8000"
-// #define DEVICE_NUM "stc002"
-#define HOST_NAME "wc00"
+// #define SERVER_PORT_NUM 8080 //アクセス方法　http://hostname:8080/, http://***.***.***.***:8080/
+#define PORT_NUM 80 //アクセス　http://hostname.local/, http://***.***.***.***/
 
-// #define SSID_1 "STS-AKB-2G"
-// #define PASS_1 "4xtxu38ynp6mp"
+#define HOST_NAME "ws00"
 
 #define SSID_0 "um50-fx"
 #define PASS_0 "n17e92@53S19n"
 
-// #define SSID_2 "GalFl-sn"
-// #define PASS_2 "noenoe0714"
+// #define SSID_0 "GalFl-sn"
+// #define PASS_0 "noenoe0714"
+
+#define MAX_WATERINT_TIME 180//ソレノイドオープン最大時間

@@ -29,6 +29,7 @@ bool wifiInit(WiFiClass& w_f, HardwareSerial& sr, String ssid, String pass, Stri
         }
         w_f.setHostname(host_name.c_str());//ホスト名を設定
         delay(1000);
+        w_f.mode(WIFI_STA);//250716_1
         w_f.begin(ssid.c_str(), pass.c_str());
         delay(1000);
         if(w_f.status() != WL_CONNECTED) {
@@ -57,6 +58,12 @@ bool wifiInit(WiFiClass& w_f, HardwareSerial& sr, String ssid, String pass, Stri
         else break;
     }
 
+    if (MDNS.begin(host_name.c_str())) {
+    Serial.println("MDNS responder started");
+    Serial.print("server name: ");
+    Serial.println(host_name.c_str());
+  }
+
 
     configTime(JST, 0, "ntp.nict.jp", "time.google.com", "ntp.jst.mfeed.ad.jp");//NTPの設定
     sr.println("");
@@ -83,7 +90,7 @@ struct tm getTimeInf()
 //sに使う変数：char s[20];
 void arrangeTime(char* s, tm time_inf)
 {
-    sprintf(s, "%04d.%02d.%02d %02d:%02d:%02d", 
+    sprintf(s, "%04d.%02d.%02d %02d:%02d:%02d",
                 time_inf.tm_year + 1900,
                 time_inf.tm_mon + 1,
                 time_inf.tm_mday,

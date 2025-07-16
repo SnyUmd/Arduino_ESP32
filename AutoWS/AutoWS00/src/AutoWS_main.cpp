@@ -6,23 +6,98 @@
 Espalexa espalexa;
 
 //**********************************************************************
+String checkDeviceSts(){
+  String result = "";
+  result += "{\n";
+  result += "\"open\":";
+  result += ary_blDeviceSts[enmDevStsOpen];
+  result += ",\n";
+  result += "\"close\":";
+  result += ary_blDeviceSts[enmDevStsClose];
+  result += ",\n";
+  result += "\"watering\":";
+  result += ary_blDeviceSts[enmDevStsWatering];
+  result += ",\n";
+  result += "\"signalopen\":";
+  result += ary_blDeviceSts[enmDevStsSignalOpen];
+  result += ",\n";
+  result += "\"signalclose\":";
+  result += ary_blDeviceSts[enmDevStsSignalClose];
+  result += ",\n";
+  result += "}";
+  return result;
+}
+
+//**********************************************************************
 void httpAction(int contentNum){
     int portLED;
+    long elapsed_time;
+    int paramTime = server.arg("time").toInt();
 
     String returnMessage = "";
-    String paramItem = server.arg("item");
     switch(contentNum)
     {
-      case 0://read-------------------------------------------------------
-        returnMessage = "Open";
+      case 0://open
+        stopTimerInterrupt(timer_close);//クローズタイマーを止める
+        clsWaterCtrl.WaterOpen();
+        ary_blDeviceSts[enmDevStsOpen] = true;
+        ary_blDeviceSts[enmDevStsClose] = false;
+        startTimerInterrupt(timer_close, MAX_WATERINT_TIME * 1000000, false);
+        returnMessage = "set open";
+        returnMessage += "\n";
+        returnMessage += "\n";
+        returnMessage += checkDeviceSts();
         break;
-      case 1:
-        returnMessage = "Close";
+      case 1://close
+        clsWaterCtrl.WaterClose();
+        ary_blDeviceSts[enmDevStsOpen] = false;
+        ary_blDeviceSts[enmDevStsClose] = true;
+        stopTimerInterrupt(timer_close);
+        returnMessage = "set close";
+        returnMessage += "\n";
+        returnMessage += "\n";
+        returnMessage += checkDeviceSts();
+        break;
+      case 2://run
+        if(paramTime > MAX_WATERINT_TIME){
+          returnMessage = "Error ";
+          returnMessage += paramTime;
+          returnMessage += " : Time is less than ";
+          returnMessage += MAX_WATERINT_TIME;
+          returnMessage += " seconds";
+          break;
+        }
+        stopTimerInterrupt(timer_close);//クローズタイマーを止める
+        ary_blDeviceSts[enmDevStsOpen] = false;
+        ary_blDeviceSts[enmDevStsClose] = false;
+        clsWaterCtrl.WaterOpen();
+        ary_blDeviceSts[enmDevStsOpen] = true;
+        ary_blDeviceSts[enmDevStsClose] = false;
+        startTimerInterrupt(timer_close, paramTime * 1000000, false);
+        returnMessage = "set start watering ";
+        returnMessage += paramTime;
+        returnMessage += " sec";
+        returnMessage += "\n";
+        returnMessage += "\n";
+        returnMessage += checkDeviceSts();
+        break;
+      case 3://read
+        returnMessage = "sts read";
+        returnMessage += "\n";
+        returnMessage += "\n";
+        returnMessage += checkDeviceSts();
         break;
       case 99:
         returnMessage ="test";
+        returnMessage += "\n";
+        returnMessage += "\n";
+        returnMessage += checkDeviceSts();
+        break;
       default:
         returnMessage = "default";
+        returnMessage += "\n";
+        returnMessage += "\n";
+        returnMessage += checkDeviceSts();
         break;
     }
 
@@ -51,6 +126,10 @@ void setHttpAction(int port_num)
     //セット
     server.on("/close", HTTP_ANY, [](){/*bzReceivedRing();*/ httpAction(1);});
 
+    server.on("/run", HTTP_ANY, [](){/*bzReceivedRing();*/ httpAction(2);});
+
+    server.on("/read", HTTP_ANY, [](){/*bzReceivedRing();*/ httpAction(3);});
+
     server.on("/test", HTTP_ANY, [](){httpAction(99);});
 
     // server.on("/reboot", HTTP_ANY, [](){httpAction(2);});
@@ -63,17 +142,20 @@ void setHttpAction(int port_num)
     });
 
     server.begin(port_num);
+    // server.begin();
 }
 
 
 
 //**********************************************************************
-void IRAM_ATTR onTimer0(){
-    waterSts = !waterSts;
-    clsWaterCtrl.SetWater(waterSts, PORT_WATER_OPEN, PORT_WATER_CLOSE);
-    clsWaterCtrl.SetLED(waterSts, PORT_LED_GREEN, PORT_LED_ORANGE, LED_OFF_EX);
-    sTime = GetTime();
-    flgCheckTime = true;
+void IRAM_ATTR onTimer(){
+}
+
+//**********************************************************************
+void IRAM_ATTR onTimer_Close(){
+  clsWaterCtrl.WaterClose();
+  ary_blDeviceSts[enmDevStsOpen] = false;
+  ary_blDeviceSts[enmDevStsClose] = true;
 }
 
 
@@ -111,32 +193,30 @@ void setup() {
 
 #pragma region server setting//----------------------------------------------
     sr.println("----- Server setting -----");
-    // server.begin(8000);
-    setHttpAction(wifiSts.portNum.toInt());
+    setHttpAction(wifiSts.portNum);
     sr.print("Port number : ");
     sr.println(wifiSts.portNum);
 
 #pragma endregion//-------------------------------------------------------
 
+  setTimerInterrupt(timer_close, enmStop, onTimer_Close);
+  // setTimerInterrupt(timer_close, enmReserve1, onTimer);
+  // setTimerInterrupt(timer_close, enmReserve2, onTimer);
+  // setTimerInterrupt(timer_close, enmReserve3, onTimer);
 
-  clsCommon.LedFlashEX(2, 200, PORT_LED_GREEN);
+
+  clsCommon.LedFlashEX(2, 200, PORT_LED_OPEN);
   delay(200);
-  clsCommon.LedFlashEX(2, 200, PORT_LED_ORANGE);
-  delay(1000);
+  clsCommon.LedFlashEX(2, 200, PORT_LED_CLOSE);
+  delay(200);
 
-  setTimerInterrupt(timer, 0, onTimer0);//テスト用タイマー　定期ON/OFF
-  startTimerInterrupt(timer, 4000000, true);
-
+  clsWaterCtrl.WaterClose();
+  ary_blDeviceSts[enmDevStsOpen] = false;
+  ary_blDeviceSts[enmDevStsClose] = true;
 }
 
 //**********************************************************************
 //**********************************************************************
 void loop() {
   server.handleClient();//サーバ動作
-
-  clsCommon.setWaterLED();
-  if(flgCheckTime && CheckElapsedTime(sTime, endTime)){
-    clsWaterCtrl.ResetWater(PORT_WATER_OPEN, PORT_WATER_CLOSE, PORT_LED_GREEN, PORT_LED_ORANGE, LED_OFF_EX);
-    flgCheckTime = false;
-  }
 }

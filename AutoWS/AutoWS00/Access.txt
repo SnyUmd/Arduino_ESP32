@@ -1,0 +1,4 @@
+http://ws00.local/open
+http://ws00.local/close
+http://ws00.local/run?time=30
+http://ws00.local/read
