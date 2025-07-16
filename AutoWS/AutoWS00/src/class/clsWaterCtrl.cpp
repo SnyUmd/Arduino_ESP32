@@ -17,7 +17,7 @@ void ClsWaterCtrl::SetWater(bool is_open, int port_open, int port_close){
 }
 
 //**********************************************************************
-void ClsWaterCtrl::ResetWater(int port_open, int port_close, int port_led_open, int port_led_close, int logic_led_off){
+void ClsWaterCtrl::ResetflgSolenoidSignal(int port_open, int port_close, int port_led_open, int port_led_close, int logic_led_off){
     digitalWrite(port_open, 0);
     digitalWrite(port_close, 0);
     digitalWrite(port_led_open, logic_led_off);
