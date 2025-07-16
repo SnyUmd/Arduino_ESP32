@@ -10,3 +10,5 @@ void stopTimerInterrupt(hw_timer_t*& timer);
 // void GetTime(long& valTime);//時間取得（起動後の経過時間）
 long GetTime();//時間取得（起動後の経過時間）
 bool CheckElapsedTime(long startTime, long targetTime);//時間タイムアウトチェック
+long ElapsedTime(long s_time, long e_time);
+bool waitTime(int wait_time);

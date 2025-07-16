@@ -71,3 +71,26 @@ bool CheckElapsedTime(long startTime, long targetTime)
     }
     return false;
 }
+
+//*********************************************************************************
+long ElapsedTime(long s_time, long e_time){
+    if(s_time > e_time)
+        return e_time + (TIME_MAX_VALUE - s_time);
+    else
+        return e_time - s_time;
+}
+
+//*********************************************************************************
+bool waitTime(int wait_time){
+    int cnt = 0;
+    int max = 3610000;//max1時間(マージンとして10秒)
+    int sTime = GetTime();
+    while(!CheckElapsedTime(sTime, wait_time)){
+        cnt++;
+        if(cnt > max) return false;
+    }
+    return true;
+
+}
+
+//*********************************************************************************
