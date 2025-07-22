@@ -11,13 +11,13 @@
 
 #define PORT_BUZZER 25
 
+#define PORT_WATER_OPEN 12
+#define PORT_WATER_CLOSE 13
+
 #define PORT_MORTER_0 18
 #define PORT_MORTER_1 5
 #define PORT_MORTER_2 2
 #define PORT_MORTER_3 15
-
-#define PORT_WATER_OPEN 12
-#define PORT_WATER_CLOSE 13
 
 #define PORT_RUN_WATER 22
 

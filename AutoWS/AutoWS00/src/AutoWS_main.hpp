@@ -85,6 +85,15 @@ enum EnmDeviceSts{
   enmDevStsSignalClose
 };
 
+String ary_messageError[]={
+  "Error : The device could not be flushed with water",
+  "Error : The device could not stop the water"
+};
+enum EnmMessageError{
+  enmNotOpening = 0,
+  enmNotClosing
+};
+
 
 int eepSize = 255;
 int cntWater = 0;

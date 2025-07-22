@@ -7,6 +7,12 @@ Espalexa espalexa;
 
 //**********************************************************************
 String checkDeviceSts(){
+  ary_blDeviceSts[enmDevStsSignalOpen] = digitalRead(PORT_WATER_OPEN);
+  ary_blDeviceSts[enmDevStsSignalClose] = digitalRead(PORT_WATER_CLOSE);
+  
+  if(clsWaterCtrl.CheckRunningWater() > 1) ary_blDeviceSts[enmDevStsWatering] = true;
+  else ary_blDeviceSts[enmDevStsWatering] = false;
+
   String result = "";
   result += "{\n";
   result += "\"open\":";
@@ -40,6 +46,12 @@ void httpAction(int contentNum){
       case 0://open
         stopTimerInterrupt(timer_close);//クローズタイマーを止める
         clsWaterCtrl.WaterOpen();
+        waitTime(1000);
+        if(clsWaterCtrl.CheckRunningWater() <= 1){
+          clsWaterCtrl.WaterClose();
+          returnMessage = ary_messageError[enmNotOpening];
+          break;
+        }
         ary_blDeviceSts[enmDevStsOpen] = true;
         ary_blDeviceSts[enmDevStsClose] = false;
         startTimerInterrupt(timer_close, MAX_WATERINT_TIME * 1000000, false);
@@ -50,6 +62,11 @@ void httpAction(int contentNum){
         break;
       case 1://close
         clsWaterCtrl.WaterClose();
+        waitTime(1000);
+        if(clsWaterCtrl.CheckRunningWater() > 1){
+          returnMessage = ary_messageError[enmNotClosing];
+          break;
+        }
         ary_blDeviceSts[enmDevStsOpen] = false;
         ary_blDeviceSts[enmDevStsClose] = true;
         stopTimerInterrupt(timer_close);
@@ -71,6 +88,12 @@ void httpAction(int contentNum){
         ary_blDeviceSts[enmDevStsOpen] = false;
         ary_blDeviceSts[enmDevStsClose] = false;
         clsWaterCtrl.WaterOpen();
+        waitTime(1000);
+        if(clsWaterCtrl.CheckRunningWater() <= 1){
+          clsWaterCtrl.WaterClose();
+          returnMessage = ary_messageError[enmNotOpening];
+          break;
+        }
         ary_blDeviceSts[enmDevStsOpen] = true;
         ary_blDeviceSts[enmDevStsClose] = false;
         startTimerInterrupt(timer_close, paramTime * 1000000, false);

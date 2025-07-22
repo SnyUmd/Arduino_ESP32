@@ -2,6 +2,7 @@
 #include "modules/def.hpp"
 #include "clsWaterCtrl.hpp"
 #include "modules/Timer.hpp"
+// #include "AutoWS_main.hpp"
 
 //▼def.hppから取得**************************
 // #define PORT_WATER_OPEN 12
