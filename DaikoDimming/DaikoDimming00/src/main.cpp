@@ -66,7 +66,7 @@ void firstLightChanged(uint8_t brightness) {
     // if(brightness <= 1) return;
     int next_power = (brightness > 1) ? brightness / 2 : 1;
     int lp = next_power - deviceSts.now_power;
-    bool bl_dark = (lp < 0) ? true: false;
+    bool bl_dark = (lp < 0) ? false: true;
 
     delay(1000);
 
